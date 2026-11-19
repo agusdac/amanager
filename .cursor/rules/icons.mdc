@@ -1,0 +1,19 @@
+---
+description: Custom SVG icon system — no emoji or third-party icon packs in UI
+globs: app/components/**/*.vue,app/layouts/**/*.vue,app/pages/**/*.vue
+alwaysApply: false
+---
+
+# App icons
+
+All UI icons must be **project-owned SVG components** under `app/components/icons/`.
+
+## Rules
+
+1. **Never** use emoji (🔔, ☰, →, etc.) or icon font libraries (Heroicons, Lucide, Font Awesome) in product UI.
+2. **Base wrapper:** `AppIcon.vue` — stroke icons on 24×24 viewBox, `stroke-width` 1.75–2, `stroke-linecap="round"`.
+3. **Naming:** `Icon{Name}.vue` (e.g. `IconBell.vue`, `IconLink.vue`).
+4. **Usage:** `<IconBell class="h-5 w-5" />` — size via Tailwind on the component; color via `currentColor` / `text-*` parent.
+5. **New icon needed?** Add a new file in `app/components/icons/` matching existing stroke style before using inline SVG in pages.
+6. **Brand / social** exceptions: `IconInstagram`, `IconYouTube`, etc. — still our wrapper components, not raw `<img>` for UI chrome.
+7. **Accessibility:** decorative icons → `aria-hidden="true"` on the SVG (handled by `AppIcon`); interactive icons → `aria-label` on the button/link.
