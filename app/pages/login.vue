@@ -24,20 +24,20 @@ async function submit() {
 
 <template>
   <div class="mx-auto max-w-md space-y-6">
-    <h1 class="text-2xl font-semibold">{{ t('auth.loginTitle') }}</h1>
-    <form class="space-y-4 rounded-lg border border-stone-200 bg-white p-6 shadow-sm" @submit.prevent="submit">
-      <label class="block text-sm">
-        <span class="text-stone-600">{{ t('auth.email') }}</span>
-        <input v-model="email" type="email" required class="mt-1 w-full rounded border border-stone-300 px-3 py-2" />
+    <h1 class="page-title">{{ t('auth.loginTitle') }}</h1>
+    <form class="card space-y-4 p-6 shadow-sm" @submit.prevent="submit">
+      <label class="block">
+        <span class="label">{{ t('auth.email') }}</span>
+        <input v-model="email" type="email" required autocomplete="email" class="field mt-1.5" />
       </label>
-      <label class="block text-sm">
-        <span class="text-stone-600">{{ t('auth.password') }}</span>
-        <input v-model="password" type="password" required class="mt-1 w-full rounded border border-stone-300 px-3 py-2" />
+      <label class="block">
+        <span class="label">{{ t('auth.password') }}</span>
+        <input v-model="password" type="password" required autocomplete="current-password" class="field mt-1.5" />
       </label>
-      <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
+      <p v-if="error" class="error-text">{{ error }}</p>
       <button
         type="submit"
-        class="w-full rounded bg-stone-900 px-4 py-2 text-white disabled:opacity-60"
+        class="btn-primary w-full"
         :disabled="loading"
       >
         {{ t('auth.submitLogin') }}

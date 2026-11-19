@@ -4,12 +4,23 @@ const { data: identities, refresh: refreshId } = await useFetch('/api/identities
 const { data: emails, refresh: refreshEmail } = await useFetch('/api/email-addresses')
 const { data: accounts, refresh: refreshAcc } = await useFetch('/api/provider-accounts')
 const { data: providers } = await useFetch('/api/providers')
+const { data: assetList } = await useFetch('/api/assets?limit=100')
 
 const idLabel = ref('')
 const idProvider = ref('')
 const emailAddress = ref('')
 const accLabel = ref('')
 const accProvider = ref('')
+
+const impactAssets = computed(() =>
+  (assetList.value?.assets ?? []).map((a: { id: string; name: string }) => ({ id: a.id, label: a.name })),
+)
+const impactIdentities = computed(() =>
+  (identities.value?.identities ?? []).map((i: { id: string; label: string }) => ({
+    id: i.id,
+    label: i.label,
+  })),
+)
 
 async function addIdentity() {
   await $fetch('/api/identities', {
@@ -38,53 +49,99 @@ async function addAccount() {
 
 <template>
   <div class="space-y-10">
-    <h1 class="text-2xl font-semibold">{{ t('accounts.title') }}</h1>
+    <header class="space-y-1">
+      <h1 class="page-title">{{ t('accounts.title') }}</h1>
+      <p class="lede">{{ t('accounts.subtitle') }}</p>
+    </header>
 
-    <section class="space-y-3">
-      <h2 class="text-lg font-medium">{{ t('accounts.identities') }}</h2>
-      <form class="flex flex-wrap gap-2" @submit.prevent="addIdentity">
-        <input v-model="idLabel" required :placeholder="t('accounts.identityLabel')" class="rounded border px-3 py-2 text-sm" />
-        <select v-model="idProvider" class="rounded border px-3 py-2 text-sm">
-          <option value="">{{ t('accounts.noProvider') }}</option>
-          <option v-for="p in providers?.providers" :key="p.id" :value="p.id">{{ p.name }}</option>
-        </select>
-        <button type="submit" class="rounded bg-stone-900 px-3 py-2 text-sm text-white">{{ t('common.add') }}</button>
+    <section class="card space-y-4 p-5">
+      <h2 class="section-title">{{ t('accounts.identities') }}</h2>
+      <form class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end" @submit.prevent="addIdentity">
+        <label class="block min-w-[10rem] flex-1 text-sm">
+          <span class="label">{{ t('accounts.identityLabel') }}</span>
+          <input v-model="idLabel" required class="field mt-1.5" />
+        </label>
+        <label class="block min-w-[10rem] text-sm">
+          <span class="label">{{ t('assets.provider') }}</span>
+          <select v-model="idProvider" class="field mt-1.5">
+            <option value="">{{ t('accounts.noProvider') }}</option>
+            <option v-for="p in providers?.providers" :key="p.id" :value="p.id">{{ p.name }}</option>
+          </select>
+        </label>
+        <button type="submit" class="btn-primary">{{ t('common.add') }}</button>
       </form>
-      <ul class="divide-y rounded-lg border bg-white">
-        <li v-for="item in identities?.identities" :key="item.id" class="px-4 py-2 text-sm">
-          <span class="font-medium">{{ item.label }}</span>
-          <span class="ml-2 text-stone-500">{{ item.providerName }}</span>
-          <span class="ml-2 rounded bg-stone-100 px-1.5 text-xs">{{ item.verificationStatus }}</span>
+      <ul v-if="identities?.identities?.length" class="divide-y divide-stone-100 border-t border-stone-100">
+        <li v-for="item in identities.identities" :key="item.id">
+          <NuxtLink
+            :to="`/identities/${item.id}`"
+            class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm transition-colors hover:bg-stone-50"
+          >
+            <div class="flex items-center gap-2">
+              <span class="font-medium text-stone-900">{{ item.label }}</span>
+              <span v-if="item.providerName" class="text-stone-500">{{ item.providerName }}</span>
+              <IconChevronRight class="h-4 w-4 text-stone-400" />
+            </div>
+            <VerificationChip :status="item.verificationStatus" />
+          </NuxtLink>
         </li>
       </ul>
+      <p v-else class="text-sm text-stone-500">{{ t('accounts.emptyIdentities') }}</p>
     </section>
 
-    <section class="space-y-3">
-      <h2 class="text-lg font-medium">{{ t('accounts.emails') }}</h2>
-      <form class="flex gap-2" @submit.prevent="addEmail">
-        <input v-model="emailAddress" type="email" required class="rounded border px-3 py-2 text-sm" />
-        <button type="submit" class="rounded bg-stone-900 px-3 py-2 text-sm text-white">{{ t('common.add') }}</button>
+    <section class="card space-y-4 p-5">
+      <h2 class="section-title">{{ t('accounts.emails') }}</h2>
+      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="addEmail">
+        <label class="block min-w-[14rem] flex-1 text-sm">
+          <span class="label">{{ t('accounts.emailAddress') }}</span>
+          <input v-model="emailAddress" type="email" required class="field mt-1.5" />
+        </label>
+        <button type="submit" class="btn-primary">{{ t('common.add') }}</button>
       </form>
-      <ul class="divide-y rounded-lg border bg-white">
-        <li v-for="item in emails?.emails" :key="item.id" class="px-4 py-2 text-sm">{{ item.address }}</li>
-      </ul>
-    </section>
-
-    <section class="space-y-3">
-      <h2 class="text-lg font-medium">{{ t('accounts.providerAccounts') }}</h2>
-      <form class="flex flex-wrap gap-2" @submit.prevent="addAccount">
-        <input v-model="accLabel" required class="rounded border px-3 py-2 text-sm" />
-        <select v-model="accProvider" class="rounded border px-3 py-2 text-sm">
-          <option value="">{{ t('accounts.noProvider') }}</option>
-          <option v-for="p in providers?.providers" :key="p.id" :value="p.id">{{ p.name }}</option>
-        </select>
-        <button type="submit" class="rounded bg-stone-900 px-3 py-2 text-sm text-white">{{ t('common.add') }}</button>
-      </form>
-      <ul class="divide-y rounded-lg border bg-white">
-        <li v-for="item in accounts?.accounts" :key="item.id" class="px-4 py-2 text-sm">
-          {{ item.label }} <span class="text-stone-500">({{ item.providerName }})</span>
+      <ul v-if="emails?.emails?.length" class="divide-y divide-stone-100 border-t border-stone-100">
+        <li
+          v-for="item in emails.emails"
+          :key="item.id"
+          class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
+        >
+          <span class="font-medium text-stone-900">{{ item.address }}</span>
+          <VerificationChip v-if="item.verificationStatus" :status="item.verificationStatus" />
         </li>
       </ul>
+      <p v-else class="text-sm text-stone-500">{{ t('accounts.emptyEmails') }}</p>
     </section>
+
+    <section class="card space-y-4 p-5">
+      <h2 class="section-title">{{ t('accounts.providerAccounts') }}</h2>
+      <form class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end" @submit.prevent="addAccount">
+        <label class="block min-w-[10rem] flex-1 text-sm">
+          <span class="label">{{ t('accounts.accountLabel') }}</span>
+          <input v-model="accLabel" required class="field mt-1.5" />
+        </label>
+        <label class="block min-w-[10rem] text-sm">
+          <span class="label">{{ t('assets.provider') }}</span>
+          <select v-model="accProvider" class="field mt-1.5">
+            <option value="">{{ t('accounts.noProvider') }}</option>
+            <option v-for="p in providers?.providers" :key="p.id" :value="p.id">{{ p.name }}</option>
+          </select>
+        </label>
+        <button type="submit" class="btn-primary">{{ t('common.add') }}</button>
+      </form>
+      <ul v-if="accounts?.accounts?.length" class="divide-y divide-stone-100 border-t border-stone-100">
+        <li
+          v-for="item in accounts.accounts"
+          :key="item.id"
+          class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
+        >
+          <span>
+            <span class="font-medium text-stone-900">{{ item.label }}</span>
+            <span v-if="item.providerName" class="ml-2 text-stone-500">({{ item.providerName }})</span>
+          </span>
+          <VerificationChip :status="item.verificationStatus" />
+        </li>
+      </ul>
+      <p v-else class="text-sm text-stone-500">{{ t('accounts.emptyAccounts') }}</p>
+    </section>
+
+    <ImpactExplorer :asset-options="impactAssets" :identity-options="impactIdentities" />
   </div>
 </template>

@@ -1,7 +1,17 @@
 import { and, eq } from 'drizzle-orm'
 import { createAssetFullSchema } from '../../../shared/schemas/inventory'
-import { assets, projectAssets, projects } from '../../../db/schema'
+import {
+  assetRoles,
+  assets,
+  identities,
+  projectAssets,
+  projectEnvironments,
+  projects,
+  providerAccounts,
+  providers,
+} from '../../../db/schema'
 import { useDb } from '../../utils/db'
+import { findOrCreateEmail, linkAssetLoginEmail } from '../../utils/inventory-links'
 import { requireSession } from '../../utils/session'
 
 export default defineEventHandler(async (event) => {
@@ -13,40 +23,101 @@ export default defineEventHandler(async (event) => {
   }
 
   const db = useDb()
+  const data = parsed.data
 
-  if (parsed.data.projectId) {
+  if (data.projectId) {
     const [project] = await db
       .select()
       .from(projects)
-      .where(and(eq(projects.id, parsed.data.projectId), eq(projects.workspaceId, session.workspaceId)))
+      .where(and(eq(projects.id, data.projectId), eq(projects.workspaceId, session.workspaceId)))
       .limit(1)
     if (!project) throw createError({ statusCode: 404, statusMessage: 'Not Found' })
+  }
+
+  let providerId = data.providerId ?? null
+  if (!providerId && data.providerSlug) {
+    const [provider] = await db
+      .select()
+      .from(providers)
+      .where(eq(providers.slug, data.providerSlug))
+      .limit(1)
+    providerId = provider?.id ?? null
+  }
+
+  if (data.providerAccountId) {
+    const [account] = await db
+      .select()
+      .from(providerAccounts)
+      .where(
+        and(eq(providerAccounts.id, data.providerAccountId), eq(providerAccounts.workspaceId, session.workspaceId)),
+      )
+      .limit(1)
+    if (!account) throw createError({ statusCode: 404, statusMessage: 'Not Found' })
+  }
+
+  if (data.identityId) {
+    const [identity] = await db
+      .select()
+      .from(identities)
+      .where(and(eq(identities.id, data.identityId), eq(identities.workspaceId, session.workspaceId)))
+      .limit(1)
+    if (!identity) throw createError({ statusCode: 404, statusMessage: 'Not Found' })
+  }
+
+  if (data.environmentId && data.projectId) {
+    const [env] = await db
+      .select()
+      .from(projectEnvironments)
+      .where(
+        and(
+          eq(projectEnvironments.id, data.environmentId),
+          eq(projectEnvironments.projectId, data.projectId),
+          eq(projectEnvironments.workspaceId, session.workspaceId),
+        ),
+      )
+      .limit(1)
+    if (!env) throw createError({ statusCode: 404, statusMessage: 'Not Found' })
   }
 
   const [asset] = await db
     .insert(assets)
     .values({
       workspaceId: session.workspaceId,
-      name: parsed.data.name,
-      type: parsed.data.type,
-      providerId: parsed.data.providerId ?? null,
-      providerAccountId: parsed.data.providerAccountId ?? null,
-      criticality: parsed.data.criticality ?? 'medium',
-      adminUrl: parsed.data.adminUrl || null,
-      publicUrl: parsed.data.publicUrl || null,
-      description: parsed.data.description ?? null,
-      externalIdentifier: parsed.data.externalIdentifier ?? null,
-      verificationStatus: parsed.data.verificationStatus ?? 'declared',
+      name: data.name,
+      type: data.type,
+      providerId,
+      providerAccountId: data.providerAccountId ?? null,
+      criticality: data.criticality ?? 'medium',
+      adminUrl: data.adminUrl || null,
+      publicUrl: data.publicUrl || null,
+      description: data.description ?? null,
+      externalIdentifier: data.externalIdentifier ?? null,
+      verificationStatus: data.verificationStatus ?? 'declared',
     })
     .returning()
 
-  if (parsed.data.projectId) {
+  if (data.projectId) {
     await db.insert(projectAssets).values({
       workspaceId: session.workspaceId,
-      projectId: parsed.data.projectId,
+      projectId: data.projectId,
       assetId: asset.id,
-      environmentId: parsed.data.environmentId ?? null,
+      environmentId: data.environmentId ?? null,
     })
+  }
+
+  if (data.identityId) {
+    await db.insert(assetRoles).values({
+      workspaceId: session.workspaceId,
+      assetId: asset.id,
+      identityId: data.identityId,
+      roleType: data.accessRoleType ?? 'admin',
+    })
+  }
+
+  const loginEmail = data.loginEmail?.trim()
+  if (loginEmail) {
+    const email = await findOrCreateEmail(db, session.workspaceId, loginEmail)
+    await linkAssetLoginEmail(db, session.workspaceId, asset.id, email.id, data.identityId)
   }
 
   return { asset }

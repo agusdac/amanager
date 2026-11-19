@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t } = useI18n()
+
 const props = defineProps<{
   current: number
   total: number
@@ -14,7 +16,7 @@ function stepState(index: number) {
 </script>
 
 <template>
-  <ol class="grid gap-2 sm:grid-cols-5" aria-label="Onboarding progress">
+  <ol class="grid gap-2 sm:grid-cols-5" :aria-label="t('onboarding.progressLabel')">
     <li
       v-for="(label, index) in labels"
       :key="index"

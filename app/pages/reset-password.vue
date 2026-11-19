@@ -12,7 +12,7 @@ const token = computed(() => String(route.query.token ?? ''))
 
 async function submit() {
   if (!token.value) {
-    error.value = 'Missing token'
+    error.value = t('auth.resetMissing')
     return
   }
   loading.value = true
@@ -24,7 +24,7 @@ async function submit() {
     })
     done.value = true
   } catch {
-    error.value = 'Invalid or expired token'
+    error.value = t('auth.resetInvalid')
   } finally {
     loading.value = false
   }
@@ -33,19 +33,20 @@ async function submit() {
 
 <template>
   <div class="mx-auto max-w-md space-y-6">
-    <h1 class="text-2xl font-semibold">{{ t('auth.resetTitle') }}</h1>
-    <form v-if="!done" class="space-y-4 rounded-lg border border-stone-200 bg-white p-6" @submit.prevent="submit">
-      <label class="block text-sm">
-        <span class="text-stone-600">{{ t('auth.password') }}</span>
-        <input v-model="password" type="password" required minlength="10" class="mt-1 w-full rounded border border-stone-300 px-3 py-2" />
+    <h1 class="page-title">{{ t('auth.resetTitle') }}</h1>
+    <form v-if="!done" class="card space-y-4 p-6 shadow-sm" @submit.prevent="submit">
+      <label class="block">
+        <span class="label">{{ t('auth.password') }}</span>
+        <input v-model="password" type="password" required minlength="10" autocomplete="new-password" class="field mt-1.5" />
       </label>
-      <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
-      <button type="submit" class="w-full rounded bg-stone-900 px-4 py-2 text-white" :disabled="loading">
-        {{ t('auth.submitReset') }}
+      <p v-if="error" class="error-text">{{ error }}</p>
+      <button type="submit" class="btn-primary w-full" :disabled="loading">
+        {{ loading ? t('common.loading') : t('auth.submitReset') }}
       </button>
     </form>
-    <p v-else class="text-sm">
-      <NuxtLink to="/login" class="underline">{{ t('nav.login') }}</NuxtLink>
+    <p v-else class="lede">
+      {{ t('auth.resetDone') }}
+      <NuxtLink to="/login" class="font-medium text-stone-900 underline">{{ t('nav.login') }}</NuxtLink>
     </p>
   </div>
 </template>

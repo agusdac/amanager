@@ -71,11 +71,12 @@ Login → workspace personal → crear proyecto → crear un asset persistido en
 | **OR-1b** | `asset_dependencies`, API + UI de impacto (lista, BFS, profundidad máxima, estados de verificación) |
 | **OR-1c** | Wizard 5 pasos (spec §6): borradores, «not sure yet», solo «My projects» en paso 1 |
 | **OR-1d** | CSV import preview/commit + export; rechazo de columnas con patrones de secreto |
-| **OR-1e** | Búsqueda y filtros con paginación servidor; seed ficticio Mini Críptico (`unverified` markers) |
+| **OR-1e** | Búsqueda y filtros con paginación servidor; seed ficticio Mini Críptico (`unverified` markers). **Re-ejecutar** `bun run db:seed --workspace=<uuid>` **sustituye** el demo Mini Críptico del workspace (no hace skip). |
+| **OR-1f** | UI `config_entries` en detalle de asset (OAuth: client ID, redirect URIs por entorno, orígenes JS); solo metadatos públicos o referencia sensible. |
+| **OR-1g** | **Grafo visual de dependencias** (cierre F1): vista en proyecto y acceso desde asset; aristas con tipos traducidos y estados de verificación. Lista BFS (OR-1b) sigue siendo la vista por defecto. |
 
 ### Fuera de Fase 1
 
-- Grafo visual de dependencias
 - Clientes / modo agencia en UI
 - Invitaciones, billing
 - Integraciones OAuth con proveedores del inventario
@@ -83,7 +84,7 @@ Login → workspace personal → crear proyecto → crear un asset persistido en
 
 ### Criterio de salida
 
-Inventariar Mini Críptico (manual, wizard o CSV) y responder las 10 preguntas de §4.4 con datos trazables y sin secretos.
+Inventariar Mini Críptico (manual, wizard o CSV) y responder las 10 preguntas de §4.4 con datos trazables y sin secretos. Checklist: [DOGFOOD_CHECKLIST.md](./DOGFOOD_CHECKLIST.md) y página in-app `/checklist`.
 
 ---
 
@@ -154,6 +155,7 @@ Skills en `.cursor/skills/` para guiar implementación y QA:
 | `i18n-en-es` | Cualquier copy de UI |
 | `nuxt-drizzle-stack` | Scaffold, Compose, auth, queries |
 | `minicriptico-dogfood` | Seed y criterios de aceptación Fase 1 |
+| `provider-brand-icon` | Nuevo proveedor o tipo de asset: icono oficial vía Simple Icons + `brandIcons.ts` |
 
 ### Skills sugeridas (F2+, no creadas aún)
 

@@ -7,7 +7,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
   ])
   if (publicPaths.has(to.path)) return
 
-  const session = await $fetch<{ user: { id: string } | null }>('/api/auth/session')
+  const api = import.meta.server ? useRequestFetch() : $fetch
+  const session = await api<{ user: { id: string } | null }>('/api/auth/session')
   if (!session.user) {
     return navigateTo('/login')
   }

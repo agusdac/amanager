@@ -267,8 +267,8 @@ async function finalize() {
 <template>
   <div class="mx-auto max-w-3xl space-y-8 pb-12">
     <header class="space-y-2">
-      <h1 class="text-2xl font-semibold tracking-tight text-stone-900">{{ t('onboarding.title') }}</h1>
-      <p class="max-w-2xl text-sm leading-relaxed text-stone-600">{{ t('onboarding.subtitle') }}</p>
+      <h1 class="page-title tracking-tight">{{ t('onboarding.title') }}</h1>
+      <p class="lede">{{ t('onboarding.subtitle') }}</p>
       <div class="flex flex-wrap items-center gap-3 text-xs text-stone-500">
         <span>{{ t('onboarding.step', { current: step, total: TOTAL_STEPS }) }}</span>
         <span v-if="saving" class="text-stone-400">{{ t('common.loading') }}</span>
@@ -321,7 +321,7 @@ async function finalize() {
               type="text"
               required
               autocomplete="organization"
-              class="mt-1.5 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-stone-900 shadow-sm focus:border-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-200"
+              class="field-wizard mt-1.5"
             />
           </label>
           <label class="block text-sm">
@@ -331,7 +331,7 @@ async function finalize() {
               v-model="websiteUrl"
               type="url"
               placeholder="https://"
-              class="mt-1.5 w-full rounded-lg border border-stone-300 px-3 py-2.5 shadow-sm focus:border-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-200"
+              class="field-wizard mt-1.5"
             />
           </label>
           <label class="block text-sm">
@@ -339,7 +339,7 @@ async function finalize() {
             <textarea
               v-model="description"
               rows="3"
-              class="mt-1.5 w-full rounded-lg border border-stone-300 px-3 py-2.5 shadow-sm focus:border-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-200"
+              class="field-wizard mt-1.5"
             />
           </label>
         </div>
@@ -356,7 +356,7 @@ async function finalize() {
           v-model="providerSearch"
           type="search"
           :placeholder="t('onboarding.toolsSearch')"
-          class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm shadow-sm focus:border-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-200"
+          class="field-wizard"
         />
         <p class="text-xs text-stone-500">{{ t('onboarding.toolsSelected', { count: selectedProviders.length }) }}</p>
         <div
@@ -407,7 +407,7 @@ async function finalize() {
                   type="text"
                   :placeholder="t('accounts.identityLabel')"
                   :disabled="id.unsure"
-                  class="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 disabled:bg-stone-100"
+                  class="field-wizard mt-1"
                 />
               </label>
               <label class="block text-sm">
@@ -415,7 +415,7 @@ async function finalize() {
                 <select
                   v-model="id.providerSlug"
                   :disabled="id.unsure"
-                  class="mt-1 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 disabled:bg-stone-100"
+                  class="field-wizard mt-1"
                 >
                   <option value="">{{ t('accounts.noProvider') }}</option>
                   <option v-for="p in providerList" :key="p.slug" :value="p.slug">{{ p.name }}</option>
@@ -513,7 +513,7 @@ async function finalize() {
               v-model="asset.name"
               type="text"
               :disabled="!asset.enabled"
-              class="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm disabled:bg-stone-50"
+              class="field-wizard flex-1"
               :placeholder="t('onboarding.assetPlaceholder')"
             />
           </div>
@@ -530,7 +530,7 @@ async function finalize() {
           <button
             v-if="step > 1"
             type="button"
-            class="inline-flex items-center gap-1 rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+            class="btn-secondary-wizard"
             :disabled="saving || finishing"
             @click="goBack"
           >
@@ -540,7 +540,7 @@ async function finalize() {
           <button
             v-if="step === 3"
             type="button"
-            class="rounded-lg px-4 py-2 text-sm text-stone-600 hover:bg-stone-100"
+            class="btn-quiet"
             :disabled="saving || finishing"
             @click="skipTools"
           >
@@ -551,7 +551,7 @@ async function finalize() {
         <button
           v-if="step < TOTAL_STEPS"
           type="button"
-          class="inline-flex items-center justify-center gap-1 rounded-lg bg-stone-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-stone-800 disabled:opacity-60"
+          class="btn-wizard"
           :disabled="saving"
           @click="goNext"
         >
@@ -561,7 +561,7 @@ async function finalize() {
         <button
           v-else
           type="button"
-          class="inline-flex items-center justify-center gap-1 rounded-lg bg-stone-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-stone-800 disabled:opacity-60"
+          class="btn-wizard"
           :disabled="finishing"
           @click="finalize"
         >

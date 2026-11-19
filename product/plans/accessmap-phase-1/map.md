@@ -11,7 +11,7 @@ Dogfood inventory complete: register Mini Críptico (manual, wizard, or CSV) and
 - Skills: `domain-model`, `no-secrets`, `i18n-en-es`, `minicriptico-dogfood`.
 - Contract: [brief](../../features/accessmap-phase-1.md) · [spec](../../specs/accessmap-phase-1.md).
 - Handoff: invoke **fire-in-the-hole** (or direct agent) on **OR-1a** first after schema migration.
-- **Build status (2026-11-19):** OR-1a … OR-1h implemented. Apply `bun run db:migrate` + `bun run db:seed` after Docker is up.
+- **Build status (2026-11-19):** OR-1a … OR-1h implemented; **OR-1c asset form** (provider, env, account, identity, login email + `asset_emails` migration `0002`). Apply `bun run db:migrate` + `bun run db:seed` after Docker is up.
 
 ## Decisions so far
 

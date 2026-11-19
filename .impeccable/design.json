@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-19T20:45:00+01:00",
+  "title": "Design System: AccessMap",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "displayName": "Ink Stone",
+        "canonical": "#1c1917",
+        "tonalRamp": ["#0c0a09", "#1c1917", "#292524", "#44403c", "#57534e", "#78716c", "#a8a29e", "#fafaf9"]
+      },
+      "ink-hover": {
+        "role": "primary",
+        "displayName": "Ink Hover",
+        "canonical": "#292524",
+        "tonalRamp": ["#0c0a09", "#1c1917", "#292524", "#44403c", "#57534e", "#78716c", "#a8a29e", "#fafaf9"]
+      },
+      "ink-body": {
+        "role": "neutral",
+        "displayName": "Ink Body",
+        "canonical": "#44403c",
+        "tonalRamp": ["#0c0a09", "#1c1917", "#292524", "#44403c", "#57534e", "#78716c", "#d6d3d1", "#fafaf9"]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Ink Soft",
+        "canonical": "#57534e",
+        "tonalRamp": ["#0c0a09", "#1c1917", "#292524", "#44403c", "#57534e", "#78716c", "#d6d3d1", "#fafaf9"]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Ink Muted",
+        "canonical": "#78716c",
+        "tonalRamp": ["#0c0a09", "#1c1917", "#292524", "#44403c", "#57534e", "#78716c", "#d6d3d1", "#fafaf9"]
+      },
+      "ink-faint": {
+        "role": "neutral",
+        "displayName": "Ink Faint",
+        "canonical": "#a8a29e",
+        "tonalRamp": ["#1c1917", "#292524", "#44403c", "#57534e", "#78716c", "#a8a29e", "#e7e5e4", "#fafaf9"]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#fafaf9",
+        "tonalRamp": ["#44403c", "#57534e", "#78716c", "#a8a29e", "#d6d3d1", "#e7e5e4", "#f5f5f4", "#fafaf9"]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#292524", "#57534e", "#a8a29e", "#d6d3d1", "#e7e5e4", "#f5f5f4", "#fafaf9", "#ffffff"]
+      },
+      "mist": {
+        "role": "neutral",
+        "displayName": "Mist",
+        "canonical": "#f5f5f4",
+        "tonalRamp": ["#44403c", "#57534e", "#78716c", "#a8a29e", "#d6d3d1", "#e7e5e4", "#f5f5f4", "#fafaf9"]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "#e7e5e4",
+        "tonalRamp": ["#44403c", "#57534e", "#78716c", "#a8a29e", "#d6d3d1", "#e7e5e4", "#f5f5f4", "#fafaf9"]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Rule Strong",
+        "canonical": "#d6d3d1",
+        "tonalRamp": ["#292524", "#44403c", "#57534e", "#78716c", "#a8a29e", "#d6d3d1", "#e7e5e4", "#fafaf9"]
+      },
+      "confirmed": {
+        "role": "semantic",
+        "displayName": "Confirmed Green",
+        "canonical": "#047857",
+        "tonalRamp": ["#022c22", "#064e3b", "#065f46", "#047857", "#059669", "#34d399", "#a7f3d0", "#ecfdf5"]
+      },
+      "confirmed-wash": {
+        "role": "semantic",
+        "displayName": "Confirmed Wash",
+        "canonical": "#ecfdf5",
+        "tonalRamp": ["#022c22", "#064e3b", "#065f46", "#047857", "#059669", "#6ee7b7", "#a7f3d0", "#ecfdf5"]
+      },
+      "confirmed-line": {
+        "role": "semantic",
+        "displayName": "Confirmed Line",
+        "canonical": "#a7f3d0",
+        "tonalRamp": ["#022c22", "#064e3b", "#047857", "#059669", "#34d399", "#6ee7b7", "#a7f3d0", "#ecfdf5"]
+      },
+      "confirmed-ink": {
+        "role": "semantic",
+        "displayName": "Confirmed Ink",
+        "canonical": "#064e3b",
+        "tonalRamp": ["#022c22", "#064e3b", "#065f46", "#047857", "#059669", "#34d399", "#a7f3d0", "#ecfdf5"]
+      },
+      "notice-wash": {
+        "role": "semantic",
+        "displayName": "Notice Wash",
+        "canonical": "#fffbeb",
+        "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fde68a", "#fffbeb"]
+      },
+      "notice-line": {
+        "role": "semantic",
+        "displayName": "Notice Line",
+        "canonical": "#fde68a",
+        "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#fbbf24", "#fde68a", "#fffbeb"]
+      },
+      "fault": {
+        "role": "semantic",
+        "displayName": "Fault Red",
+        "canonical": "#dc2626",
+        "tonalRamp": ["#450a0a", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#f87171", "#fecaca", "#fef2f2"]
+      },
+      "fault-ink": {
+        "role": "semantic",
+        "displayName": "Fault Ink",
+        "canonical": "#b91c1c",
+        "tonalRamp": ["#450a0a", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#f87171", "#fecaca", "#fef2f2"]
+      }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "Page titles. The wizard title also uses -0.025em tracking." },
+      "title": { "displayName": "Title", "purpose": "Section headings. Some inventory sections use weight 500." },
+      "body": { "displayName": "Body", "purpose": "Working copy, navigation, buttons, and list rows at 14px." },
+      "label": { "displayName": "Label", "purpose": "Uppercase category labels. Stat labels are the same size at regular weight." },
+      "mono": { "displayName": "Mono", "purpose": "CSV import and raw preview text only." }
+    },
+    "shadows": [
+      {
+        "name": "rest",
+        "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "purpose": "Hairline rest under auth forms, the wizard shell, and wizard fields. It does not grow on hover."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "150ms color transitions on the stepper, selectable rows, and the locale switch."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Compact ink action used on auth, home, and inventory.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Save</button>",
+      "css": ".ds-btn-primary { background: #1c1917; color: #ffffff; padding: 8px 16px; border: none; border-radius: 4px; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 400; line-height: 1.25rem; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background: #292524; } .ds-btn-primary:focus-visible { outline: 2px solid #e7e5e4; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }"
+    },
+    {
+      "name": "Wizard Button",
+      "kind": "button",
+      "refersTo": "button-wizard",
+      "description": "Primary action inside the wizard, with an 8px corner and a trailing stroke.",
+      "html": "<button class=\"ds-btn-wizard\" type=\"button\">Continue <svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M9 6l6 6-6 6\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></button>",
+      "css": ".ds-btn-wizard { display: inline-flex; align-items: center; justify-content: center; gap: 4px; background: #1c1917; color: #ffffff; padding: 10px 20px; border: none; border-radius: 8px; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; line-height: 1.25rem; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-wizard:hover { background: #292524; } .ds-btn-wizard:focus-visible { outline: 2px solid #e7e5e4; outline-offset: 2px; } .ds-btn-wizard:disabled { opacity: 0.6; cursor: not-allowed; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Bordered action on Card. Hover fills with Paper.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Import</button>",
+      "css": ".ds-btn-secondary { background: #ffffff; color: #44403c; padding: 8px 16px; border: 1px solid #d6d3d1; border-radius: 4px; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 400; line-height: 1.25rem; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-secondary:hover { background: #fafaf9; } .ds-btn-secondary:focus-visible { outline: 2px solid #e7e5e4; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-wizard",
+      "description": "Wizard field. Compact forms use a 4px corner, 8px 12px padding, and no focus ring.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Project name</span><input class=\"ds-input\" type=\"text\" value=\"Mini Críptico\" /></label>",
+      "css": ".ds-field { display: block; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-field-label { display: block; color: #44403c; font-size: 0.875rem; font-weight: 500; } .ds-input { display: block; width: 100%; margin-top: 6px; box-sizing: border-box; background: #ffffff; color: #1c1917; padding: 10px 12px; border: 1px solid #d6d3d1; border-radius: 8px; font: inherit; font-size: 0.875rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); } .ds-input:hover { border-color: #a8a29e; } .ds-input:focus { outline: none; border-color: #78716c; box-shadow: 0 0 0 2px #e7e5e4; } .ds-input:disabled { background: #f5f5f4; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "White entry on paper. Stats omit the rest shadow; auth and the wizard shell keep it.",
+      "html": "<article class=\"ds-card\"><p class=\"ds-card-label\">Projects</p><p class=\"ds-card-value\">4</p></article>",
+      "css": ".ds-card { background: #ffffff; border: 1px solid #e7e5e4; border-radius: 8px; padding: 16px; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-card-label { margin: 0; color: #78716c; font-size: 0.75rem; font-weight: 400; letter-spacing: 0.025em; text-transform: uppercase; } .ds-card-value { margin: 4px 0 0; color: #1c1917; font-size: 1.5rem; font-weight: 600; line-height: 2rem; }"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Chosen provider on the review step. Verification badges use the same Mist at a 4px corner.",
+      "html": "<span class=\"ds-chip\">GitHub</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; background: #f5f5f4; color: #292524; border-radius: 9999px; padding: 2px 10px; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; line-height: 1.25rem; }"
+    },
+    {
+      "name": "Top Navigation",
+      "kind": "nav",
+      "refersTo": "button-primary",
+      "description": "White header ruled off from the paper. No sidebar and no active fill.",
+      "html": "<header class=\"ds-nav\"><a class=\"ds-nav-brand\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" aria-hidden=\"true\"><path d=\"M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>AccessMap</a><nav class=\"ds-nav-links\"><a href=\"#\">Home</a><a href=\"#\">Projects</a><span class=\"ds-locale\"><button type=\"button\" class=\"ds-locale-on\">EN</button><button type=\"button\">ES</button></span></nav></header>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 16px; background: #ffffff; border-bottom: 1px solid #e7e5e4; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-nav-brand { display: inline-flex; align-items: center; gap: 8px; color: #1c1917; font-weight: 600; font-size: 0.875rem; text-decoration: none; } .ds-nav-links { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; } .ds-nav-links a { color: #57534e; font-size: 0.875rem; text-decoration: none; } .ds-nav-links a:hover { color: #1c1917; } .ds-nav-links a:focus-visible, .ds-nav-brand:focus-visible, .ds-locale button:focus-visible { outline: 2px solid #e7e5e4; outline-offset: 2px; } .ds-locale { display: inline-flex; gap: 4px; padding: 2px; background: #ffffff; border: 1px solid #e7e5e4; border-radius: 6px; } .ds-locale button { border: none; background: transparent; color: #57534e; border-radius: 4px; padding: 4px 8px; font: inherit; font-size: 0.875rem; cursor: pointer; } .ds-locale button:hover { background: #f5f5f4; } .ds-locale-on, .ds-locale-on:hover { background: #1c1917; color: #ffffff; }"
+    },
+    {
+      "name": "Stepper",
+      "kind": "custom",
+      "refersTo": "stepper-current",
+      "description": "Wizard progress. Current is ink, done is confirmed green, upcoming is a ruled card.",
+      "html": "<ol class=\"ds-steps\"><li class=\"ds-step ds-step-done\"><span class=\"ds-step-index\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" aria-hidden=\"true\"><path d=\"M5 12l4 4L19 6\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></span><span class=\"ds-step-label\">Welcome</span></li><li class=\"ds-step ds-step-current\"><span class=\"ds-step-index\">2</span><span class=\"ds-step-label\">Project</span></li><li class=\"ds-step\"><span class=\"ds-step-index\">3</span><span class=\"ds-step-label\">Tools</span></li></ol>",
+      "css": ".ds-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-step { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 8px 12px; border: 1px solid #e7e5e4; border-radius: 8px; background: #ffffff; color: #78716c; text-align: left; transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), border-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-step-index { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.025em; text-transform: uppercase; opacity: 0.8; font-variant-numeric: tabular-nums; } .ds-step-label { font-size: 0.875rem; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-step-current { background: #1c1917; border-color: #1c1917; color: #ffffff; } .ds-step-done { background: #ecfdf5; border-color: #a7f3d0; color: #064e3b; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Field Notebook",
+    "overview": "AccessMap looks like a field notebook for infrastructure facts. The page is warm paper. Entries sit on white cards, separated from the page by a thin stone rule. Actions are written in ink. The voice is quiet, literal, and warm: the screen records a fact and does not sell it.\n\nDensity is comfortable. A page title is 24px and semibold. Working text is 14px. Sections stack on a 32px rhythm inside a 64rem column. There is no display size and no custom typeface. The system font is the hand of the notebook.\n\nColor is rationed. Ink is the only color that acts, and it is writing, not a brand accent. Green, amber, and red appear only when a state changes: confirmed, unfinished, or failed. Confirmed visual rejection: no chromatic brand accent, no gradient, and no colored app sidebar.",
+    "keyCharacteristics": [
+      "Warm paper with white cards and a 1px stone rule",
+      "Ink as the only action color",
+      "Status color used only for confirmed, unfinished, and failed",
+      "Flat surfaces, with a hairline shadow as a rest",
+      "System sans, 14px working text, 24px titles",
+      "4px corners on compact tools, 8px corners in the wizard"
+    ],
+    "rules": [
+      {
+        "name": "The Ink Rule",
+        "body": "Ink Stone is the only action color. Green, amber, and red mark state. They never become a brand accent, a gradient, or a sidebar.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Interface text uses the system sans. Mono is for imported or raw text, never for labels or navigation.",
+        "section": "typography"
+      },
+      {
+        "name": "The Narrow Page Rule",
+        "body": "App content stays inside 64rem. Auth stays inside 28rem. The wizard stays inside 48rem. Do not invent a wider canvas for an ordinary screen.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Surfaces are flat. Separate them with a 1px rule and a tone change. The rest shadow never becomes a lift.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Two Corners Rule",
+        "body": "Compact tools stay at 4px. The wizard stays at 8px, and its shell at 12px. Do not introduce a third family of corners.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do use Ink Stone for the primary action, the current step, and the selected segment.",
+      "Do keep the page on Paper and the entry on Card, separated by a 1px Rule.",
+      "Do use Confirmed Green, Notice Amber, and Fault Red only to mark state.",
+      "Do draw icons as 24px strokes at 1.75px with round caps, in currentColor.",
+      "Do keep compact corners at 4px and wizard corners at 8px."
+    ],
+    "donts": [
+      "Don't introduce a chromatic brand accent, a gradient, or a colored app sidebar.",
+      "Don't lift a button or a card on hover. The rest shadow stays a rest.",
+      "Don't add a corner radius outside 4px, 6px, 8px, 12px, and the pill.",
+      "Don't set interface text in a second family. Mono stays on imported and raw text."
+    ]
+  }
+}

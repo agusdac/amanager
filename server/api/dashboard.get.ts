@@ -25,6 +25,12 @@ export default defineEventHandler(async (event) => {
       ),
     )
 
+  const attentionAssets = await db
+    .select({ id: assets.id, name: assets.name, type: assets.type, verificationStatus: assets.verificationStatus })
+    .from(assets)
+    .where(and(eq(assets.workspaceId, ws), inArray(assets.verificationStatus, ['unverified'])))
+    .limit(6)
+
   const [draft] = await db
     .select()
     .from(onboardingDrafts)
@@ -40,5 +46,6 @@ export default defineEventHandler(async (event) => {
       unverifiedAssets: unverified[0]?.count ?? 0,
     },
     onboarding: draft && !draft.completedAt ? { step: draft.step, updatedAt: draft.updatedAt } : null,
+    attentionAssets,
   }
 })

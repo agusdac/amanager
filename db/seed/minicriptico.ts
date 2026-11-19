@@ -1,19 +1,24 @@
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import {
   assetDependencies,
+  assetEmails,
   assetRoles,
   assets,
   emailAddresses,
   identities,
+  identityEmails,
   projectAssets,
   projectEnvironments,
   projects,
   providerAccounts,
   providers,
+  configEntries,
   vaultReferences,
+  verifications,
 } from '../schema'
 import type * as schema from '../schema'
+import { resetMiniCripticoSeed } from './reset-minicriptico'
 
 export async function seedMiniCriptico(db: NodePgDatabase<typeof schema>, workspaceId: string) {
   const prov = Object.fromEntries(
@@ -39,30 +44,54 @@ export async function seedMiniCriptico(db: NodePgDatabase<typeof schema>, worksp
       })
       .returning()
     projectId = project.id
+  } else {
+    await resetMiniCripticoSeed(db, workspaceId, projectId)
   }
 
-  const [envProd] = await db
-    .insert(projectEnvironments)
-    .values({ workspaceId, projectId, name: 'production', kind: 'production' })
-    .returning()
-  const [envDev] = await db
-    .insert(projectEnvironments)
-    .values({ workspaceId, projectId, name: 'development', kind: 'development' })
-    .returning()
+  const envRows = await db
+    .select()
+    .from(projectEnvironments)
+    .where(and(eq(projectEnvironments.workspaceId, workspaceId), eq(projectEnvironments.projectId, projectId)))
+  let envProd = envRows.find((e) => e.kind === 'production')
+  let envDev = envRows.find((e) => e.kind === 'development')
+  if (!envProd) {
+    ;[envProd] = await db
+      .insert(projectEnvironments)
+      .values({ workspaceId, projectId, name: 'production', kind: 'production' })
+      .returning()
+  }
+  if (!envDev) {
+    ;[envDev] = await db
+      .insert(projectEnvironments)
+      .values({ workspaceId, projectId, name: 'development', kind: 'development' })
+      .returning()
+  }
 
   const emails = ['Email A', 'Email B', 'Email C', 'Email D']
   const emailIds: string[] = []
+  const emailByLabel = new Map<string, string>()
   for (const label of emails) {
-    const [row] = await db
-      .insert(emailAddresses)
-      .values({
-        workspaceId,
-        address: `${label.toLowerCase().replace(' ', '-')}@example.invalid`,
-        label,
-        verificationStatus: 'unverified',
-      })
-      .returning()
+    const address = `${label.toLowerCase().replace(' ', '-')}@example.invalid`
+    const [existing] = await db
+      .select()
+      .from(emailAddresses)
+      .where(and(eq(emailAddresses.workspaceId, workspaceId), eq(emailAddresses.address, address)))
+      .limit(1)
+    const row =
+      existing ??
+      (
+        await db
+          .insert(emailAddresses)
+          .values({
+            workspaceId,
+            address,
+            label,
+            verificationStatus: 'unverified',
+          })
+          .returning()
+      )[0]
     emailIds.push(row.id)
+    emailByLabel.set(label, row.id)
   }
 
   const [googleA] = await db
@@ -171,4 +200,97 @@ export async function seedMiniCriptico(db: NodePgDatabase<typeof schema>, worksp
     assetId: oauth.id,
   })
 
+  await db.insert(configEntries).values([
+    {
+      workspaceId,
+      projectId,
+      assetId: oauth.id,
+      key: 'oauth_client_id',
+      description: 'Public OAuth client ID (not the client secret)',
+      valueType: 'string',
+      publicValue: '123456789012-abcdefghijklmnop.apps.googleusercontent.com',
+      isSensitiveReference: false,
+    },
+    {
+      workspaceId,
+      projectId,
+      assetId: oauth.id,
+      key: 'redirect_uri_production',
+      description: 'Authorized redirect URI — production',
+      valueType: 'url',
+      publicValue: 'https://minicriptico.com/api/auth/callback/google',
+      isSensitiveReference: false,
+    },
+    {
+      workspaceId,
+      projectId,
+      assetId: oauth.id,
+      key: 'redirect_uri_development',
+      description: 'Authorized redirect URI — development',
+      valueType: 'url',
+      publicValue: 'http://localhost:3000/api/auth/callback/google',
+      isSensitiveReference: false,
+    },
+    {
+      workspaceId,
+      projectId,
+      assetId: oauth.id,
+      key: 'javascript_origin_production',
+      description: 'Authorized JavaScript origin — production',
+      valueType: 'url',
+      publicValue: 'https://minicriptico.com',
+      isSensitiveReference: false,
+    },
+  ])
+
+  const emailA = emailByLabel.get('Email A')!
+  const emailB = emailByLabel.get('Email B')!
+  await db.insert(identityEmails).values([
+    { workspaceId, identityId: googleA.id, emailId: emailA, purpose: 'login' },
+    { workspaceId, identityId: googleB.id, emailId: emailB, purpose: 'login' },
+  ])
+
+  await db.insert(assetEmails).values([
+    { workspaceId, assetId: youtube.id, emailId: emailA, purpose: 'login' },
+    { workspaceId, assetId: gsc.id, emailId: emailB, purpose: 'login' },
+    { workspaceId, assetId: oauth.id, emailId: emailA, purpose: 'login' },
+  ])
+
+  const verificationTargets = [
+    {
+      sourceId: gsc.id,
+      status: 'dns_txt',
+      evidenceNote: 'Domain property verified via DNS TXT on minicriptico.com (declared in dogfood seed).',
+    },
+    {
+      sourceId: domain.id,
+      status: 'registrar_lock',
+      evidenceNote: 'Registrar: Namecheap; DNS delegated to Cloudflare (declared).',
+    },
+  ]
+  for (const v of verificationTargets) {
+    const [existingVerification] = await db
+      .select({ id: verifications.id })
+      .from(verifications)
+      .where(
+        and(
+          eq(verifications.workspaceId, workspaceId),
+          eq(verifications.sourceType, 'asset'),
+          eq(verifications.sourceId, v.sourceId),
+          eq(verifications.status, v.status),
+        ),
+      )
+      .limit(1)
+    if (!existingVerification) {
+      await db.insert(verifications).values({
+        workspaceId,
+        sourceType: 'asset',
+        sourceId: v.sourceId,
+        status: v.status,
+        evidenceNote: v.evidenceNote,
+      })
+    }
+  }
+
+  return { projectId }
 }

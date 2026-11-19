@@ -12,6 +12,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:seed": "bun run db/seed/run.ts",
+    "db:workspaces": "bun run scripts/list-workspaces.ts",
     "test": "vitest run"
   },
   "dependencies": {
@@ -20,6 +21,7 @@
     "nuxt": "^4.6.4",
     "pg": "^8.23.1",
     "reka-ui": "^2.11.0",
+    "simple-icons": "^16.38.0",
     "vue": "^3.5.45",
     "vue-router": "^5.4.0",
     "zod": "^4.6.7"

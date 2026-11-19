@@ -1,6 +1,14 @@
 <script setup lang="ts">
 const { t } = useI18n()
-const { data: session, refresh } = await useFetch('/api/auth/session', { key: 'session' })
+const route = useRoute()
+const { data: session, refresh } = useSessionFetch()
+
+function navClass(path: string) {
+  const current = path === '/home'
+    ? route.path === '/home'
+    : route.path === path || route.path.startsWith(`${path}/`)
+  return current ? 'font-medium text-stone-900' : 'hover:text-stone-900'
+}
 
 async function logout() {
   await $fetch('/api/auth/logout', { method: 'POST' })
@@ -18,11 +26,12 @@ async function logout() {
           <span>{{ t('app.name') }}</span>
         </NuxtLink>
         <nav class="flex flex-wrap items-center gap-4 text-sm text-stone-600">
-          <NuxtLink v-if="session?.user" to="/home" class="hover:text-stone-900">{{ t('nav.home') }}</NuxtLink>
-          <NuxtLink v-if="session?.user" to="/projects" class="hover:text-stone-900">{{ t('nav.projects') }}</NuxtLink>
-          <NuxtLink v-if="session?.user" to="/accounts" class="hover:text-stone-900">{{ t('nav.accounts') }}</NuxtLink>
-          <NuxtLink v-if="session?.user" to="/assets" class="hover:text-stone-900">{{ t('nav.assets') }}</NuxtLink>
-          <NuxtLink v-if="session?.user" to="/onboarding" class="hover:text-stone-900">{{ t('nav.onboarding') }}</NuxtLink>
+          <NuxtLink v-if="session?.user" to="/home" :class="navClass('/home')">{{ t('nav.home') }}</NuxtLink>
+          <NuxtLink v-if="session?.user" to="/projects" :class="navClass('/projects')">{{ t('nav.projects') }}</NuxtLink>
+          <NuxtLink v-if="session?.user" to="/accounts" :class="navClass('/accounts')">{{ t('nav.accounts') }}</NuxtLink>
+          <NuxtLink v-if="session?.user" to="/assets" :class="navClass('/assets')">{{ t('nav.assets') }}</NuxtLink>
+          <NuxtLink v-if="session?.user" to="/onboarding" :class="navClass('/onboarding')">{{ t('nav.onboarding') }}</NuxtLink>
+          <NuxtLink v-if="session?.user" to="/checklist" :class="navClass('/checklist')">{{ t('nav.checklist') }}</NuxtLink>
           <LocaleSwitcher />
           <button
             v-if="session?.user"

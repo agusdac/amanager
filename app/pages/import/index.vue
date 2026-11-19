@@ -23,13 +23,13 @@ async function revert() {
 
 <template>
   <div class="space-y-4">
-    <h1 class="text-2xl font-semibold">{{ t('import.title') }}</h1>
-    <textarea v-model="csv" rows="10" class="w-full rounded border p-3 font-mono text-xs" />
-    <div class="flex gap-2">
-      <button type="button" class="rounded border px-3 py-2 text-sm" @click="runPreview">{{ t('import.preview') }}</button>
-      <button type="button" class="rounded bg-stone-900 px-3 py-2 text-sm text-white" @click="runCommit">{{ t('import.commit') }}</button>
-      <button v-if="batchId" type="button" class="rounded border px-3 py-2 text-sm text-red-700" @click="revert">{{ t('import.revert') }}</button>
+    <h1 class="page-title">{{ t('import.title') }}</h1>
+    <textarea v-model="csv" rows="10" spellcheck="false" class="field font-mono text-xs" />
+    <div class="flex flex-wrap gap-2">
+      <button type="button" class="btn-secondary" @click="runPreview">{{ t('import.preview') }}</button>
+      <button type="button" class="btn-primary" @click="runCommit">{{ t('import.commit') }}</button>
+      <button v-if="batchId" type="button" class="btn-danger" @click="revert">{{ t('import.revert') }}</button>
     </div>
-    <pre v-if="preview" class="overflow-auto rounded border bg-stone-50 p-3 text-xs">{{ JSON.stringify(preview, null, 2) }}</pre>
+    <pre v-if="preview" class="card overflow-auto bg-stone-50 p-3 font-mono text-xs text-stone-800">{{ JSON.stringify(preview, null, 2) }}</pre>
   </div>
 </template>

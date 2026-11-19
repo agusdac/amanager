@@ -6,37 +6,60 @@ const { data } = await useFetch('/api/dashboard')
 <template>
   <div class="space-y-8">
     <div>
-      <h1 class="text-2xl font-semibold">{{ t('home.title') }}</h1>
-      <p class="text-sm text-stone-600">{{ t('app.tagline') }}</p>
+      <h1 class="page-title">{{ t('home.title') }}</h1>
+      <p class="lede">{{ t('app.tagline') }}</p>
     </div>
+
+    <section class="card p-5">
+      <WorkspaceSearch />
+    </section>
 
     <div v-if="data" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="rounded-lg border border-stone-200 bg-white p-4">
-        <p class="text-xs uppercase text-stone-500">{{ t('home.projects') }}</p>
-        <p class="mt-1 text-2xl font-semibold">{{ data.counts.projects }}</p>
-      </div>
-      <div class="rounded-lg border border-stone-200 bg-white p-4">
-        <p class="text-xs uppercase text-stone-500">{{ t('home.assets') }}</p>
-        <p class="mt-1 text-2xl font-semibold">{{ data.counts.assets }}</p>
-      </div>
-      <div class="rounded-lg border border-stone-200 bg-white p-4">
-        <p class="text-xs uppercase text-stone-500">{{ t('home.identities') }}</p>
-        <p class="mt-1 text-2xl font-semibold">{{ data.counts.identities }}</p>
-      </div>
-      <div class="rounded-lg border border-stone-200 bg-white p-4">
-        <p class="text-xs uppercase text-stone-500">{{ t('home.dependencies') }}</p>
-        <p class="mt-1 text-2xl font-semibold">{{ data.counts.dependencies }}</p>
-      </div>
+      <NuxtLink to="/projects" class="card p-4 transition-shadow hover:shadow-md">
+        <p class="text-xs uppercase tracking-wide text-stone-500">{{ t('home.projects') }}</p>
+        <p class="stat-value">{{ data.counts.projects }}</p>
+      </NuxtLink>
+      <NuxtLink to="/assets" class="card p-4 transition-shadow hover:shadow-md">
+        <p class="text-xs uppercase tracking-wide text-stone-500">{{ t('home.assets') }}</p>
+        <p class="stat-value">{{ data.counts.assets }}</p>
+      </NuxtLink>
+      <NuxtLink to="/accounts" class="card p-4 transition-shadow hover:shadow-md">
+        <p class="text-xs uppercase tracking-wide text-stone-500">{{ t('home.identities') }}</p>
+        <p class="stat-value">{{ data.counts.identities }}</p>
+      </NuxtLink>
+      <NuxtLink to="/assets" class="card p-4 transition-shadow hover:shadow-md">
+        <p class="text-xs uppercase tracking-wide text-stone-500">{{ t('home.dependencies') }}</p>
+        <p class="stat-value">{{ data.counts.dependencies }}</p>
+      </NuxtLink>
     </div>
 
-    <div v-if="data?.onboarding" class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm">
+    <section
+      v-if="data?.counts?.unverifiedAssets"
+      class="rounded-xl border border-amber-200 bg-amber-50/80 p-5"
+    >
+      <h2 class="text-sm font-medium text-amber-950">{{ t('home.attentionTitle') }}</h2>
+      <p class="mt-1 text-sm text-amber-900/90">
+        {{ t('home.attentionHint', { count: data.counts.unverifiedAssets }) }}
+      </p>
+      <ul v-if="data.attentionAssets?.length" class="mt-3 space-y-2 text-sm">
+        <li v-for="a in data.attentionAssets" :key="a.id">
+          <NuxtLink :to="`/assets/${a.id}`" class="font-medium text-amber-950 underline">
+            {{ a.name }}
+          </NuxtLink>
+          <span class="ml-2 text-amber-800/80"><AssetTypeLabel :type="a.type" :show-icon="false" /></span>
+        </li>
+      </ul>
+    </section>
+
+    <div v-if="data?.onboarding" class="notice">
       {{ t('home.resumeOnboarding', { step: data.onboarding.step }) }}
-      <NuxtLink to="/onboarding" class="ml-2 font-medium underline">{{ t('home.continue') }}</NuxtLink>
+      <NuxtLink to="/onboarding" class="ml-2 font-medium text-stone-900 underline">{{ t('home.continue') }}</NuxtLink>
     </div>
 
     <div class="flex flex-wrap gap-3">
-      <NuxtLink to="/onboarding" class="rounded bg-stone-900 px-4 py-2 text-sm text-white">{{ t('nav.onboarding') }}</NuxtLink>
-      <NuxtLink to="/import" class="rounded border border-stone-300 px-4 py-2 text-sm">{{ t('nav.import') }}</NuxtLink>
+      <NuxtLink to="/checklist" class="btn-primary">{{ t('home.openChecklist') }}</NuxtLink>
+      <NuxtLink to="/onboarding" class="btn-secondary">{{ t('nav.onboarding') }}</NuxtLink>
+      <NuxtLink to="/import" class="btn-secondary">{{ t('nav.import') }}</NuxtLink>
     </div>
   </div>
 </template>

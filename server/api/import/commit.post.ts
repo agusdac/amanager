@@ -1,7 +1,15 @@
 import { and, eq } from 'drizzle-orm'
 import { csvImportSchema } from '../../../shared/schemas/inventory'
-import { assets, importBatches, projectAssets, projects, providers } from '../../../db/schema'
+import {
+  assets,
+  importBatches,
+  projectAssets,
+  projectEnvironments,
+  projects,
+  providers,
+} from '../../../db/schema'
 import { parseCsv } from '../../utils/csv'
+import { findOrCreateEmail, linkAssetLoginEmail } from '../../utils/inventory-links'
 import { scanCsvHeaders, rowHasSuspiciousSecret } from '../../utils/secret-scan'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
@@ -74,11 +82,36 @@ export default defineEventHandler(async (event) => {
       })
       .returning()
 
+    let environmentId: string | null = null
+    const envName = (row.environment ?? '').trim().toLowerCase()
+    if (envName) {
+      const [env] = await db
+        .select()
+        .from(projectEnvironments)
+        .where(
+          and(
+            eq(projectEnvironments.workspaceId, session.workspaceId),
+            eq(projectEnvironments.projectId, project.id),
+            eq(projectEnvironments.name, envName),
+          ),
+        )
+        .limit(1)
+      environmentId = env?.id ?? null
+    }
+
     await db.insert(projectAssets).values({
       workspaceId: session.workspaceId,
       projectId: project.id,
       assetId: asset.id,
+      environmentId,
     })
+
+    const loginEmail = (row.login_email ?? '').trim()
+    if (loginEmail && loginEmail.includes('@')) {
+      const email = await findOrCreateEmail(db, session.workspaceId, loginEmail)
+      await linkAssetLoginEmail(db, session.workspaceId, asset.id, email.id)
+    }
+
     created++
   }
 

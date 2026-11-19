@@ -31,12 +31,20 @@ export default defineEventHandler(async (event) => {
   if (providerId) filters.push(eq(assets.providerId, providerId))
   if (assetIds) filters.push(inArray(assets.id, assetIds))
   if (search) {
+    const pattern = `%${search}%`
     filters.push(
       or(
-        ilike(assets.name, `%${search}%`),
-        ilike(assets.type, `%${search}%`),
-        ilike(assets.description, `%${search}%`),
-        ilike(assets.externalIdentifier, `%${search}%`),
+        ilike(assets.name, pattern),
+        ilike(assets.type, pattern),
+        ilike(assets.description, pattern),
+        ilike(assets.externalIdentifier, pattern),
+        sql`exists (
+          select 1 from asset_emails ae
+          inner join email_addresses em on em.id = ae.email_id
+          where ae.asset_id = ${assets.id}
+            and ae.workspace_id = ${session.workspaceId}
+            and em.address ilike ${pattern}
+        )`,
       )!,
     )
   }
@@ -52,6 +60,7 @@ export default defineEventHandler(async (event) => {
     .select({
       asset: assets,
       providerName: providers.name,
+      providerSlug: providers.slug,
     })
     .from(assets)
     .leftJoin(providers, eq(assets.providerId, providers.id))
@@ -61,7 +70,7 @@ export default defineEventHandler(async (event) => {
     .offset(offset)
 
   return {
-    assets: list.map((r) => ({ ...r.asset, providerName: r.providerName })),
+    assets: list.map((r) => ({ ...r.asset, providerName: r.providerName, providerSlug: r.providerSlug })),
     page,
     limit,
     total,

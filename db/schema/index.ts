@@ -238,6 +238,18 @@ export const assetRoles = pgTable('asset_roles', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
+export const assetEmails = pgTable('asset_emails', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').notNull(),
+  assetId: uuid('asset_id')
+    .notNull()
+    .references(() => assets.id, { onDelete: 'cascade' }),
+  emailId: uuid('email_id')
+    .notNull()
+    .references(() => emailAddresses.id, { onDelete: 'cascade' }),
+  purpose: text('purpose').notNull(),
+})
+
 export const assetDependencies = pgTable(
   'asset_dependencies',
   {

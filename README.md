@@ -46,9 +46,10 @@ First registration creates the owner and a **Personal** workspace; further signu
 | --- | --- |
 | `bun run dev` | Nuxt dev server |
 | `bun run db:push` | Push Drizzle schema to Postgres |
-| `bun run db:migrate` | Apply migrations (`0000` + `0001` F1) |
+| `bun run db:migrate` | Apply migrations (`0000`–`0002` F1) |
 | `bun run db:seed` | Seed system `providers` |
-| `bun run db:seed -- --workspace=<uuid>` | Fictional Mini Críptico inventory |
+| `bun run db:seed -- --workspace=<uuid>` | Fictional Mini Críptico inventory (idempotent) |
+| `bun scripts/list-workspaces.ts` | List workspace UUIDs for seeding |
 | `bun run test` | Vitest (workspace isolation + CSV secret scan) |
 | `bun run build` | Production build |
 
