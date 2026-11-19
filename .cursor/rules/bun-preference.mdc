@@ -1,0 +1,4 @@
+---
+alwaysApply: true
+---
+Use bun package manager when needing to install dependencies over npm or pnpm.

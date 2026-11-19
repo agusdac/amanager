@@ -1,0 +1,7 @@
+{
+	email {$ACME_EMAIL:internal}
+}
+
+{$NUXT_PUBLIC_APP_HOST:localhost} {
+	reverse_proxy app:3000
+}

@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: accessmap
+      POSTGRES_PASSWORD: accessmap_dev
+      POSTGRES_DB: accessmap
+    ports:
+      - "5432:5432"
+    volumes:
+      - accessmap_pg_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U accessmap -d accessmap"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
+volumes:
+  accessmap_pg_dev:

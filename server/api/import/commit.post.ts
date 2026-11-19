@@ -1,0 +1,86 @@
+import { and, eq } from 'drizzle-orm'
+import { csvImportSchema } from '../../../shared/schemas/inventory'
+import { assets, importBatches, projectAssets, projects, providers } from '../../../db/schema'
+import { parseCsv } from '../../utils/csv'
+import { scanCsvHeaders, rowHasSuspiciousSecret } from '../../utils/secret-scan'
+import { useDb } from '../../utils/db'
+import { requireSession } from '../../utils/session'
+import { slugify } from '../../utils/slug'
+
+export default defineEventHandler(async (event) => {
+  const session = await requireSession(event)
+  const body = await readBody(event)
+  const parsed = csvImportSchema.safeParse(body)
+  if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Invalid input' })
+
+  const { headers, rows } = parseCsv(parsed.data.csv)
+  const headerScan = scanCsvHeaders(headers)
+  if (!headerScan.ok) {
+    throw createError({ statusCode: 400, statusMessage: `Forbidden columns: ${headerScan.rejected.join(', ')}` })
+  }
+
+  for (const row of rows) {
+    if (rowHasSuspiciousSecret(row)) {
+      throw createError({ statusCode: 400, statusMessage: 'CSV contains suspicious secret values' })
+    }
+  }
+
+  const db = useDb()
+  const providerRows = await db.select().from(providers)
+  const bySlug = new Map(providerRows.map((p) => [p.slug, p.id]))
+
+  const [batch] = await db
+    .insert(importBatches)
+    .values({
+      workspaceId: session.workspaceId,
+      rowCount: rows.length,
+      status: 'committed',
+    })
+    .returning()
+
+  let created = 0
+  for (const row of rows) {
+    const projectName = row.project || row.asset_name || 'Imported'
+    let [project] = await db
+      .select()
+      .from(projects)
+      .where(and(eq(projects.workspaceId, session.workspaceId), eq(projects.slug, slugify(projectName))))
+      .limit(1)
+
+    if (!project) {
+      ;[project] = await db
+        .insert(projects)
+        .values({
+          workspaceId: session.workspaceId,
+          slug: slugify(projectName),
+          name: projectName,
+        })
+        .returning()
+    }
+
+    const providerSlug = (row.provider ?? '').toLowerCase().replace(/\s+/g, '-')
+    const [asset] = await db
+      .insert(assets)
+      .values({
+        workspaceId: session.workspaceId,
+        name: row.asset_name || 'Unnamed asset',
+        type: row.asset_type || 'other',
+        providerId: bySlug.get(providerSlug) ?? null,
+        adminUrl: row.admin_url || null,
+        description: row.notes || null,
+        source: 'import',
+        importBatchId: batch.id,
+        verificationStatus: 'declared',
+      })
+      .returning()
+
+    await db.insert(projectAssets).values({
+      workspaceId: session.workspaceId,
+      projectId: project.id,
+      assetId: asset.id,
+    })
+    created++
+  }
+
+  return { batchId: batch.id, created }
+})
