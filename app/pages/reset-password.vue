@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'default' })
 
 const { t } = useI18n()
+useAppPageTitle('pageTitles.resetPassword')
 const route = useRoute()
 const password = ref('')
 const done = ref(false)

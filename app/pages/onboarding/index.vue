@@ -22,6 +22,7 @@ type AssetDraft = {
 }
 
 const { t } = useI18n()
+useAppPageTitle('pageTitles.onboarding')
 const step = ref(1)
 const stepError = ref('')
 const finalizeError = ref('')

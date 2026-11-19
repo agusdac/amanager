@@ -44,6 +44,7 @@ const configValueType = ref<'string' | 'url' | 'boolean'>('string')
 const configSensitive = ref(false)
 const configError = ref('')
 const configLoading = ref(false)
+const depRemovingId = ref<string | null>(null)
 
 const impactAssets = computed(() =>
   (assetList.value?.assets ?? []).map((a: { id: string; name: string }) => ({ id: a.id, label: a.name })),
@@ -77,6 +78,53 @@ watch(
 )
 
 const primaryProjectId = computed(() => data.value?.projects?.[0]?.projectId)
+
+const projectGraphUrl = computed(() =>
+  primaryProjectId.value ? `/api/projects/${primaryProjectId.value}` : null,
+)
+const { data: projectGraphPack } = await useFetch(projectGraphUrl, { watch: [projectGraphUrl] })
+
+const projectGraphNodes = computed(() =>
+  (projectGraphPack.value?.assets ?? []).map((a) => ({
+    id: a.id,
+    name: a.name,
+    type: a.type,
+    providerSlug: a.providerSlug,
+    verificationStatus: a.verificationStatus,
+  })),
+)
+
+const projectGraphEdges = computed(() =>
+  (projectGraphPack.value?.dependencies ?? []).map((d) => ({
+    id: d.id,
+    from: d.fromAssetId,
+    to: d.toAssetId,
+    relationType: d.relationType,
+    verificationStatus: d.verificationStatus,
+  })),
+)
+
+const projectGraphStorageKey = computed(() =>
+  primaryProjectId.value ? `dep-graph-${primaryProjectId.value}` : null,
+)
+
+useAppPageTitle(
+  computed(() => (data.value?.asset?.name ? data.value.asset.name : t('pageTitles.loading'))),
+)
+
+const assetTabs = computed(() => [
+  { id: 'overview', label: t('tabs.assets.overview') },
+  { id: 'access', label: t('tabs.assets.access') },
+  { id: 'dependencies', label: t('tabs.assets.dependencies') },
+  { id: 'config', label: t('tabs.assets.config') },
+  { id: 'verifications', label: t('tabs.assets.verifications') },
+  {
+    id: 'map',
+    label: t('tabs.assets.map'),
+    visible: Boolean(primaryProjectId.value && projectGraphEdges.value.length),
+  },
+  { id: 'impact', label: t('tabs.assets.impact') },
+])
 
 async function saveMetadata() {
   saveError.value = ''
@@ -208,6 +256,16 @@ async function addConfigEntry() {
   }
 }
 
+async function removeDependency(dependencyId: string) {
+  depRemovingId.value = dependencyId
+  try {
+    await $fetch(`/api/dependencies/${dependencyId}`, { method: 'DELETE' })
+    await refresh()
+  } finally {
+    depRemovingId.value = null
+  }
+}
+
 async function removeConfigEntry(id: string) {
   configError.value = ''
   try {
@@ -249,9 +307,10 @@ async function removeConfigEntry(id: string) {
 
     <p v-if="pending" class="text-stone-600">{{ t('common.loading') }}</p>
 
-    <template v-else-if="data?.asset">
+    <AppDetailTabs v-else-if="data?.asset" :tabs="assetTabs" default-tab="overview">
+      <template #overview>
       <section class="card p-6">
-        <h2 class="section-title">{{ t('assets.sectionMetadata') }}</h2>
+        <h2 class="sr-only">{{ t('assets.sectionMetadata') }}</h2>
         <form class="mt-4 grid gap-4 sm:grid-cols-2" @submit.prevent="saveMetadata">
           <label class="block text-sm sm:col-span-2">
             <span class="label">{{ t('assets.name') }}</span>
@@ -319,7 +378,7 @@ async function removeConfigEntry(id: string) {
 
       <section
         v-if="data.projects?.length"
-        class="card bg-stone-50/80 p-6"
+        class="card mt-6 bg-stone-50/80 p-6"
       >
         <h2 class="text-sm font-medium text-stone-700">{{ t('assets.projectsLinked') }}</h2>
         <ul class="mt-2 space-y-1 text-sm">
@@ -329,9 +388,11 @@ async function removeConfigEntry(id: string) {
           </li>
         </ul>
       </section>
+      </template>
 
+      <template #access>
       <section class="card p-6">
-        <h2 class="section-title">{{ t('assets.sectionAccess') }}</h2>
+        <h2 class="sr-only">{{ t('assets.sectionAccess') }}</h2>
 
         <ul v-if="data.roles?.length" class="list-card mt-3 text-sm">
           <li v-for="role in data.roles" :key="role.id" class="flex justify-between gap-2 px-3 py-2">
@@ -391,13 +452,19 @@ async function removeConfigEntry(id: string) {
         </div>
         <p v-if="accessError" class="error-text mt-2">{{ accessError }}</p>
       </section>
+      </template>
 
+      <template #dependencies>
       <AssetDependenciesPanel
         v-if="data.dependencies"
         :outbound="data.dependencies.outbound"
         :inbound="data.dependencies.inbound"
+        :removing-id="depRemovingId"
+        @remove="removeDependency"
       />
+      </template>
 
+      <template #config>
       <section v-if="data.vaultReferences?.length" class="card bg-stone-50/80 p-6">
         <h2 class="section-title">{{ t('assets.sectionVaultRefs') }}</h2>
         <p class="lede">{{ t('assets.vaultRefsHint') }}</p>
@@ -410,7 +477,7 @@ async function removeConfigEntry(id: string) {
         </ul>
       </section>
 
-      <section class="card p-6">
+      <section class="card p-6" :class="data.vaultReferences?.length ? 'mt-6' : ''">
         <h2 class="section-title">{{ t('assets.sectionConfig') }}</h2>
         <p class="lede">{{ t('assets.configHint') }}</p>
         <ul v-if="data.configEntries?.length" class="list-card mt-4 text-sm">
@@ -465,9 +532,11 @@ async function removeConfigEntry(id: string) {
           </button>
         </form>
       </section>
+      </template>
 
+      <template #verifications>
       <section class="card p-6">
-        <h2 class="section-title">{{ t('assets.sectionVerifications') }}</h2>
+        <h2 class="sr-only">{{ t('assets.sectionVerifications') }}</h2>
         <p class="lede">{{ t('assets.verificationsHint') }}</p>
         <ul v-if="data.verifications?.length" class="list-card mt-4 text-sm">
           <li v-for="v in data.verifications" :key="v.id" class="space-y-1 px-3 py-2">
@@ -498,7 +567,36 @@ async function removeConfigEntry(id: string) {
           </button>
         </form>
       </section>
+      </template>
 
+      <template #map>
+      <section
+        v-if="primaryProjectId && projectGraphEdges.length"
+        class="space-y-4"
+      >
+        <div class="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 class="sr-only">{{ t('graph.title') }}</h2>
+          <NuxtLink
+            :to="`/projects/${primaryProjectId}?tab=graph`"
+            class="text-sm text-stone-600 underline hover:text-stone-900"
+          >
+            {{ t('graph.openProjectMap') }}
+          </NuxtLink>
+        </div>
+        <ClientOnly>
+          <DependencyGraph
+            v-if="projectGraphStorageKey"
+            compact
+            :nodes="projectGraphNodes"
+            :edges="projectGraphEdges"
+            :highlight-id="assetId"
+            :storage-key="projectGraphStorageKey"
+          />
+        </ClientOnly>
+      </section>
+      </template>
+
+      <template #impact>
       <ImpactExplorer
         :asset-options="impactAssets"
         :identity-options="impactIdentities"
@@ -506,6 +604,7 @@ async function removeConfigEntry(id: string) {
         :initial-entity-id="assetId"
         :auto-run="true"
       />
-    </template>
+      </template>
+    </AppDetailTabs>
   </div>
 </template>

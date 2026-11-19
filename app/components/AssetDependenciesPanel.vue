@@ -9,12 +9,22 @@ type DepRow = {
   peerType: string
 }
 
-defineProps<{
+const props = defineProps<{
   outbound: DepRow[]
   inbound: DepRow[]
+  removingId?: string | null
+}>()
+
+const emit = defineEmits<{
+  remove: [id: string]
 }>()
 
 const { t } = useI18n()
+
+function askRemove(id: string) {
+  if (!import.meta.client || !window.confirm(t('dependencies.confirmDelete'))) return
+  emit('remove', id)
+}
 
 function relationLabel(type: string) {
   const key = `dependencies.relationTypes.${type}`
@@ -37,7 +47,17 @@ function relationLabel(type: string) {
           <li v-for="d in outbound" :key="d.id" class="space-y-1 px-3 py-2">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <span class="font-medium text-stone-800">{{ relationLabel(d.relationType) }}</span>
-              <VerificationChip :status="d.verificationStatus" />
+              <div class="flex items-center gap-2">
+                <VerificationChip :status="d.verificationStatus" />
+                <button
+                  type="button"
+                  class="text-xs font-medium text-red-700 hover:underline disabled:opacity-50"
+                  :disabled="props.removingId === d.id"
+                  @click="askRemove(d.id)"
+                >
+                  {{ t('dependencies.remove') }}
+                </button>
+              </div>
             </div>
             <NuxtLink :to="`/assets/${d.peerId}`" class="text-stone-900 underline">
               {{ d.peerName }}
@@ -54,7 +74,17 @@ function relationLabel(type: string) {
           <li v-for="d in inbound" :key="d.id" class="space-y-1 px-3 py-2">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <span class="font-medium text-stone-800">{{ relationLabel(d.relationType) }}</span>
-              <VerificationChip :status="d.verificationStatus" />
+              <div class="flex items-center gap-2">
+                <VerificationChip :status="d.verificationStatus" />
+                <button
+                  type="button"
+                  class="text-xs font-medium text-red-700 hover:underline disabled:opacity-50"
+                  :disabled="props.removingId === d.id"
+                  @click="askRemove(d.id)"
+                >
+                  {{ t('dependencies.remove') }}
+                </button>
+              </div>
             </div>
             <NuxtLink :to="`/assets/${d.peerId}`" class="text-stone-900 underline">
               {{ d.peerName }}

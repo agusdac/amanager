@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { t } = useI18n()
+useAppPageTitle('pageTitles.assets')
 const q = ref('')
 const page = ref(1)
 const { data } = await useFetch(() => `/api/assets?q=${encodeURIComponent(q.value)}&page=${page.value}&limit=25`, {

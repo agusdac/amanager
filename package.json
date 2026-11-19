@@ -16,6 +16,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "d3-force": "^3.0.1",
     "drizzle-orm": "^0.45.4",
     "nodemailer": "^10.6.0",
     "nuxt": "^4.6.4",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@nuxtjs/i18n": "^10.6.0",
     "@nuxtjs/tailwindcss": "^6.14.0",
+    "@types/d3-force": "^3.0.10",
     "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "@vue/test-utils": "^2.6.0",

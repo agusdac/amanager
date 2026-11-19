@@ -72,7 +72,50 @@
     "verified_by_integration": "Verified by integration",
     "confirmed": "Confirmed"
   },
+  "tabs": {
+    "projects": {
+      "assets": "Assets",
+      "environments": "Environments",
+      "graph": "Map",
+      "dependencies": "Dependencies",
+      "danger": "Danger zone"
+    },
+    "assets": {
+      "overview": "Overview",
+      "access": "Access",
+      "dependencies": "Dependencies",
+      "config": "Config & vault",
+      "verifications": "Verifications",
+      "map": "Map",
+      "impact": "Impact"
+    },
+    "identity": {
+      "access": "Asset access",
+      "emails": "Emails",
+      "accounts": "Provider accounts",
+      "impact": "Impact"
+    },
+    "accounts": {
+      "identities": "Identities",
+      "emails": "Emails",
+      "providerAccounts": "Provider accounts",
+      "impact": "Impact"
+    }
+  },
+  "graph": {
+    "title": "Dependency map",
+    "hint": "Drag nodes, scroll to zoom, pan on the background. Arrows point to the dependency target.",
+    "search": "Find asset…",
+    "focusNeighbors": "Neighborhood only",
+    "onlyUnverified": "Unverified edges only",
+    "resetLayout": "Reset layout",
+    "fit": "Fit view",
+    "empty": "No dependencies match these filters.",
+    "openProjectMap": "Open full project map"
+  },
   "dependencies": {
+    "confirmDelete": "Remove this dependency from the map?",
+    "remove": "Remove",
     "relationTypes": {
       "depends_on": "Depends on",
       "hosted_on": "Hosted on",
@@ -129,7 +172,49 @@
     "q9": "Onboard another developer without sharing passwords?",
     "q9hint": "Roles + vault refs (runbooks in Fase 2).",
     "q10": "What to change before GitHub→Bitbucket, Namecheap→Hostinger, or OAuth account move?",
-    "q10hint": "Impact lists on repos, domain, OAuth (migration plans Fase 3)."
+    "q10hint": "Impact lists on repos, domain, OAuth (migration plans Fase 3).",
+    "links": {
+      "identities": "Identities",
+      "googleA": "Google A",
+      "googleB": "Google B",
+      "emails": "Email addresses",
+      "impactEmailA": "Impact from Google A",
+      "oauthConfig": "OAuth config entries",
+      "vaultRefs": "Vault references",
+      "environments": "Project environments",
+      "youtubeAccess": "YouTube access",
+      "gsc": "Search Console",
+      "domain": "Domain asset",
+      "domainImpact": "Domain impact",
+      "mail": "Mail hosting",
+      "ses": "AWS SES",
+      "projectDeps": "Project dependencies",
+      "vps": "VPS-01",
+      "repo": "GitHub repo",
+      "sshVault": "SSH / vault hints",
+      "cloudflareStorage": "Cloudflare storage",
+      "consumerRepo": "Consumer repo",
+      "oauthRoles": "OAuth roles",
+      "repoImpact": "Repo impact",
+      "oauthImpact": "OAuth impact",
+      "projectMap": "Dependency map"
+    }
+  },
+  "pageTitles": {
+    "home": "Home",
+    "projects": "Projects",
+    "projectNew": "New project",
+    "assets": "Assets",
+    "accounts": "Accounts",
+    "checklist": "Dogfood checklist",
+    "onboarding": "Onboarding",
+    "import": "Import CSV",
+    "login": "Log in",
+    "register": "Create account",
+    "forgotPassword": "Forgot password",
+    "resetPassword": "Reset password",
+    "identity": "Identity",
+    "loading": "Loading…"
   },
   "auth": {
     "email": "Email",
@@ -170,7 +255,21 @@
     "deleteHint": "Removes the project, its environments, and links to assets. Assets stay in your workspace inventory.",
     "deleteConfirmLabel": "Type the project name to confirm",
     "deleteConfirmButton": "Delete permanently",
-    "deleteError": "Could not delete the project."
+    "deleteError": "Could not delete the project.",
+    "envName": "Environment name",
+    "envKind": "Kind",
+    "envKinds": {
+      "production": "Production",
+      "development": "Development",
+      "staging": "Staging",
+      "other": "Other"
+    },
+    "addEnvironment": "Add environment",
+    "noEnvironments": "No environments yet — add production and development to tag assets.",
+    "deleteEnvironment": "Remove",
+    "confirmDeleteEnvironment": "Remove this environment? Assets linked to it will show «Not set».",
+    "envDeleteError": "Could not remove the environment.",
+    "envCreateError": "Could not add the environment."
   },
   "assets": {
     "add": "Add asset",
@@ -385,6 +484,7 @@
     "cancel": "Cancel",
     "loading": "Loading…",
     "add": "Add",
-    "optional": "optional"
+    "optional": "optional",
+    "remove": "Remove"
   }
 }

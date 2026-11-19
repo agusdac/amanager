@@ -2,25 +2,29 @@
 const { t } = useI18n()
 const STORAGE_KEY = 'accessmap-dogfood-checklist'
 
+useAppPageTitle('pageTitles.checklist')
+
 const questionIds = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9', 'q10'] as const
 
-const quickLinks: Record<(typeof questionIds)[number], { to: string; labelKey: string }[]> = {
-  q1: [{ to: '/accounts', labelKey: 'nav.accounts' }],
-  q2: [
-    { to: '/accounts', labelKey: 'nav.accounts' },
-    { to: '/assets', labelKey: 'nav.assets' },
-  ],
+const fallbackLinks: Record<(typeof questionIds)[number], { to: string; labelKey: string }[]> = {
+  q1: [{ to: '/accounts?tab=identities', labelKey: 'checklist.links.identities' }],
+  q2: [{ to: '/accounts?tab=emails', labelKey: 'checklist.links.emails' }],
   q3: [{ to: '/assets', labelKey: 'nav.assets' }],
   q4: [{ to: '/assets', labelKey: 'nav.assets' }],
   q5: [{ to: '/assets', labelKey: 'nav.assets' }],
   q6: [{ to: '/assets', labelKey: 'nav.assets' }],
   q7: [{ to: '/assets', labelKey: 'nav.assets' }],
   q8: [{ to: '/assets', labelKey: 'nav.assets' }],
-  q9: [
-    { to: '/accounts', labelKey: 'nav.accounts' },
-    { to: '/assets', labelKey: 'nav.assets' },
-  ],
-  q10: [{ to: '/assets', labelKey: 'nav.assets' }],
+  q9: [{ to: '/accounts?tab=identities', labelKey: 'checklist.links.identities' }],
+  q10: [{ to: '/assets?tab=impact', labelKey: 'tabs.assets.impact' }],
+}
+
+const { data: linkPack } = await useFetch('/api/dogfood/quick-links')
+
+function linksFor(id: (typeof questionIds)[number]) {
+  const fromApi = linkPack.value?.questions?.[id]
+  if (fromApi?.length) return fromApi
+  return fallbackLinks[id] ?? []
 }
 
 const checked = ref<Record<string, boolean>>({})
@@ -87,10 +91,10 @@ function reset() {
               <span class="font-medium text-stone-500">{{ t('checklist.whereToLook') }}:</span>
               {{ t(`checklist.${id}hint`) }}
             </span>
-            <span v-if="quickLinks[id]?.length" class="flex flex-wrap gap-2 pt-1">
+            <span v-if="linksFor(id).length" class="flex flex-wrap gap-2 pt-1">
               <NuxtLink
-                v-for="link in quickLinks[id]"
-                :key="link.to"
+                v-for="(link, li) in linksFor(id)"
+                :key="`${link.to}-${li}`"
                 :to="link.to"
                 class="rounded-full border border-stone-200 bg-stone-50 px-3 py-0.5 text-xs font-medium text-stone-700 hover:bg-stone-100"
               >

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 const { t } = useI18n()
+
+useAppPageTitle('pageTitles.accounts')
 const { data: identities, refresh: refreshId } = await useFetch('/api/identities')
 const { data: emails, refresh: refreshEmail } = await useFetch('/api/email-addresses')
 const { data: accounts, refresh: refreshAcc } = await useFetch('/api/provider-accounts')
@@ -45,6 +47,13 @@ async function addAccount() {
   accLabel.value = ''
   await refreshAcc()
 }
+
+const accountTabs = computed(() => [
+  { id: 'identities', label: t('tabs.accounts.identities') },
+  { id: 'emails', label: t('tabs.accounts.emails') },
+  { id: 'providerAccounts', label: t('tabs.accounts.providerAccounts') },
+  { id: 'impact', label: t('tabs.accounts.impact') },
+])
 </script>
 
 <template>
@@ -54,8 +63,10 @@ async function addAccount() {
       <p class="lede">{{ t('accounts.subtitle') }}</p>
     </header>
 
+    <AppDetailTabs :tabs="accountTabs" default-tab="identities">
+      <template #identities>
     <section class="card space-y-4 p-5">
-      <h2 class="section-title">{{ t('accounts.identities') }}</h2>
+      <h2 class="sr-only">{{ t('accounts.identities') }}</h2>
       <form class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end" @submit.prevent="addIdentity">
         <label class="block min-w-[10rem] flex-1 text-sm">
           <span class="label">{{ t('accounts.identityLabel') }}</span>
@@ -87,9 +98,11 @@ async function addAccount() {
       </ul>
       <p v-else class="text-sm text-stone-500">{{ t('accounts.emptyIdentities') }}</p>
     </section>
+      </template>
 
+      <template #emails>
     <section class="card space-y-4 p-5">
-      <h2 class="section-title">{{ t('accounts.emails') }}</h2>
+      <h2 class="sr-only">{{ t('accounts.emails') }}</h2>
       <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="addEmail">
         <label class="block min-w-[14rem] flex-1 text-sm">
           <span class="label">{{ t('accounts.emailAddress') }}</span>
@@ -109,9 +122,11 @@ async function addAccount() {
       </ul>
       <p v-else class="text-sm text-stone-500">{{ t('accounts.emptyEmails') }}</p>
     </section>
+      </template>
 
+      <template #providerAccounts>
     <section class="card space-y-4 p-5">
-      <h2 class="section-title">{{ t('accounts.providerAccounts') }}</h2>
+      <h2 class="sr-only">{{ t('accounts.providerAccounts') }}</h2>
       <form class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end" @submit.prevent="addAccount">
         <label class="block min-w-[10rem] flex-1 text-sm">
           <span class="label">{{ t('accounts.accountLabel') }}</span>
@@ -141,7 +156,11 @@ async function addAccount() {
       </ul>
       <p v-else class="text-sm text-stone-500">{{ t('accounts.emptyAccounts') }}</p>
     </section>
+      </template>
 
+      <template #impact>
     <ImpactExplorer :asset-options="impactAssets" :identity-options="impactIdentities" />
+      </template>
+    </AppDetailTabs>
   </div>
 </template>

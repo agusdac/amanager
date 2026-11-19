@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { ENVIRONMENT_KINDS, RELATION_TYPE_KEYS } from '~/constants/inventory'
+
 const ASSET_TYPES = ['service', 'domain', 'hosting', 'repository', 'dns', 'email', 'other'] as const
 const ACCESS_ROLES = ['admin', 'operator', 'owner', 'developer', 'viewer', 'other'] as const
-const RELATION_TYPES = ['depends_on', 'hosted_on', 'deployed_from', 'authenticated_by', 'verified_with', 'stores_data_in'] as const
 
 const { t } = useI18n()
 const route = useRoute()
@@ -27,7 +28,14 @@ const assetLoading = ref(false)
 
 const depFrom = ref('')
 const depTo = ref('')
-const depType = ref('depends_on')
+const depType = ref<(typeof RELATION_TYPE_KEYS)[number]>('depends_on')
+const depRemovingId = ref<string | null>(null)
+
+const envName = ref('')
+const envKind = ref<(typeof ENVIRONMENT_KINDS)[number]>('development')
+const envError = ref('')
+const envLoading = ref(false)
+const envDeletingId = ref<string | null>(null)
 
 function resetAssetForm() {
   assetName.value = ''
@@ -50,6 +58,52 @@ async function addDependency() {
   depFrom.value = ''
   depTo.value = ''
   await refresh()
+}
+
+async function removeDependency(dependencyId: string) {
+  if (!import.meta.client || !window.confirm(t('dependencies.confirmDelete'))) return
+  depRemovingId.value = dependencyId
+  try {
+    await $fetch(`/api/dependencies/${dependencyId}`, { method: 'DELETE' })
+    await refresh()
+  } finally {
+    depRemovingId.value = null
+  }
+}
+
+async function addEnvironment() {
+  envError.value = ''
+  envLoading.value = true
+  try {
+    await $fetch('/api/environments', {
+      method: 'POST',
+      body: {
+        projectId: id.value,
+        name: envName.value.trim(),
+        kind: envKind.value,
+      },
+    })
+    envName.value = ''
+    await refresh()
+  } catch (e: unknown) {
+    envError.value = formatApiError(e) || t('projects.envCreateError')
+  } finally {
+    envLoading.value = false
+  }
+}
+
+async function removeEnvironment(environmentId: string) {
+  if (!import.meta.client || !window.confirm(t('projects.confirmDeleteEnvironment'))) return
+  envDeletingId.value = environmentId
+  envError.value = ''
+  try {
+    await $fetch(`/api/environments/${environmentId}`, { method: 'DELETE' })
+    await refresh()
+  } catch (e: unknown) {
+    envError.value = formatApiError(e) || t('projects.envDeleteError')
+  } finally {
+    envDeletingId.value = null
+  }
 }
 
 async function createAsset() {
@@ -80,6 +134,54 @@ async function createAsset() {
     assetLoading.value = false
   }
 }
+
+const graphNodes = computed(() =>
+  (data.value?.assets ?? []).map((a) => ({
+    id: a.id,
+    name: a.name,
+    type: a.type,
+    providerSlug: a.providerSlug,
+    verificationStatus: a.verificationStatus,
+  })),
+)
+
+const graphEdges = computed(() =>
+  (data.value?.dependencies ?? []).map((d) => ({
+    id: d.id,
+    from: d.fromAssetId,
+    to: d.toAssetId,
+    relationType: d.relationType,
+    verificationStatus: d.verificationStatus,
+  })),
+)
+
+const graphStorageKey = computed(() => `dep-graph-${id.value}`)
+
+const assetNameById = computed(() => {
+  const m = new Map<string, string>()
+  for (const a of data.value?.assets ?? []) m.set(a.id, a.name)
+  return m
+})
+
+const projectTabs = computed(() => [
+  { id: 'assets', label: t('tabs.projects.assets') },
+  { id: 'environments', label: t('tabs.projects.environments') },
+  {
+    id: 'graph',
+    label: t('tabs.projects.graph'),
+    visible: Boolean(data.value?.assets?.length),
+  },
+  { id: 'dependencies', label: t('tabs.projects.dependencies') },
+  { id: 'danger', label: t('tabs.projects.danger') },
+])
+
+useAppPageTitle(
+  computed(() =>
+    data.value?.project?.name
+      ? `${data.value.project.name}`
+      : t('pageTitles.loading'),
+  ),
+)
 
 const showDeleteConfirm = ref(false)
 const deleteConfirmName = ref('')
@@ -122,9 +224,11 @@ async function deleteProject() {
       </a>
     </header>
 
-    <section class="space-y-3">
+    <AppDetailTabs :tabs="projectTabs" default-tab="assets">
+      <template #assets>
+    <div class="space-y-3">
       <div class="flex items-center justify-between gap-4">
-        <h2 class="section-title">{{ t('projects.assetsTitle') }}</h2>
+        <h2 class="sr-only">{{ t('projects.assetsTitle') }}</h2>
         <button
           type="button"
           class="btn-secondary"
@@ -275,10 +379,65 @@ async function deleteProject() {
         </li>
       </ul>
       <p v-else class="lede">{{ t('projects.noAssets') }}</p>
-    </section>
+    </div>
+      </template>
 
-    <section class="space-y-3">
-      <h2 class="section-title">{{ t('projects.dependencies') }}</h2>
+      <template #environments>
+        <div class="space-y-4">
+          <form class="card flex flex-wrap items-end gap-3 p-5" @submit.prevent="addEnvironment">
+            <label class="block min-w-[10rem] flex-1 text-sm">
+              <span class="label">{{ t('projects.envName') }}</span>
+              <input v-model="envName" required class="field mt-1.5" />
+            </label>
+            <label class="block min-w-[10rem] text-sm">
+              <span class="label">{{ t('projects.envKind') }}</span>
+              <select v-model="envKind" class="field mt-1.5">
+                <option v-for="kind in ENVIRONMENT_KINDS" :key="kind" :value="kind">
+                  {{ t(`projects.envKinds.${kind}`) }}
+                </option>
+              </select>
+            </label>
+            <button type="submit" class="btn-secondary" :disabled="envLoading">
+              {{ t('projects.addEnvironment') }}
+            </button>
+          </form>
+          <p v-if="envError" class="error-text">{{ envError }}</p>
+          <ul v-if="data.environments?.length" class="list-card text-sm">
+            <li
+              v-for="env in data.environments"
+              :key="env.id"
+              class="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+            >
+              <span>
+                <span class="font-medium text-stone-900">{{ env.name }}</span>
+                <span class="ml-2 text-stone-500">({{ t(`projects.envKinds.${env.kind}`) }})</span>
+              </span>
+              <button
+                type="button"
+                class="text-xs font-medium text-red-700 hover:underline"
+                :disabled="envDeletingId === env.id"
+                @click="removeEnvironment(env.id)"
+              >
+                {{ t('projects.deleteEnvironment') }}
+              </button>
+            </li>
+          </ul>
+          <p v-else class="lede">{{ t('projects.noEnvironments') }}</p>
+        </div>
+      </template>
+
+      <template #graph>
+    <div v-if="data.assets?.length" class="space-y-3">
+      <h2 class="sr-only">{{ t('graph.title') }}</h2>
+      <ClientOnly>
+        <DependencyGraph :nodes="graphNodes" :edges="graphEdges" :storage-key="graphStorageKey" />
+      </ClientOnly>
+    </div>
+      </template>
+
+      <template #dependencies>
+    <div class="space-y-3">
+      <h2 class="sr-only">{{ t('projects.dependencies') }}</h2>
       <form v-if="data.assets?.length" class="flex flex-wrap items-center gap-2" @submit.prevent="addDependency">
         <select v-model="depFrom" required class="field w-auto">
           <option value="">{{ t('projects.depFrom') }}</option>
@@ -288,8 +447,8 @@ async function deleteProject() {
           <option value="">{{ t('projects.depTo') }}</option>
           <option v-for="a in data.assets" :key="a.id" :value="a.id">{{ a.name }}</option>
         </select>
-        <select v-model="depType" class="field w-auto">
-          <option v-for="relation in RELATION_TYPES" :key="relation" :value="relation">
+        <select v-model="depType" class="field w-auto max-w-[14rem]">
+          <option v-for="relation in RELATION_TYPE_KEYS" :key="relation" :value="relation">
             {{ t(`dependencies.relationTypes.${relation}`) }}
           </option>
         </select>
@@ -297,13 +456,27 @@ async function deleteProject() {
       </form>
       <ul v-if="data.dependencies?.length" class="list-card text-sm">
         <li v-for="d in data.dependencies" :key="d.id" class="flex flex-wrap items-center gap-2 px-4 py-2">
-          <span>{{ t(`dependencies.relationTypes.${d.relationType}`) }}</span>
+          <span class="font-medium text-stone-800">{{ assetNameById.get(d.fromAssetId) ?? d.fromAssetId }}</span>
+          <span class="text-stone-400" aria-hidden="true">→</span>
+          <span class="font-medium text-stone-800">{{ assetNameById.get(d.toAssetId) ?? d.toAssetId }}</span>
+          <span class="text-stone-500">·</span>
+          <span class="text-stone-600">{{ t(`dependencies.relationTypes.${d.relationType}`) }}</span>
           <VerificationChip :status="d.verificationStatus" />
+          <button
+            type="button"
+            class="ml-auto text-xs font-medium text-red-700 hover:underline disabled:opacity-50"
+            :disabled="depRemovingId === d.id"
+            @click="removeDependency(d.id)"
+          >
+            {{ t('dependencies.remove') }}
+          </button>
         </li>
       </ul>
       <p v-else-if="data.assets?.length" class="lede">{{ t('projects.noDependencies') }}</p>
-    </section>
+    </div>
+      </template>
 
+      <template #danger>
     <section class="rounded-xl border border-red-200 bg-red-50/50 p-5">
       <h2 class="text-lg font-medium text-red-900">{{ t('projects.deleteTitle') }}</h2>
       <p class="mt-1 text-sm text-red-800/90">{{ t('projects.deleteHint') }}</p>
@@ -351,5 +524,7 @@ async function deleteProject() {
         </div>
       </form>
     </section>
+      </template>
+    </AppDetailTabs>
   </div>
 </template>

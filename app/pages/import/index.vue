@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { t } = useI18n()
+useAppPageTitle('pageTitles.import')
 const csv = ref(`project,provider,asset_type,asset_name,login_email,environment,admin_url,notes
 Mini Críptico,github,repository,web repo,,production,,placeholder`)
 const preview = ref<Record<string, unknown> | null>(null)

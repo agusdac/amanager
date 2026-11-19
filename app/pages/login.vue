@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'default' })
 
 const { t } = useI18n()
+useAppPageTitle('pageTitles.login')
 const email = ref('')
 const password = ref('')
 const error = ref('')

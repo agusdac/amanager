@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'default' })
 
 const { t } = useI18n()
+useAppPageTitle('pageTitles.forgotPassword')
 const email = ref('')
 const sent = ref(false)
 const loading = ref(false)

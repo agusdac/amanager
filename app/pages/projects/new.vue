@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { t } = useI18n()
+useAppPageTitle('pageTitles.projectNew')
 const name = ref('')
 const websiteUrl = ref('')
 const description = ref('')

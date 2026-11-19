@@ -72,7 +72,50 @@
     "verified_by_integration": "Verificado por integración",
     "confirmed": "Confirmado"
   },
+  "tabs": {
+    "projects": {
+      "assets": "Activos",
+      "environments": "Entornos",
+      "graph": "Mapa",
+      "dependencies": "Dependencias",
+      "danger": "Zona de riesgo"
+    },
+    "assets": {
+      "overview": "Resumen",
+      "access": "Acceso",
+      "dependencies": "Dependencias",
+      "config": "Config y vault",
+      "verifications": "Verificaciones",
+      "map": "Mapa",
+      "impact": "Impacto"
+    },
+    "identity": {
+      "access": "Acceso a activos",
+      "emails": "Correos",
+      "accounts": "Cuentas de proveedor",
+      "impact": "Impacto"
+    },
+    "accounts": {
+      "identities": "Identidades",
+      "emails": "Correos",
+      "providerAccounts": "Cuentas de proveedor",
+      "impact": "Impacto"
+    }
+  },
+  "graph": {
+    "title": "Mapa de dependencias",
+    "hint": "Arrastra nodos, usa la rueda para zoom y arrastra el fondo para moverte. Las flechas apuntan al destino de la dependencia.",
+    "search": "Buscar activo…",
+    "focusNeighbors": "Solo vecindad",
+    "onlyUnverified": "Solo aristas sin verificar",
+    "resetLayout": "Reiniciar disposición",
+    "fit": "Encajar vista",
+    "empty": "Ninguna dependencia coincide con estos filtros.",
+    "openProjectMap": "Ver mapa completo del proyecto"
+  },
   "dependencies": {
+    "confirmDelete": "¿Quitar esta dependencia del mapa?",
+    "remove": "Quitar",
     "relationTypes": {
       "depends_on": "Depende de",
       "hosted_on": "Alojado en",
@@ -129,7 +172,49 @@
     "q9": "Incorporar desarrollador sin compartir contraseñas",
     "q9hint": "Roles + vault (runbooks Fase 2).",
     "q10": "Qué cambiar antes de migrar GitHub, registrador u OAuth",
-    "q10hint": "Listas de impacto (planes Fase 3)."
+    "q10hint": "Listas de impacto (planes Fase 3).",
+    "links": {
+      "identities": "Identidades",
+      "googleA": "Google A",
+      "googleB": "Google B",
+      "emails": "Correos",
+      "impactEmailA": "Impacto desde Google A",
+      "oauthConfig": "Config OAuth",
+      "vaultRefs": "Referencias vault",
+      "environments": "Entornos del proyecto",
+      "youtubeAccess": "Acceso YouTube",
+      "gsc": "Search Console",
+      "domain": "Dominio",
+      "domainImpact": "Impacto del dominio",
+      "mail": "Correo alojado",
+      "ses": "AWS SES",
+      "projectDeps": "Dependencias del proyecto",
+      "vps": "VPS-01",
+      "repo": "Repo GitHub",
+      "sshVault": "SSH / vault",
+      "cloudflareStorage": "Almacenamiento Cloudflare",
+      "consumerRepo": "Repo consumidor",
+      "oauthRoles": "Roles OAuth",
+      "repoImpact": "Impacto del repo",
+      "oauthImpact": "Impacto OAuth",
+      "projectMap": "Mapa de dependencias"
+    }
+  },
+  "pageTitles": {
+    "home": "Inicio",
+    "projects": "Proyectos",
+    "projectNew": "Nuevo proyecto",
+    "assets": "Activos",
+    "accounts": "Cuentas",
+    "checklist": "Checklist dogfood",
+    "onboarding": "Onboarding",
+    "import": "Importar CSV",
+    "login": "Iniciar sesión",
+    "register": "Crear cuenta",
+    "forgotPassword": "Olvidé mi contraseña",
+    "resetPassword": "Restablecer contraseña",
+    "identity": "Identidad",
+    "loading": "Cargando…"
   },
   "auth": {
     "email": "Correo",
@@ -170,7 +255,21 @@
     "deleteHint": "Elimina el proyecto, sus entornos y los enlaces a recursos. Los recursos siguen en el inventario del workspace.",
     "deleteConfirmLabel": "Escribe el nombre del proyecto para confirmar",
     "deleteConfirmButton": "Borrar permanentemente",
-    "deleteError": "No se pudo borrar el proyecto."
+    "deleteError": "No se pudo borrar el proyecto.",
+    "envName": "Nombre del entorno",
+    "envKind": "Tipo",
+    "envKinds": {
+      "production": "Producción",
+      "development": "Desarrollo",
+      "staging": "Staging",
+      "other": "Otro"
+    },
+    "addEnvironment": "Añadir entorno",
+    "noEnvironments": "Sin entornos — añade producción y desarrollo para etiquetar activos.",
+    "deleteEnvironment": "Quitar",
+    "confirmDeleteEnvironment": "¿Quitar este entorno? Los activos enlazados quedarán sin entorno.",
+    "envDeleteError": "No se pudo quitar el entorno.",
+    "envCreateError": "No se pudo añadir el entorno."
   },
   "assets": {
     "add": "Añadir recurso",
@@ -385,6 +484,7 @@
     "cancel": "Cancelar",
     "loading": "Cargando…",
     "add": "Añadir",
-    "optional": "opcional"
+    "optional": "opcional",
+    "remove": "Quitar"
   }
 }

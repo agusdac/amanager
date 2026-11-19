@@ -74,6 +74,7 @@ Login → workspace personal → crear proyecto → crear un asset persistido en
 | **OR-1e** | Búsqueda y filtros con paginación servidor; seed ficticio Mini Críptico (`unverified` markers). **Re-ejecutar** `bun run db:seed --workspace=<uuid>` **sustituye** el demo Mini Críptico del workspace (no hace skip). |
 | **OR-1f** | UI `config_entries` en detalle de asset (OAuth: client ID, redirect URIs por entorno, orígenes JS); solo metadatos públicos o referencia sensible. |
 | **OR-1g** | **Grafo visual de dependencias** (cierre F1): vista en proyecto y acceso desde asset; aristas con tipos traducidos y estados de verificación. Lista BFS (OR-1b) sigue siendo la vista por defecto. |
+| **OR-1h** | **Tabs en vistas de detalle** (proyecto, activo, identidad, accounts): navegación por secciones con Reka UI + query `?tab=` compartible. |
 
 ### Fuera de Fase 1
 

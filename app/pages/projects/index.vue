@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { t } = useI18n()
+useAppPageTitle('pageTitles.projects')
 const { data, refresh, pending } = await useFetch('/api/projects')
 </script>
 

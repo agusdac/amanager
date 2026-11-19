@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { t } = useI18n()
+useAppPageTitle('pageTitles.home')
 const { data } = await useFetch('/api/dashboard')
 </script>
 
