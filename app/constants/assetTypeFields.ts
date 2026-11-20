@@ -1,4 +1,4 @@
-import type { AssetAttributes } from '../../shared/schemas/assetAttributes'
+import type { AssetAttributes } from '#shared/schemas/assetAttributes'
 
 export type AssetAttributeFieldDef = {
   key: keyof AssetAttributes

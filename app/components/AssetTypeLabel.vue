@@ -12,8 +12,10 @@ const props = withDefaults(
     providerSlug?: string | null
     showDescription?: boolean
     showIcon?: boolean
+    /** Table/list density: brand icon without extra frame padding. */
+    dense?: boolean
   }>(),
-  { showDescription: false, showIcon: true, providerSlug: null },
+  { showDescription: false, showIcon: true, providerSlug: null, dense: false },
 )
 
 const { t, te } = useI18n()
@@ -45,6 +47,7 @@ const useVectorIcon = computed(() => assetTypeUsesVectorIcon(props.type))
       :asset-type="type"
       :title="label"
       :size="16"
+      :framed="!dense"
     />
     <span
       v-else-if="showIcon"

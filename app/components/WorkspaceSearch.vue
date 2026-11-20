@@ -69,7 +69,7 @@ const hasResults = computed(() => {
             {{ a.name }}
           </NuxtLink>
           <span class="ml-2 text-subtle">
-            <AssetTypeLabel :type="a.type" :provider-slug="a.providerSlug" />
+            <AssetTypeLabel :type="a.type" :provider-slug="a.providerSlug" dense />
           </span>
         </li>
       </ul>

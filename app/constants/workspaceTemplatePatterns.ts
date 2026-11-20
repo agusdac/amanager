@@ -1,5 +1,5 @@
-import type { RUNBOOK_STEP_KINDS } from '../../shared/schemas/runbooks'
-import type { InventoryTargetType, WorkspaceInventoryGenerator } from '../../shared/runbooks/inventoryTargets'
+import type { RUNBOOK_STEP_KINDS } from '#shared/schemas/runbooks'
+import type { InventoryTargetType, WorkspaceInventoryGenerator } from '#shared/runbooks/inventoryTargets'
 
 type StepKind = (typeof RUNBOOK_STEP_KINDS)[number]
 type StepRisk = 'low' | 'medium' | 'high'

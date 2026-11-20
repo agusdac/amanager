@@ -286,7 +286,7 @@ async function deleteProject() {
     >
       <div
         v-if="pendingDepPreview"
-        class="rounded-lg border border-rule bg-stone-50/90 dark:bg-stone-900/80 px-3 py-2.5"
+        class="rounded-lg border border-rule bg-stone-50/90 dark:bg-stone-900/80 dark:bg-stone-900/80 px-3 py-2.5"
       >
         <DependencyListRow v-bind="pendingDepPreview" compact />
       </div>
@@ -300,7 +300,7 @@ async function deleteProject() {
     >
       <p
         v-if="pendingEnvironment"
-        class="rounded-lg border border-rule bg-stone-50/90 dark:bg-stone-900/80 px-3 py-2.5 text-sm font-medium text-ink"
+        class="rounded-lg border border-rule bg-stone-50/90 dark:bg-stone-900/80 dark:bg-stone-900/80 px-3 py-2.5 text-sm font-medium text-ink"
       >
         {{ pendingEnvironment.name }}
         <span class="font-normal text-subtle">
@@ -447,7 +447,7 @@ async function deleteProject() {
               {{ asset.name }}
             </NuxtLink>
             <span class="text-sm text-subtle">
-              <AssetTypeLabel :type="asset.type" :provider-slug="asset.providerSlug" />
+              <AssetTypeLabel :type="asset.type" :provider-slug="asset.providerSlug" dense />
             </span>
             <VerificationChip :status="asset.verificationStatus" />
           </div>
@@ -546,7 +546,7 @@ async function deleteProject() {
                   <NuxtLink :to="`/assets/${asset.id}`" class="font-medium text-ink hover:underline">
                     {{ asset.name }}
                   </NuxtLink>
-                  <AssetTypeLabel :type="asset.type" :provider-slug="asset.providerSlug" />
+                  <AssetTypeLabel :type="asset.type" :provider-slug="asset.providerSlug" dense />
                 </li>
               </ul>
               <p v-else class="px-4 py-3 text-xs text-subtle">{{ t('projects.envNoAssets') }}</p>

@@ -1,4 +1,4 @@
-import { isAppTheme } from '../../shared/schemas/theme'
+import { isAppTheme } from '~/constants/theme'
 
 /** Apply signed-in user's DB theme to cookie + document (call from AppShell). */
 export function useSyncUserTheme() {

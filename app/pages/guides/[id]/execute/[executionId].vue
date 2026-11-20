@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { stepStatusUi } from '~/constants/stepResultStatusUi'
-import { STEP_RESULT_STATUSES } from '../../../../../shared/schemas/runbooks'
+import { STEP_RESULT_STATUSES } from '#shared/schemas/runbooks'
 
 const { t } = useI18n()
 

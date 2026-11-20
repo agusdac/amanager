@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { renderMarkdownPreview } from '../../shared/markdown/preview'
+import { renderMarkdownPreview } from '#shared/markdown/preview'
 
 const props = defineProps<{
   markdown: string

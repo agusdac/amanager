@@ -1,14 +1,13 @@
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { users } from '../../db/schema'
-import { appThemes } from '../../shared/schemas/theme'
 import { useDb } from '../utils/db'
 import { requireSession } from '../utils/session'
 
 const patchSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   locale: z.enum(['en', 'es']).optional(),
-  theme: z.enum(appThemes).optional(),
+  theme: z.enum(['light', 'dark']).optional(),
 })
 
 export default defineEventHandler(async (event) => {

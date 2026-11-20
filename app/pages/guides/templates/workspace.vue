@@ -8,7 +8,7 @@ import {
   type InventoryTargetType,
   type WorkspaceInventoryGenerator,
 } from '~/constants/runbookInventoryGenerators'
-import { RUNBOOK_STEP_KINDS } from '../../../../shared/schemas/runbooks'
+import { RUNBOOK_STEP_KINDS } from '#shared/schemas/runbooks'
 import {
   WORKSPACE_TEMPLATE_PATTERN_IDS,
   HILKO_MARKDOWN_SNIPPETS,
@@ -18,7 +18,7 @@ import {
   type WorkspaceStepDraft,
   type WorkspaceTemplatePatternId,
 } from '~/constants/workspaceTemplatePatterns'
-import { workspaceStepToPayload } from '../../../../shared/runbooks/workspaceStepPayload'
+import { workspaceStepToPayload } from '#shared/runbooks/workspaceStepPayload'
 
 type StepKind = (typeof RUNBOOK_STEP_KINDS)[number]
 type StepRisk = 'low' | 'medium' | 'high'
@@ -378,7 +378,7 @@ async function save() {
           <div
             v-for="(step, index) in steps"
             :key="index"
-            class="rounded-xl border border-rule bg-stone-50/60 dark:bg-stone-900/70 p-4"
+            class="rounded-xl border border-rule bg-stone-50/60 dark:bg-stone-900/70 dark:bg-stone-900/70 p-4"
           >
             <div class="flex flex-wrap items-center justify-between gap-2">
               <span class="text-xs font-medium uppercase tracking-wide text-subtle">
@@ -469,7 +469,7 @@ async function save() {
                   </button>
                 </div>
                 <div v-if="step.inventoryScope === 'specific'" class="flex flex-wrap items-center gap-2">
-                  <span v-if="step.inventoryTargetLabel" class="text-sm text-stone-800 dark:text-stone-200">{{ step.inventoryTargetLabel }}</span>
+                  <span v-if="step.inventoryTargetLabel" class="text-sm text-ink">{{ step.inventoryTargetLabel }}</span>
                   <span v-else class="text-sm text-subtle">{{ t('guides.templates.noTargetSelected') }}</span>
                   <button type="button" class="btn-secondary text-xs" @click="openReferencePicker(index)">
                     {{ t('guides.templates.pickReference') }}
@@ -546,7 +546,7 @@ async function save() {
                 <span v-if="stepPreviewLoading[index]" class="text-xs text-subtle">{{ t('common.loading') }}</span>
                 <span
                   v-else-if="stepPreviews[index]?.sample"
-                  class="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-900"
+                  class="badge-amber"
                 >
                   {{ t('guides.templates.previewSampleBadge') }}
                 </span>

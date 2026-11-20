@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AssetAttributes } from '../../shared/schemas/assetAttributes'
+import type { AssetAttributes } from '#shared/schemas/assetAttributes'
 import {
   ASSET_TYPE_ATTRIBUTE_FIELDS,
   projectDomainFromWebsite,

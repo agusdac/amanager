@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AssetAttributes } from '../../../shared/schemas/assetAttributes'
+import type { AssetAttributes } from '#shared/schemas/assetAttributes'
 import {
   ASSET_TYPES_WITH_VAULT_HINT,
   ASSET_TYPE_KEYS,
@@ -540,7 +540,7 @@ async function removeConfigEntry(id: string) {
 
       <section
         v-if="data.projects?.length"
-        class="card mt-6 bg-stone-50/80 dark:bg-stone-900/80 p-6"
+        class="card mt-6 bg-stone-50/80 dark:bg-stone-900/80 dark:bg-stone-900/80 p-6"
       >
         <h2 class="text-sm font-medium text-ink-secondary">{{ t('assets.projectsLinked') }}</h2>
         <ul class="mt-3 space-y-3 text-sm">
@@ -657,7 +657,7 @@ async function removeConfigEntry(id: string) {
       </template>
 
       <template #config>
-      <section v-if="data.vaultReferences?.length" class="card bg-stone-50/80 dark:bg-stone-900/80 p-6">
+      <section v-if="data.vaultReferences?.length" class="card bg-stone-50/80 dark:bg-stone-900/80 dark:bg-stone-900/80 p-6">
         <h2 class="section-title">{{ t('assets.sectionVaultRefs') }}</h2>
         <p class="lede">{{ t('assets.vaultRefsHint') }}</p>
         <ul class="list-card mt-3 text-sm">

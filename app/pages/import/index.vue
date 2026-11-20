@@ -31,6 +31,6 @@ async function revert() {
       <button type="button" class="btn-primary" @click="runCommit">{{ t('import.commit') }}</button>
       <button v-if="batchId" type="button" class="btn-danger" @click="revert">{{ t('import.revert') }}</button>
     </div>
-    <pre v-if="preview" class="card overflow-auto bg-surface-muted p-3 font-mono text-xs text-stone-800 dark:text-stone-200">{{ JSON.stringify(preview, null, 2) }}</pre>
+    <pre v-if="preview" class="card overflow-auto bg-surface-muted p-3 font-mono text-xs text-ink">{{ JSON.stringify(preview, null, 2) }}</pre>
   </div>
 </template>

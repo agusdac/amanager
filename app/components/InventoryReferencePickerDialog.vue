@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { InventoryTargetType } from '../../shared/runbooks/inventoryTargets'
+import type { InventoryTargetType } from '#shared/runbooks/inventoryTargets'
 
 const open = defineModel<boolean>('open', { default: false })
 

@@ -484,4 +484,18 @@
     @apply flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm text-ink transition-colors no-underline;
     @apply hover:bg-surface-muted;
   }
+
+  .notice-wash {
+    @apply border-amber-200 bg-amber-50/50;
+    @apply dark:border-amber-800 dark:bg-amber-950/40;
+  }
+
+  .notice-wash__text {
+    @apply text-sm text-amber-950 dark:text-amber-100;
+  }
+
+  .badge-amber {
+    @apply rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-900;
+    @apply dark:bg-amber-950/50 dark:text-amber-200;
+  }
 }

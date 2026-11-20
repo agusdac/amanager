@@ -1,4 +1,4 @@
-import type { STEP_RESULT_STATUSES } from '../../shared/schemas/runbooks'
+import type { STEP_RESULT_STATUSES } from '#shared/schemas/runbooks'
 
 type StepStatus = (typeof STEP_RESULT_STATUSES)[number]
 

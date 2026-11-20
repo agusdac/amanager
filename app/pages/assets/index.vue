@@ -169,7 +169,7 @@ const assetTabs = computed(() => [
                     <NuxtLink :to="`/assets/${a.id}`" class="text-ink hover:underline">{{ a.name }}</NuxtLink>
                   </td>
                   <td class="px-4 py-3 text-ink-secondary">
-                    <AssetTypeLabel :type="a.type" :provider-slug="a.providerSlug" show-description />
+                    <AssetTypeLabel :type="a.type" :provider-slug="a.providerSlug" show-description dense />
                   </td>
                   <td class="px-4 py-3 text-muted">{{ a.providerName ?? '—' }}</td>
                   <td class="px-4 py-3">

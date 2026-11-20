@@ -1,6 +1,5 @@
-import type { AppTheme } from '../../shared/schemas/theme'
-import { isAppTheme } from '../../shared/schemas/theme'
-import { THEME_COOKIE } from '~/constants/theme'
+import type { AppTheme } from '~/constants/theme'
+import { isAppTheme, THEME_COOKIE } from '~/constants/theme'
 
 /** Cookie + `html.dark` — call once from `app.vue`. */
 export function useAppTheme() {

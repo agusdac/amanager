@@ -13,7 +13,8 @@
     "db:push": "drizzle-kit push",
     "db:seed": "bun run db/seed/run.ts",
     "db:workspaces": "bun run scripts/list-workspaces.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "ui:dark-sweep": "bun run scripts/patch-dark-typography.ts"
   },
   "dependencies": {
     "d3-force": "^3.0.1",

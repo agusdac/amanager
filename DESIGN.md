@@ -296,3 +296,29 @@ The wizard progress is a row of five cells, one column until 640px and five from
 - **Don't** lift a button or a card on hover. The rest shadow stays a rest.
 - **Don't** add a corner radius outside 4px, 6px, 8px, 12px, and the pill.
 - **Don't** set interface text in a second family. Mono stays on imported and raw text.
+
+## Dark appearance (notebook at night)
+
+Applied via `html.dark` (`class` strategy). User preference `light` | `dark` on account + cookie `hilko_theme`.
+
+### Dark tokens (Tailwind stone)
+
+| Role | Light | Dark |
+| --- | --- | --- |
+| Paper / page | stone-50 | stone-950 |
+| Card / surface | white | stone-900 |
+| Ink primary | stone-900 | stone-100 |
+| Muted body | stone-600 | stone-300 |
+| Subtle meta | stone-500 | stone-400 |
+| Rule | stone-200 | stone-700 |
+| Primary button | stone-900 on white text | stone-100 on stone-900 text |
+| Checkbox checked | stone-900 fill, light check | stone-200 fill, dark check |
+
+Semantic utilities: `text-ink`, `text-muted`, `text-subtle`, `bg-surface`, `border-rule`, `notice-wash` (amber callouts).
+
+### Dark-specific rules
+
+- **Do** invert ink for primary actions (light fill, dark text in dark mode).
+- **Do** keep verification/status chips with muted washes, not neon.
+- **Do** use `brandIconFill` for Simple Icons that are too dark on stone-900.
+- **Don't** leave light-only `bg-white` / `text-stone-700` on runbook or guide surfaces.

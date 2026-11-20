@@ -74,7 +74,7 @@ function confirmRemove() {
     >
       <div
         v-if="pendingRow"
-        class="rounded-lg border border-rule bg-stone-50/90 dark:bg-stone-900/80 px-3 py-2.5"
+        class="rounded-lg border border-rule bg-stone-50/90 dark:bg-stone-900/80 dark:bg-stone-900/80 px-3 py-2.5"
       >
         <DependencyListRow
           v-bind="pendingRow"
@@ -105,7 +105,7 @@ function confirmRemove() {
               @remove="askRemove(d.id)"
             />
             <span class="mt-1 block text-xs text-subtle">
-              <AssetTypeLabel :type="d.peerType" />
+              <AssetTypeLabel :type="d.peerType" dense />
             </span>
           </li>
         </ul>
@@ -127,7 +127,7 @@ function confirmRemove() {
               @remove="askRemove(d.id)"
             />
             <span class="mt-1 block text-xs text-subtle">
-              <AssetTypeLabel :type="d.peerType" />
+              <AssetTypeLabel :type="d.peerType" dense />
             </span>
           </li>
         </ul>

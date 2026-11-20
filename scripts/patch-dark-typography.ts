@@ -1,6 +1,6 @@
 /**
- * One-off safe pass: add semantic text/surface classes for dark mode readability.
- * Skips files that already use semantic tokens.
+ * Maintenance sweep: map raw stone/white classes → semantic dark-safe utilities.
+ * Run: `bun run ui:dark-sweep` after adding pages that still use ad-hoc Tailwind grays.
  */
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
@@ -22,6 +22,8 @@ function walk(dir: string) {
 
 walk(join(root, 'app'))
 targets.push(join(root, 'shared', 'markdown', 'preview.ts'))
+
+const skipFiles = new Set(['app/constants/assetTypeBadge.ts'])
 
 type Rule = { from: RegExp; to: string }
 
@@ -53,6 +55,7 @@ let changed = 0
 for (const file of targets) {
   const rel = relative(root, file)
   if (rel.includes('assets\\css\\main.css') || rel.includes('assets/css/main.css')) continue
+  if (skipFiles.has(rel.replace(/\\/g, '/'))) continue
 
   let content = readFileSync(file, 'utf8')
   const before = content

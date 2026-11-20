@@ -130,8 +130,8 @@ async function startExecution() {
         <button type="button" class="btn-secondary text-sm" @click="loadRefreshDiff">{{ t('guides.refreshInventory') }}</button>
       </div>
 
-      <div v-if="refreshDiff.length" class="card space-y-3 border-amber-200 bg-amber-50/50 p-4">
-        <p class="text-sm text-stone-800 dark:text-stone-200">{{ t('guides.refreshPreview') }}</p>
+      <div v-if="refreshDiff.length" class="card notice-wash space-y-3 p-4">
+        <p class="notice-wash__text">{{ t('guides.refreshPreview') }}</p>
         <ul class="space-y-2 text-sm">
           <li v-for="d in refreshDiff" :key="d.stepKey" class="flex gap-2">
             <input v-model="selectedMerge" type="checkbox" class="checkbox" :value="d.stepKey" />

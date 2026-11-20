@@ -10,6 +10,9 @@ const localeChoice = ref<'en' | 'es'>('en')
 const themeChoice = ref<'light' | 'dark'>('light')
 const { setTheme } = useAppTheme()
 const themeAutoPersistSkip = ref(true)
+const themePersistError = ref('')
+const themePersistSaved = ref(false)
+let themeSavedTimer: ReturnType<typeof setTimeout> | null = null
 const profileSaving = ref(false)
 const profileError = ref('')
 const profileSaved = ref(false)
@@ -36,12 +39,23 @@ watch(
 watch(themeChoice, async (theme) => {
   setTheme(theme)
   if (themeAutoPersistSkip.value || !data.value?.user) return
+  themePersistError.value = ''
+  if (themeSavedTimer) clearTimeout(themeSavedTimer)
+  themePersistSaved.value = false
   try {
     await $fetch('/api/me', { method: 'PATCH', body: { theme } })
     await refreshNuxtData('session')
-  } catch {
-    /* revert on next full load; avoid blocking the UI */
+    themePersistSaved.value = true
+    themeSavedTimer = setTimeout(() => {
+      themePersistSaved.value = false
+    }, 2000)
+  } catch (e: unknown) {
+    themePersistError.value = formatApiError(e)
   }
+})
+
+onUnmounted(() => {
+  if (themeSavedTimer) clearTimeout(themeSavedTimer)
 })
 
 async function saveProfile() {
@@ -138,6 +152,10 @@ async function confirmDeleteAccount() {
             </label>
           </div>
           <p class="mt-2 text-xs text-subtle">{{ t('account.appearanceHint') }}</p>
+          <p v-if="themePersistError" class="mt-2 error-text">{{ themePersistError }}</p>
+          <p v-else-if="themePersistSaved" class="mt-2 text-sm text-emerald-700 dark:text-emerald-400">
+            {{ t('account.themeSaved') }}
+          </p>
         </fieldset>
         <p v-if="profileError" class="error-text">{{ profileError }}</p>
         <p v-else-if="profileSaved" class="text-sm text-emerald-700 dark:text-emerald-400">{{ t('account.saved') }}</p>
