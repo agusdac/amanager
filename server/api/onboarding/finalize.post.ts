@@ -1,7 +1,11 @@
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import {
+  assetDependencies,
+  assetRoles,
   assets,
+  emailAddresses,
+  identityEmails,
   identities,
   onboardingDrafts,
   projectAssets,
@@ -10,6 +14,7 @@ import {
   providerAccounts,
   providers,
 } from '../../../db/schema'
+import { linkIdentityLoginEmail } from '../../utils/inventory-links'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
 import { slugify } from '../../utils/slug'
@@ -23,6 +28,7 @@ const finalizeSchema = z.object({
       label: z.string(),
       providerSlug: z.string().optional().nullable(),
       unsure: z.boolean().optional(),
+      loginEmail: z.string().optional().nullable(),
     }),
   ),
   assets: z.array(
@@ -34,6 +40,26 @@ const finalizeSchema = z.object({
       unsure: z.boolean().optional(),
     }),
   ),
+  accessLinks: z
+    .array(
+      z.object({
+        identityLabel: z.string(),
+        providerSlug: z.string(),
+        roleType: z.string(),
+        enabled: z.boolean().optional(),
+      }),
+    )
+    .optional(),
+  dependencies: z
+    .array(
+      z.object({
+        fromProviderSlug: z.string(),
+        toProviderSlug: z.string(),
+        relationType: z.string(),
+        enabled: z.boolean().optional(),
+      }),
+    )
+    .optional(),
 })
 
 export default defineEventHandler(async (event) => {
@@ -74,9 +100,16 @@ export default defineEventHandler(async (event) => {
         verificationStatus: 'declared',
       })
       .returning()
+    identityMap.set(`${item.label}\0${item.providerSlug ?? ''}`, row.id)
     identityMap.set(item.label, row.id)
+
+    const email = item.loginEmail?.trim()
+    if (email) {
+      await linkIdentityLoginEmail(db, session.workspaceId, row.id, email)
+    }
   }
 
+  const assetByProvider = new Map<string, string>()
   for (const item of parsed.data.assets) {
     if (item.unsure || !item.name) continue
     let providerAccountId: string | null = null
@@ -111,11 +144,44 @@ export default defineEventHandler(async (event) => {
       projectId: project.id,
       assetId: asset.id,
     })
+
+    if (item.providerSlug && !assetByProvider.has(item.providerSlug)) {
+      assetByProvider.set(item.providerSlug, asset.id)
+    }
+  }
+
+  for (const link of parsed.data.accessLinks ?? []) {
+    if (link.enabled === false) continue
+    const identityId =
+      identityMap.get(`${link.identityLabel}\0${link.providerSlug}`) ?? identityMap.get(link.identityLabel)
+    const assetId = assetByProvider.get(link.providerSlug)
+    if (!identityId || !assetId) continue
+    await db.insert(assetRoles).values({
+      workspaceId: session.workspaceId,
+      assetId,
+      identityId,
+      roleType: link.roleType,
+      verificationStatus: 'declared',
+    })
+  }
+
+  for (const dep of parsed.data.dependencies ?? []) {
+    if (dep.enabled === false) continue
+    const fromId = assetByProvider.get(dep.fromProviderSlug)
+    const toId = assetByProvider.get(dep.toProviderSlug)
+    if (!fromId || !toId || fromId === toId) continue
+    await db.insert(assetDependencies).values({
+      workspaceId: session.workspaceId,
+      fromAssetId: fromId,
+      toAssetId: toId,
+      relationType: dep.relationType,
+      verificationStatus: 'declared',
+    })
   }
 
   await db
     .update(onboardingDrafts)
-    .set({ completedAt: new Date(), step: 5 })
+    .set({ completedAt: new Date(), step: 7 })
     .where(eq(onboardingDrafts.workspaceId, session.workspaceId))
 
   return { projectId: project.id }

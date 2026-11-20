@@ -8,9 +8,9 @@
 
 | Decision | Gist |
 | -------- | ---- |
-| [01 Provider catalog](../plans/accessmap-phase-1/decisions/01-provider-catalog.md) | Global seeded `providers`; assets optional link |
-| [02 Onboarding draft](../plans/accessmap-phase-1/decisions/02-onboarding-draft-storage.md) | `onboarding_drafts` in Postgres |
-| [03 Search & impact](../plans/accessmap-phase-1/decisions/03-search-and-impact.md) | ILIKE search; BFS list depth 8; F1 nav |
+| [01 Provider catalog](../plans/hilko-phase-1/decisions/01-provider-catalog.md) | Global seeded `providers`; assets optional link |
+| [02 Onboarding draft](../plans/hilko-phase-1/decisions/02-onboarding-draft-storage.md) | `onboarding_drafts` in Postgres |
+| [03 Search & impact](../plans/hilko-phase-1/decisions/03-search-and-impact.md) | ILIKE search; BFS list depth 8; F1 nav |
 | Phase 0 stack | Nuxt, Drizzle `pg`, custom sessions, i18n `no_prefix` |
 
 ## User stories & flows
@@ -74,7 +74,7 @@ Unique constraints per workspace; composite checks on junction tables.
 
 ### OR-1c — Inventory UI + nav
 
-- **Goal:** List/detail pages per [03 Search & impact](../plans/accessmap-phase-1/decisions/03-search-and-impact.md) nav set.
+- **Goal:** List/detail pages per [03 Search & impact](../plans/hilko-phase-1/decisions/03-search-and-impact.md) nav set.
 - **Deps:** OR-1b
 - **Done means:** Home shows counts/pending; no Guías/Migraciones links.
 - **Checklist:**

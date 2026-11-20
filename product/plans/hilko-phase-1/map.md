@@ -1,15 +1,15 @@
-# Map — AccessMap Phase 1 (Inventory)
+# Map — Hilko Phase 1 (Inventory)
 
 ## Destination
 
-Dogfood inventory complete: register Mini Críptico (manual, wizard, or CSV) and answer spec **[§4.4](../../../docs/ACCESSMAP_SPEC_CURSOR.md)** and **[§26.A](../../../docs/ACCESSMAP_SPEC_CURSOR.md)**. Second workspace still cannot read first.
+Dogfood inventory complete: register Mini Críptico (manual, wizard, or CSV) and answer spec **[§4.4](../../../docs/HILKO_SPEC_CURSOR.md)** and **[§26.A](../../../docs/HILKO_SPEC_CURSOR.md)**. Second workspace still cannot read first.
 
 ## Notes
 
-- Depends on [Phase 0 map](../accessmap-phase-0/map.md) (shipped foundation in repo).
-- Version: **v0.2.0** · Slug: `accessmap-phase-1` · Forge: local twin only.
+- Depends on [Phase 0 map](../hilko-phase-0/map.md) (shipped foundation in repo).
+- Version: **v0.2.0** · Slug: `hilko-phase-1` · Forge: local twin only.
 - Skills: `domain-model`, `no-secrets`, `i18n-en-es`, `minicriptico-dogfood`.
-- Contract: [brief](../../features/accessmap-phase-1.md) · [spec](../../specs/accessmap-phase-1.md).
+- Contract: [brief](../../features/hilko-phase-1.md) · [spec](../../specs/hilko-phase-1.md).
 - Handoff: invoke **fire-in-the-hole** (or direct agent) on **OR-1a** first after schema migration.
 - **Build status (2026-11-19):** OR-1a … OR-1h implemented; **OR-1c asset form** (provider, env, account, identity, login email + `asset_emails` migration `0002`). Apply `bun run db:migrate` + `bun run db:seed` after Docker is up.
 
@@ -18,7 +18,7 @@ Dogfood inventory complete: register Mini Críptico (manual, wizard, or CSV) and
 - [Provider catalog (system seed)](./decisions/01-provider-catalog.md) — global `providers`, optional on asset
 - [Onboarding draft storage](./decisions/02-onboarding-draft-storage.md) — `onboarding_drafts` jsonb in Postgres
 - [Search & impact defaults](./decisions/03-search-and-impact.md) — ILIKE + BFS list, depth 8, F1 nav set
-- Inherited from Phase 0: stack, i18n `no_prefix`, custom sessions, Compose — see [accessmap-phase-0/decisions](../accessmap-phase-0/decisions/)
+- Inherited from Phase 0: stack, i18n `no_prefix`, custom sessions, Compose — see [hilko-phase-0/decisions](../hilko-phase-0/decisions/)
 
 ## Not yet specified
 

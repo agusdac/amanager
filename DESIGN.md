@@ -1,5 +1,5 @@
 ---
-name: AccessMap
+name: Hilko
 description: Your digital infrastructure map
 colors:
   ink: "#1c1917"
@@ -137,13 +137,13 @@ components:
     padding: "8px 12px"
 ---
 
-# Design System: AccessMap
+# Design System: Hilko
 
 ## Overview
 
 **Creative North Star: "The Field Notebook"**
 
-AccessMap looks like a field notebook for infrastructure facts. The page is warm paper. Entries sit on white cards, separated from the page by a thin stone rule. Actions are written in ink. The voice is quiet, literal, and warm: the screen records a fact and does not sell it.
+Hilko looks like a field notebook for infrastructure facts. The page is warm paper. Entries sit on white cards, separated from the page by a thin stone rule. Actions are written in ink. The voice is quiet, literal, and warm: the screen records a fact and does not sell it.
 
 Density is comfortable. A page title is 24px and semibold. Working text is 14px. Sections stack on a 32px rhythm inside a 64rem column. There is no display size and no custom typeface. The system font is the hand of the notebook.
 

@@ -56,7 +56,16 @@ const containerRef = ref<HTMLElement | null>(null)
 const svgRef = ref<SVGSVGElement | null>(null)
 
 const width = ref(640)
-const height = computed(() => (props.compact ? 300 : 460))
+const viewportHeight = ref(720)
+const viewportWidth = ref(1024)
+
+const expanded = ref(false)
+
+const height = computed(() => {
+  if (expanded.value) return Math.max(320, viewportHeight.value - 80)
+  if (props.compact) return 300
+  return 460
+})
 
 const pan = ref({ x: 0, y: 0 })
 const scale = ref(1)
@@ -65,6 +74,24 @@ const search = ref('')
 const neighborhoodOnly = ref(Boolean(props.highlightId))
 const onlyUnverified = ref(false)
 const hoveredEdgeId = ref<string | null>(null)
+const pinnedEdgeId = ref<string | null>(null)
+let hoverClearTimer: ReturnType<typeof setTimeout> | null = null
+
+type GraphDetailPopover =
+  | {
+      kind: 'edge'
+      edgeId: string
+      left: number
+      top: number
+    }
+  | {
+      kind: 'node'
+      nodeId: string
+      left: number
+      top: number
+    }
+
+const detailPopover = ref<GraphDetailPopover | null>(null)
 
 const relationTypesInGraph = computed(() => {
   const set = new Set<string>()
@@ -100,6 +127,88 @@ function relationLabel(type: string) {
   const key = `dependencies.relationTypes.${type}`
   return te(key) ? t(key) : type.replaceAll('_', ' ')
 }
+
+function relationHelp(type: string) {
+  const key = `graph.relationHelp.${type}`
+  return te(key) ? t(key) : t('graph.relationHelp.other')
+}
+
+function typeDescription(type: string) {
+  const key = `assets.typeDescriptions.${type}`
+  return te(key) ? t(key) : ''
+}
+
+function nodeById(id: string) {
+  return props.nodes.find((n) => n.id === id) ?? simNodes.value.find((n) => n.id === id)
+}
+
+function edgeById(id: string) {
+  return filteredEdges.value.find((e) => e.id === id)
+}
+
+function isEdgeHighlighted(linkId: string) {
+  return pinnedEdgeId.value === linkId || hoveredEdgeId.value === linkId
+}
+
+function onEdgePointerEnter(linkId: string) {
+  if (hoverClearTimer) {
+    clearTimeout(hoverClearTimer)
+    hoverClearTimer = null
+  }
+  hoveredEdgeId.value = linkId
+}
+
+function onEdgePointerLeave(linkId: string) {
+  if (pinnedEdgeId.value === linkId) return
+  hoverClearTimer = setTimeout(() => {
+    if (hoveredEdgeId.value === linkId) hoveredEdgeId.value = null
+    hoverClearTimer = null
+  }, 220)
+}
+
+function popoverAtPointer(event: MouseEvent): { left: number; top: number } {
+  const el = containerRef.value
+  if (!el) return { left: 16, top: 16 }
+  const rect = el.getBoundingClientRect()
+  const pad = 12
+  const maxW = 280
+  const maxH = 220
+  let left = event.clientX - rect.left + 8
+  let top = event.clientY - rect.top + 8
+  left = Math.max(pad, Math.min(left, rect.width - maxW - pad))
+  top = Math.max(pad, Math.min(top, rect.height - maxH - pad))
+  return { left, top }
+}
+
+function openEdgeDetail(link: SimLink, event: MouseEvent) {
+  event.stopPropagation()
+  pinnedEdgeId.value = link.id
+  hoveredEdgeId.value = link.id
+  const { left, top } = popoverAtPointer(event)
+  detailPopover.value = { kind: 'edge', edgeId: link.id, left, top }
+}
+
+function openNodeDetail(node: SimNode, event: MouseEvent) {
+  event.stopPropagation()
+  const { left, top } = popoverAtPointer(event)
+  detailPopover.value = { kind: 'node', nodeId: node.id, left, top }
+}
+
+function closeDetailPopover() {
+  detailPopover.value = null
+  pinnedEdgeId.value = null
+  hoveredEdgeId.value = null
+}
+
+const popoverEdge = computed(() => {
+  if (detailPopover.value?.kind !== 'edge') return null
+  return edgeById(detailPopover.value.edgeId)
+})
+
+const popoverNode = computed(() => {
+  if (detailPopover.value?.kind !== 'node') return null
+  return nodeById(detailPopover.value.nodeId)
+})
 
 const filteredEdges = computed(() => {
   let list = props.edges.filter((e) => enabledRelations.value.has(e.relationType))
@@ -201,28 +310,84 @@ function runSimulation() {
 }
 
 watch(
-  [filteredEdges, visibleNodeIds, width],
+  [filteredEdges, visibleNodeIds, width, height],
   () => {
     if (import.meta.client) runSimulation()
   },
   { deep: true },
 )
 
+function measureViewport() {
+  if (!import.meta.client) return
+  viewportHeight.value = window.innerHeight
+  viewportWidth.value = window.innerWidth
+}
+
+function syncCanvasWidth() {
+  if (expanded.value) {
+    width.value = Math.max(320, viewportWidth.value - 48)
+    return
+  }
+  if (containerRef.value) width.value = Math.max(320, containerRef.value.clientWidth)
+}
+
+function toggleExpanded() {
+  const entering = !expanded.value
+  expanded.value = entering
+  if (import.meta.client) {
+    document.body.style.overflow = entering ? 'hidden' : ''
+  }
+  measureViewport()
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      syncCanvasWidth()
+      if (entering) {
+        fitView({ padding: 76, minScale: 0.55, maxScale: 1.65 })
+        runSimulation()
+      } else {
+        fitView({ padding: 32, minScale: 0.92, maxScale: 1.22 })
+      }
+    })
+  })
+}
+
+function onWindowResize() {
+  if (!expanded.value) return
+  measureViewport()
+  syncCanvasWidth()
+}
+
 let resizeObserver: ResizeObserver | null = null
 
+function onWindowKeydown(ev: KeyboardEvent) {
+  if (ev.key !== 'Escape') return
+  if (detailPopover.value) {
+    closeDetailPopover()
+    return
+  }
+  if (expanded.value) toggleExpanded()
+}
+
 onMounted(() => {
-  const el = containerRef.value
-  if (el) width.value = Math.max(320, el.clientWidth)
+  measureViewport()
+  syncCanvasWidth()
   runSimulation()
   resizeObserver = new ResizeObserver(() => {
-    if (containerRef.value) width.value = Math.max(320, containerRef.value.clientWidth)
+    if (!expanded.value) syncCanvasWidth()
   })
+  const el = containerRef.value
   if (el) resizeObserver.observe(el)
+  window.addEventListener('keydown', onWindowKeydown)
+  window.addEventListener('resize', onWindowResize)
 })
 
 onUnmounted(() => {
   resizeObserver?.disconnect()
   stopSimulation()
+  window.removeEventListener('keydown', onWindowKeydown)
+  window.removeEventListener('resize', onWindowResize)
+  if (hoverClearTimer) clearTimeout(hoverClearTimer)
+  if (import.meta.client) document.body.style.overflow = ''
 })
 
 
@@ -233,19 +398,26 @@ function nodeOpacity(node: SimNode) {
 }
 
 function nodeStroke(node: SimNode) {
+  if (detailPopover.value?.kind === 'node' && detailPopover.value.nodeId === node.id) return '#b45309'
   if (props.highlightId === node.id) return '#292524'
   return '#e7e5e4'
 }
 
 function nodeFill(node: SimNode) {
+  if (detailPopover.value?.kind === 'node' && detailPopover.value.nodeId === node.id) return '#fffbeb'
   if (props.highlightId === node.id) return '#fafaf9'
   return '#ffffff'
 }
 
 function linkOpacity(link: SimLink) {
-  if (hoveredEdgeId.value && hoveredEdgeId.value !== link.id) return 0.25
+  const active = pinnedEdgeId.value ?? hoveredEdgeId.value
+  if (active) return isEdgeHighlighted(link.id) ? 1 : 0.2
   if (onlyUnverified.value) return 0.95
-  return 0.7
+  return 0.72
+}
+
+function linkStrokeWidth(link: SimLink) {
+  return isEdgeHighlighted(link.id) ? 2.75 : 1.75
 }
 
 function linkDash(link: SimLink) {
@@ -273,6 +445,8 @@ function midPoint(link: SimLink) {
 }
 
 const draggingNode = ref<string | null>(null)
+const nodeDragMoved = ref(false)
+let nodeDragStart = { x: 0, y: 0 }
 
 function clientToGraph(clientX: number, clientY: number) {
   const svg = svgRef.value
@@ -286,21 +460,28 @@ function clientToGraph(clientX: number, clientY: number) {
 function onNodePointerDown(node: SimNode, event: PointerEvent) {
   event.stopPropagation()
   draggingNode.value = node.id
+  nodeDragMoved.value = false
+  nodeDragStart = { x: event.clientX, y: event.clientY }
   node.fx = node.x
   node.fy = node.y
   simulation?.alphaTarget(0.25).restart()
 
   const move = (ev: PointerEvent) => {
+    if (Math.hypot(ev.clientX - nodeDragStart.x, ev.clientY - nodeDragStart.y) > 4) {
+      nodeDragMoved.value = true
+    }
     const pt = clientToGraph(ev.clientX, ev.clientY)
     node.fx = pt.x
     node.fy = pt.y
   }
-  const up = () => {
+  const up = (ev: PointerEvent) => {
     simulation?.alphaTarget(0)
     node.fx = node.x ?? node.fx
     node.fy = node.y ?? node.fy
     draggingNode.value = null
     persistPositions()
+    const target = ev.target
+    if (!nodeDragMoved.value) openNodeDetail(node, ev)
     window.removeEventListener('pointermove', move)
     window.removeEventListener('pointerup', up)
   }
@@ -354,7 +535,13 @@ function resetLayout() {
   simulation?.alpha(1).restart()
 }
 
-function fitView() {
+type FitViewOptions = {
+  padding?: number
+  minScale?: number
+  maxScale?: number
+}
+
+function fitView(opts: FitViewOptions = {}) {
   const nodes = simNodes.value.filter((n) => n.x != null && n.y != null)
   if (nodes.length === 0) return
   let minX = Infinity
@@ -367,11 +554,13 @@ function fitView() {
     maxX = Math.max(maxX, n.x!)
     maxY = Math.max(maxY, n.y!)
   }
-  const pad = 64
-  const bw = maxX - minX + pad * 2
-  const bh = maxY - minY + pad * 2
-  const k = Math.min(1.6, Math.min(width.value / bw, height.value / bh))
-  scale.value = Math.max(0.4, k)
+  const pad = opts.padding ?? (expanded.value ? 72 : 40)
+  const minScale = opts.minScale ?? (expanded.value ? 0.5 : 0.82)
+  const maxScale = opts.maxScale ?? (expanded.value ? 1.65 : 1.25)
+  const bw = Math.max(maxX - minX + pad * 2, 120)
+  const bh = Math.max(maxY - minY + pad * 2, 120)
+  const k = Math.min(width.value / bw, height.value / bh)
+  scale.value = Math.max(minScale, Math.min(maxScale, k))
   pan.value = {
     x: width.value / 2 - ((minX + maxX) / 2) * scale.value,
     y: height.value / 2 - ((minY + maxY) / 2) * scale.value,
@@ -428,10 +617,28 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
     <p class="text-xs text-stone-500">{{ t('graph.hint') }}</p>
 
     <div
+      v-if="expanded"
+      class="fixed inset-0 z-[70] bg-stone-900/40"
+      aria-hidden="true"
+      @click="toggleExpanded"
+    />
+
+    <div
       ref="containerRef"
-      class="relative overflow-hidden rounded-xl border border-stone-200 bg-gradient-to-b from-stone-50 to-white shadow-inner"
-      :class="compact ? 'min-h-[300px]' : 'min-h-[460px]'"
+      class="graph-canvas-shell relative overflow-hidden rounded-xl border border-stone-200 bg-gradient-to-b from-stone-50 to-white shadow-inner"
+      :class="{ 'graph-canvas-shell--expanded': expanded }"
+      :style="{ minHeight: `${height}px` }"
     >
+      <button
+        type="button"
+        class="graph-expand-btn"
+        :aria-label="expanded ? t('graph.shrink') : t('graph.enlarge')"
+        :title="expanded ? t('graph.shrink') : t('graph.enlarge')"
+        @click.stop="toggleExpanded"
+      >
+        <IconMinimize v-if="expanded" class="h-4 w-4" />
+        <IconExpand v-else class="h-4 w-4" />
+      </button>
       <p
         v-if="isEmpty"
         class="absolute inset-0 z-10 flex items-center justify-center px-6 text-center text-sm text-stone-500"
@@ -466,28 +673,49 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
             <g
               v-for="link in simLinks"
               :key="link.id"
-              @pointerenter="hoveredEdgeId = link.id"
-              @pointerleave="hoveredEdgeId = null"
+              class="cursor-pointer"
+              @pointerenter="onEdgePointerEnter(link.id)"
+              @pointerleave="onEdgePointerLeave(link.id)"
             >
               <path
                 :d="linkPath(link)"
                 fill="none"
+                stroke="transparent"
+                stroke-width="18"
+                pointer-events="stroke"
+                @click="openEdgeDetail(link, $event)"
+              />
+              <path
+                :d="linkPath(link)"
+                fill="none"
                 :stroke="relationEdgeColor(link.relationType)"
-                stroke-width="1.75"
+                :stroke-width="linkStrokeWidth(link)"
                 :stroke-dasharray="linkDash(link)"
                 :opacity="linkOpacity(link)"
+                pointer-events="none"
                 marker-end="url(#dep-arrow)"
               />
-              <text
-                v-if="hoveredEdgeId === link.id"
-                :x="midPoint(link).x"
-                :y="midPoint(link).y - 6"
-                text-anchor="middle"
-                class="pointer-events-none text-[10px] font-medium"
-                fill="#44403c"
-              >
-                {{ edgeLabel(link) }}
-              </text>
+              <template v-if="isEdgeHighlighted(link.id)">
+                <rect
+                  :x="midPoint(link).x - 52"
+                  :y="midPoint(link).y - 22"
+                  width="104"
+                  height="18"
+                  rx="4"
+                  fill="rgba(255,255,255,0.92)"
+                  stroke="#e7e5e4"
+                  class="pointer-events-none"
+                />
+                <text
+                  :x="midPoint(link).x"
+                  :y="midPoint(link).y - 10"
+                  text-anchor="middle"
+                  class="pointer-events-none text-[10px] font-medium"
+                  fill="#44403c"
+                >
+                  {{ edgeLabel(link) }}
+                </text>
+              </template>
             </g>
           </g>
           <g class="nodes">
@@ -496,7 +724,7 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
               :key="node.id"
               :transform="`translate(${node.x ?? 0},${node.y ?? 0})`"
               :opacity="nodeOpacity(node)"
-              class="cursor-grab"
+              class="cursor-pointer"
               @pointerdown="onNodePointerDown(node, $event)"
             >
               <rect
@@ -520,19 +748,91 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
                     :size="14"
                     :title="node.name"
                   />
-                  <NuxtLink
-                    :to="`/assets/${node.id}`"
-                    class="truncate text-xs font-medium text-stone-800 hover:underline"
-                    @click.stop
-                  >
+                  <span class="truncate text-xs font-medium text-stone-800">
                     {{ node.name }}
-                  </NuxtLink>
+                  </span>
                 </div>
               </foreignObject>
             </g>
           </g>
         </g>
       </svg>
+
+      <div
+        v-if="detailPopover && popoverEdge && detailPopover.kind === 'edge'"
+        class="graph-popover"
+        :style="{ left: `${detailPopover.left}px`, top: `${detailPopover.top}px` }"
+        role="dialog"
+        @pointerdown.stop
+      >
+        <button type="button" class="graph-popover-close" :aria-label="t('common.close')" @click="closeDetailPopover">
+          ×
+        </button>
+        <p class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ t('graph.popover.edgeTitle') }}</p>
+        <p class="mt-1 text-sm font-semibold text-stone-900">{{ relationLabel(popoverEdge.relationType) }}</p>
+        <p class="mt-2 text-xs leading-relaxed text-stone-600">{{ relationHelp(popoverEdge.relationType) }}</p>
+        <dl class="mt-3 space-y-1.5 text-xs text-stone-700">
+          <div class="flex justify-between gap-2">
+            <dt class="text-stone-500">{{ t('graph.popover.from') }}</dt>
+            <dd class="text-right font-medium">{{ nodeById(popoverEdge.from)?.name ?? popoverEdge.from }}</dd>
+          </div>
+          <div class="flex justify-between gap-2">
+            <dt class="text-stone-500">{{ t('graph.popover.to') }}</dt>
+            <dd class="text-right font-medium">{{ nodeById(popoverEdge.to)?.name ?? popoverEdge.to }}</dd>
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <dt class="text-stone-500">{{ t('graph.popover.verification') }}</dt>
+            <dd><VerificationChip :status="popoverEdge.verificationStatus ?? 'declared'" /></dd>
+          </div>
+        </dl>
+      </div>
+
+      <div
+        v-if="detailPopover && popoverNode && detailPopover.kind === 'node'"
+        class="graph-popover"
+        :style="{ left: `${detailPopover.left}px`, top: `${detailPopover.top}px` }"
+        role="dialog"
+        @pointerdown.stop
+      >
+        <button type="button" class="graph-popover-close" :aria-label="t('common.close')" @click="closeDetailPopover">
+          ×
+        </button>
+        <p class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ t('graph.popover.nodeTitle') }}</p>
+        <p class="mt-1 text-sm font-semibold text-stone-900">{{ popoverNode.name }}</p>
+        <p class="mt-1 text-xs text-stone-600">
+          <AssetTypeLabel :type="popoverNode.type" :provider-slug="popoverNode.providerSlug" :show-icon="true" />
+        </p>
+        <p v-if="typeDescription(popoverNode.type)" class="mt-2 text-xs leading-relaxed text-stone-600">
+          {{ typeDescription(popoverNode.type) }}
+        </p>
+        <div class="mt-2 flex items-center gap-2 text-xs">
+          <span class="text-stone-500">{{ t('graph.popover.verification') }}</span>
+          <VerificationChip :status="popoverNode.verificationStatus ?? 'declared'" />
+        </div>
+        <NuxtLink :to="`/assets/${popoverNode.id}`" class="btn-secondary mt-3 w-full text-center text-xs">
+          {{ t('graph.popover.openAsset') }}
+        </NuxtLink>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.graph-canvas-shell--expanded {
+  @apply fixed inset-3 z-[80] m-0 rounded-xl border-stone-300 shadow-2xl;
+  max-height: calc(100vh - 1.5rem);
+}
+
+.graph-expand-btn {
+  @apply absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 bg-white/95 text-stone-700 shadow-sm transition-colors hover:bg-white hover:text-stone-900;
+}
+
+.graph-popover {
+  @apply absolute z-20 max-w-[17.5rem] rounded-lg border border-stone-200 bg-white p-4 pr-8 text-stone-900 shadow-lg;
+  pointer-events: auto;
+}
+
+.graph-popover-close {
+  @apply absolute right-2 top-1.5 flex h-7 w-7 items-center justify-center rounded text-lg leading-none text-stone-500 hover:bg-stone-100 hover:text-stone-800;
+}
+</style>

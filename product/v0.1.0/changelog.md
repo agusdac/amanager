@@ -2,4 +2,4 @@
 
 ## Added
 
-- [accessmap-phase-0](../features/accessmap-phase-0.md): Nuxt foundation with custom session auth, workspace isolation, and minimal project/asset CRUD.
+- [hilko-phase-0](../features/hilko-phase-0.md): Nuxt foundation with custom session auth, workspace isolation, and minimal project/asset CRUD.

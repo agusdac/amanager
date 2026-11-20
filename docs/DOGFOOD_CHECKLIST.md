@@ -1,6 +1,6 @@
 # Dogfood checklist — Mini Críptico (spec §4.4)
 
-Use the in-app page **`/checklist`** for interactive progress (saved in your browser). Answer each item from AccessMap data only — no secrets.
+Use the in-app page **`/checklist`** for interactive progress (saved in your browser). Answer each item from Hilko data only — no secrets.
 
 | # | Question | Primary UI |
 | --- | --- | --- |
@@ -19,4 +19,4 @@ Use the in-app page **`/checklist`** for interactive progress (saved in your bro
 
 **Re-seed (dev):** `bun run db:seed --workspace=<uuid>` replaces the Mini Críptico demo dataset in that workspace (assets, deps, config, vault refs, seed identities/accounts).
 
-Reference: [ACCESSMAP_SPEC_CURSOR.md](./ACCESSMAP_SPEC_CURSOR.md) §4.4, [ROADMAP.md](./ROADMAP.md) Fase 1.
+Reference: [HILKO_SPEC_CURSOR.md](./HILKO_SPEC_CURSOR.md) §4.4, [ROADMAP.md](./ROADMAP.md) Fase 1.

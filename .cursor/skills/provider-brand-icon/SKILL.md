@@ -1,12 +1,21 @@
 ---
 name: provider-brand-icon
 description: >-
-  Adds or updates provider and asset-type brand icons in AccessMap using Simple
+  Adds or updates provider and asset-type brand icons in Hilko using Simple
   Icons (official brand SVGs). Use when adding a new provider in db/seed/providers.ts,
   a new asset type with a known product, or when the user asks for service logos/icons.
 ---
 
-# Provider brand icons (AccessMap)
+# Provider brand icons (Hilko)
+
+## Scope (brands only — not UI icons)
+
+| Need | Use |
+| --- | --- |
+| Provider / product logo in inventory | **This skill** → Simple Icons → `brandIcons.ts` |
+| Buttons, nav, expand, chevrons, etc. | **`.cursor/rules/icons.mdc`** → Lucide via `app/components/icons/Icon*.vue` |
+
+[Simple Icons](https://simpleicons.org) lists **trademarks and product marks**, not generic UI shapes. There is no “expand” or “close” icon in the package. Before adding a new file, search simpleicons.org **only** when the subject is a company or product (Stripe, Hetzner, Figma). For basic UI, create or reuse an `Icon*.vue` component.
 
 ## Policy
 
@@ -38,6 +47,13 @@ Resolution order in `resolveBrandIcon()`: **asset type** (e.g. `search_console`)
    - Add `slug: si…` to `PROVIDER_BRAND_ICONS`
 6. If the icon is missing from Simple Icons: open a [Simple Icons icon request](https://github.com/simple-icons/simple-icons/issues/new?template=icon_request.yml) or use **glyph fallback** until merged — do not hotlink random CDNs.
 7. Run `bun run build` to verify tree-shaken imports resolve.
+
+## When adding a basic UI icon (not a brand)
+
+1. **Do not** import from `simple-icons` for chrome icons.
+2. Search [lucide.dev/icons](https://lucide.dev/icons) (e.g. `maximize-2` for fullscreen expand).
+3. Check `app/components/icons/` for an existing wrapper; if missing, add `Icon{Name}.vue` importing from `lucide-vue-next` (see `IconExpand.vue`).
+4. Use `<Icon{Name} class="h-4 w-4" />` in UI.
 
 ## When adding a new asset type tied to a product
 

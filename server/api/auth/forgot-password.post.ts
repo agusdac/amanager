@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
     const link = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`
     await sendMail({
       to: user.email,
-      subject: 'Reset your AccessMap password',
+      subject: 'Reset your Hilko password',
       text: `Use this link within one hour:\n\n${link}\n`,
     })
   }

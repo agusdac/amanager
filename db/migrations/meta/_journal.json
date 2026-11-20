@@ -22,6 +22,20 @@
       "when": 1795116242440,
       "tag": "0002_soft_greymalkin",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795128000000,
+      "tag": "0003_password_manager_urls",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795135000000,
+      "tag": "0004_user_locale",
+      "breakpoints": true
     }
   ]
 }

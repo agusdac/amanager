@@ -5,13 +5,13 @@ import { requireSession } from '../../utils/session'
 
 type QuickLink = { to: string; labelKey: string }
 
-const IDENTITY_LABELS = ['Google A', 'Google B'] as const
+const IDENTITY_LABELS = ['Work Google Workspace admin', 'Client Google Cloud billing'] as const
 
 const ASSET_NAMES = {
   oauth: 'Google OAuth client',
   youtube: 'YouTube channel',
   gsc: 'Search Console property',
-  domain: 'minicriptico.com domain',
+  domain: 'northline.example domain',
   mail: 'OpenShip mail (placeholder)',
   ses: 'AWS SES (placeholder)',
   vps1: 'VPS-01 (placeholder)',
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
   const [project] = await db
     .select()
     .from(projects)
-    .where(and(eq(projects.workspaceId, session.workspaceId), eq(projects.slug, 'minicriptico')))
+    .where(and(eq(projects.workspaceId, session.workspaceId), eq(projects.slug, 'northline-demo')))
     .limit(1)
 
   const identityRows = await db
@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
       ),
     )
 
-  const googleA = identityRows.find((i) => i.label === 'Google A')?.id
+  const googleA = identityRows.find((i) => i.label === 'Work Google Workspace admin')?.id
   const googleB = identityRows.find((i) => i.label === 'Google B')?.id
 
   const assetIdByKey: Partial<Record<keyof typeof ASSET_NAMES, string>> = {}

@@ -3,12 +3,12 @@
     "status": "unreleased",
     "date": null,
     "theme": "Inventory — dogfood Mini Críptico",
-    "features": ["accessmap-phase-1"]
+    "features": ["hilko-phase-1"]
   },
   "v0.1.0": {
     "status": "unreleased",
     "date": null,
     "theme": "Foundation — auth, workspace, first asset",
-    "features": ["accessmap-phase-0"]
+    "features": ["hilko-phase-0"]
   }
 }

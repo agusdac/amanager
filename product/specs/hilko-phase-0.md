@@ -6,10 +6,10 @@ v0.1.0 · OR-0.1 … OR-0.7 · Exit: [ROADMAP Fase 0](../../docs/ROADMAP.md)
 
 ## Decisions locked
 
-- [Stack](../plans/accessmap-phase-0/decisions/01-stack-nuxt-drizzle-bun.md) — Nuxt 4, bun, Drizzle `pg`
-- [i18n](../plans/accessmap-phase-0/decisions/02-i18n-no-prefix.md) — `no_prefix`, `en` default
-- [Auth](../plans/accessmap-phase-0/decisions/03-auth-custom-sessions.md) — custom sessions, first-user signup
-- [Compose](../plans/accessmap-phase-0/decisions/04-compose-dev-prod.md) — dev DB+Mailpit; prod app+DB+Caddy
+- [Stack](../plans/hilko-phase-0/decisions/01-stack-nuxt-drizzle-bun.md) — Nuxt 4, bun, Drizzle `pg`
+- [i18n](../plans/hilko-phase-0/decisions/02-i18n-no-prefix.md) — `no_prefix`, `en` default
+- [Auth](../plans/hilko-phase-0/decisions/03-auth-custom-sessions.md) — custom sessions, first-user signup
+- [Compose](../plans/hilko-phase-0/decisions/04-compose-dev-prod.md) — dev DB+Mailpit; prod app+DB+Caddy
 
 ## Behaviors
 

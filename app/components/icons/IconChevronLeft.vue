@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import AppIcon from './AppIcon.vue'
+import { ChevronLeft } from 'lucide-vue-next'
+import { UI_ICON_STROKE } from './uiIconDefaults'
+
+defineOptions({ inheritAttrs: false })
 </script>
 
 <template>
-  <AppIcon v-bind="$attrs">
-    <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
-  </AppIcon>
+  <ChevronLeft v-bind="$attrs" :stroke-width="UI_ICON_STROKE" class="shrink-0" aria-hidden="true" />
 </template>

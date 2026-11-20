@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'auth' })
 
 const { t } = useI18n()
 useAppPageTitle('pageTitles.forgotPassword')

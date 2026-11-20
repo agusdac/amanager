@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { t } = useI18n()
-const STORAGE_KEY = 'accessmap-dogfood-checklist'
+const STORAGE_KEY = 'hilko-dogfood-checklist'
 
 useAppPageTitle('pageTitles.checklist')
 

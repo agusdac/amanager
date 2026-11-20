@@ -1,12 +1,12 @@
 ---
 name: domain-model
 description: >-
-  AccessMap domain entities and rules. Use when designing schema, Drizzle tables, APIs,
+  Hilko domain entities and rules. Use when designing schema, Drizzle tables, APIs,
   queries, or inventory UI (projects, identities, assets, dependencies).
 ---
-# AccessMap domain model
+# Hilko domain model
 
-Read [docs/ACCESSMAP_SPEC_CURSOR.md](../../../docs/ACCESSMAP_SPEC_CURSOR.md) §3 and §15 when in doubt.
+Read [docs/HILKO_SPEC_CURSOR.md](../../../docs/HILKO_SPEC_CURSOR.md) §3 and §15 when in doubt.
 
 ## Entities are not synonyms
 

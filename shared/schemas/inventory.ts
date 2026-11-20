@@ -1,9 +1,13 @@
 import { z } from 'zod'
+import { assetAttributesSchema } from './assetAttributes'
+import { optionalNullableText, optionalUrlField } from './fields'
 
 export const ASSET_TYPE_KEYS = [
   'service',
   'domain',
   'hosting',
+  'hosting_account',
+  'server',
   'repository',
   'dns',
   'email',
@@ -15,6 +19,10 @@ export const ASSET_TYPE_KEYS = [
   'mail_hosting',
   'object_storage',
   'transactional_email',
+  'payment_service',
+  'ai_service',
+  'password_manager',
+  'design_tool',
   'other',
 ] as const
 
@@ -79,6 +87,12 @@ export const createEnvironmentSchema = z.object({
   kind: z.enum(['production', 'development', 'staging', 'other']),
 })
 
+export const updateProjectAssetEnvironmentSchema = z.object({
+  projectId: z.string().uuid(),
+  assetId: z.string().uuid(),
+  environmentId: z.string().uuid().nullable(),
+})
+
 const accessRoleTypes = ['owner', 'admin', 'operator', 'developer', 'billing', 'viewer', 'other'] as const
 
 export const createAssetFullSchema = z.object({
@@ -93,14 +107,21 @@ export const createAssetFullSchema = z.object({
   accessRoleType: z.enum(accessRoleTypes).optional(),
   loginEmail: z.string().email().max(320).optional().or(z.literal('')),
   criticality: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-  adminUrl: z.string().url().max(2000).optional().or(z.literal('')),
-  publicUrl: z.string().url().max(2000).optional().or(z.literal('')),
-  description: z.string().max(2000).optional(),
+  adminUrl: optionalUrlField.optional(),
+  publicUrl: optionalUrlField.optional(),
+  description: optionalNullableText,
   externalIdentifier: z.string().max(500).optional(),
   verificationStatus: z.enum(['unverified', 'declared', 'confirmed_by_human']).optional(),
+  passwordManagerItemUrl: optionalUrlField.optional(),
+  attributes: assetAttributesSchema.optional(),
 })
 
 export const patchAssetSchema = createAssetFullSchema.partial().omit({ projectId: true })
+
+export const patchEmailSchema = z.object({
+  passwordManagerItemUrl: optionalUrlField.optional(),
+  label: z.string().max(200).optional(),
+})
 
 export const createDependencySchema = z.object({
   fromAssetId: z.string().uuid(),
@@ -121,6 +142,7 @@ export const createVaultRefSchema = z.object({
   projectId: z.string().uuid().optional(),
   label: z.string().min(1).max(200),
   locationHint: z.string().min(1).max(500),
+  itemUrl: z.string().url().max(2000).optional().or(z.literal('')),
   vaultProvider: z.string().max(80).optional(),
   notes: z.string().max(2000).optional(),
 })
@@ -141,8 +163,10 @@ export const createConfigEntrySchema = z
     message: 'Sensitive keys must not store a public value',
   })
 
+export const ONBOARDING_MAX_STEP = 7
+
 export const onboardingDraftSchema = z.object({
-  step: z.number().int().min(1).max(5),
+  step: z.number().int().min(1).max(ONBOARDING_MAX_STEP),
   payload: z.record(z.string(), z.unknown()),
 })
 

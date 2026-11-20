@@ -5,6 +5,6 @@ export default defineConfig({
   out: './db/migrations',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? 'postgres://accessmap:accessmap_dev@localhost:5432/accessmap',
+    url: process.env.DATABASE_URL ?? 'postgres://hilko:hilko_dev@localhost:5432/hilko',
   },
 })

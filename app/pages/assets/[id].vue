@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { ASSET_TYPE_KEYS, CONFIG_ENTRY_KEY_PRESETS, VERIFICATION_METHOD_KEYS } from '~/constants/inventory'
+import type { AssetAttributes } from '../../../shared/schemas/assetAttributes'
+import {
+  ASSET_TYPES_WITH_VAULT_HINT,
+  ASSET_TYPE_KEYS,
+  CONFIG_ENTRY_KEY_PRESETS,
+  NEEDS_CONFIRMATION_VERIFICATION_STATUSES,
+  VERIFICATION_METHOD_KEYS,
+  VERIFICATION_STATUS_KEYS,
+} from '~/constants/inventory'
 
 const ACCESS_ROLES = ['admin', 'operator', 'owner', 'developer', 'billing', 'viewer', 'other'] as const
 const CRITICALITY = ['low', 'medium', 'high', 'critical'] as const
@@ -24,8 +32,11 @@ const publicUrl = ref('')
 const providerId = ref('')
 const providerAccountId = ref('')
 const criticality = ref('medium')
+const verificationStatus = ref<(typeof VERIFICATION_STATUS_KEYS)[number]>('declared')
 const saveError = ref('')
 const saving = ref(false)
+const passwordManagerItemUrl = ref('')
+const emailPmUrls = ref<Record<string, string>>({})
 
 const newLoginEmail = ref('')
 const newRoleIdentityId = ref('')
@@ -73,8 +84,43 @@ watch(
     providerId.value = d.asset.providerId ?? ''
     providerAccountId.value = d.asset.providerAccountId ?? ''
     criticality.value = d.asset.criticality ?? 'medium'
+    verificationStatus.value = (d.asset.verificationStatus ??
+      'declared') as (typeof VERIFICATION_STATUS_KEYS)[number]
+    passwordManagerItemUrl.value = d.asset.passwordManagerItemUrl ?? ''
+    const pm: Record<string, string> = {}
+    for (const em of d.emails ?? []) {
+      pm[em.emailId] = em.passwordManagerItemUrl ?? ''
+    }
+    emailPmUrls.value = pm
   },
   { immediate: true },
+)
+
+const showVaultLinkField = computed(() =>
+  (ASSET_TYPES_WITH_VAULT_HINT as readonly string[]).includes(type.value),
+)
+
+const needsConfirmation = computed(() =>
+  (NEEDS_CONFIRMATION_VERIFICATION_STATUSES as readonly string[]).includes(
+    data.value?.asset?.verificationStatus ?? '',
+  ),
+)
+
+const primaryProjectWebsite = computed(
+  () => data.value?.projects?.[0]?.projectWebsiteUrl ?? projectGraphPack.value?.project?.websiteUrl ?? null,
+)
+
+const projectAssetOptions = computed(
+  () =>
+    projectGraphPack.value?.assets?.map((a: { id: string; name: string; type: string }) => ({
+      id: a.id,
+      name: a.name,
+      type: a.type,
+    })) ?? [],
+)
+
+const assetAttributes = computed(
+  () => (data.value?.asset?.attributesJson ?? null) as AssetAttributes | null,
 )
 
 const primaryProjectId = computed(() => data.value?.projects?.[0]?.projectId)
@@ -82,7 +128,28 @@ const primaryProjectId = computed(() => data.value?.projects?.[0]?.projectId)
 const projectGraphUrl = computed(() =>
   primaryProjectId.value ? `/api/projects/${primaryProjectId.value}` : null,
 )
-const { data: projectGraphPack } = await useFetch(projectGraphUrl, { watch: [projectGraphUrl] })
+const { data: projectGraphPack, refresh: refreshProjectGraph } = await useFetch(projectGraphUrl, {
+  watch: [projectGraphUrl],
+})
+
+const envLinkSaving = ref(false)
+
+async function setProjectEnvironment(projectId: string, rawEnvironmentId: string) {
+  envLinkSaving.value = true
+  try {
+    await $fetch('/api/project-assets', {
+      method: 'PATCH',
+      body: {
+        projectId,
+        assetId: assetId.value,
+        environmentId: rawEnvironmentId || null,
+      },
+    })
+    await Promise.all([refresh(), refreshProjectGraph()])
+  } finally {
+    envLinkSaving.value = false
+  }
+}
 
 const projectGraphNodes = computed(() =>
   (projectGraphPack.value?.assets ?? []).map((a) => ({
@@ -130,18 +197,23 @@ async function saveMetadata() {
   saveError.value = ''
   saving.value = true
   try {
+    const body: Record<string, unknown> = {
+      name: name.value.trim(),
+      type: type.value,
+      description: description.value.trim() || null,
+      adminUrl: adminUrl.value.trim(),
+      publicUrl: publicUrl.value.trim(),
+      providerId: providerId.value || null,
+      providerAccountId: providerAccountId.value || null,
+      criticality: criticality.value,
+      verificationStatus: verificationStatus.value,
+    }
+    if (showVaultLinkField.value) {
+      body.passwordManagerItemUrl = passwordManagerItemUrl.value.trim()
+    }
     await $fetch(`/api/assets/${assetId.value}`, {
       method: 'PATCH',
-      body: {
-        name: name.value,
-        type: type.value,
-        description: description.value || null,
-        adminUrl: adminUrl.value || '',
-        publicUrl: publicUrl.value || '',
-        providerId: providerId.value || null,
-        providerAccountId: providerAccountId.value || null,
-        criticality: criticality.value,
-      },
+      body,
     })
     await refresh()
   } catch (e: unknown) {
@@ -189,7 +261,14 @@ async function addRole() {
   }
 }
 
-async function addVerification() {
+async function confirmControlQuick() {
+  verifyMethod.value = 'provider_console'
+  await addVerification('confirmed_by_human')
+}
+
+async function addVerification(
+  outcome: (typeof VERIFICATION_STATUS_KEYS)[number] = 'confirmed_by_human',
+) {
   verifyError.value = ''
   verifyLoading.value = true
   try {
@@ -200,6 +279,7 @@ async function addVerification() {
         sourceId: assetId.value,
         method: verifyMethod.value,
         evidenceNote: verifyNote.value.trim() || undefined,
+        status: outcome,
       },
     })
     verifyNote.value = ''
@@ -256,6 +336,30 @@ async function addConfigEntry() {
   }
 }
 
+async function saveTypeAttributes(attributes: AssetAttributes) {
+  await $fetch(`/api/assets/${assetId.value}`, {
+    method: 'PATCH',
+    body: { attributes },
+  })
+  await refresh()
+}
+
+async function saveAssetVaultLink() {
+  await $fetch(`/api/assets/${assetId.value}`, {
+    method: 'PATCH',
+    body: { passwordManagerItemUrl: passwordManagerItemUrl.value.trim() || '' },
+  })
+  await refresh()
+}
+
+async function saveEmailVaultLink(emailId: string) {
+  await $fetch(`/api/email-addresses/${emailId}`, {
+    method: 'PATCH',
+    body: { passwordManagerItemUrl: emailPmUrls.value[emailId]?.trim() || '' },
+  })
+  await refresh()
+}
+
 async function removeDependency(dependencyId: string) {
   depRemovingId.value = dependencyId
   try {
@@ -307,18 +411,34 @@ async function removeConfigEntry(id: string) {
 
     <p v-if="pending" class="text-stone-600">{{ t('common.loading') }}</p>
 
-    <AppDetailTabs v-else-if="data?.asset" :tabs="assetTabs" default-tab="overview">
+    <AppCallout
+      v-else-if="data?.asset && needsConfirmation"
+      :title="t('assets.verificationCalloutTitle')"
+      variant="warning"
+    >
+      {{ t('assets.verificationCalloutBody') }}
+      <template #actions>
+        <NuxtLink :to="{ query: { ...route.query, tab: 'verifications' } }" class="btn-primary text-sm">
+          {{ t('assets.verificationCalloutCta') }}
+        </NuxtLink>
+        <NuxtLink to="/assets?verification=needs_confirmation" class="btn-secondary text-sm">
+          {{ t('assets.openVerificationQueue') }}
+        </NuxtLink>
+      </template>
+    </AppCallout>
+
+    <AppDetailTabs v-if="!pending && data?.asset" :tabs="assetTabs" default-tab="overview">
       <template #overview>
       <section class="card p-6">
         <h2 class="sr-only">{{ t('assets.sectionMetadata') }}</h2>
-        <form class="mt-4 grid gap-4 sm:grid-cols-2" @submit.prevent="saveMetadata">
-          <label class="block text-sm sm:col-span-2">
+        <form class="form-grid mt-2" @submit.prevent="saveMetadata">
+          <label class="form-field sm:col-span-2">
             <span class="label">{{ t('assets.name') }}</span>
-            <input v-model="name" required class="field mt-1.5" />
+            <input v-model="name" required class="field" />
           </label>
-          <label class="block text-sm">
+          <label class="form-field">
             <span class="label">{{ t('assets.type') }}</span>
-            <select v-model="type" class="field mt-1.5">
+            <select v-model="type" class="field">
               <option v-for="ty in assetTypeOptions" :key="ty" :value="ty">{{ t(`assets.types.${ty}`) }}</option>
               <option
                 v-if="!assetTypeOptions.includes(type as (typeof assetTypeOptions)[number])"
@@ -329,42 +449,66 @@ async function removeConfigEntry(id: string) {
             </select>
             <p v-if="typeDescription" class="mt-1 text-xs text-stone-500">{{ typeDescription }}</p>
           </label>
-          <label class="block text-sm">
+          <label class="form-field">
             <span class="label">{{ t('assets.criticality') }}</span>
-            <select v-model="criticality" class="field mt-1.5">
+            <select v-model="criticality" class="field">
               <option v-for="c in CRITICALITY" :key="c" :value="c">{{ t(`assets.criticalityLevels.${c}`) }}</option>
             </select>
           </label>
-          <label class="block text-sm">
+          <label class="form-field">
             <span class="label">{{ t('assets.provider') }}</span>
-            <select v-model="providerId" class="field mt-1.5">
+            <select v-model="providerId" class="field">
               <option value="">{{ t('accounts.noProvider') }}</option>
               <option v-for="p in providers?.providers" :key="p.id" :value="p.id">{{ p.name }}</option>
             </select>
           </label>
-          <label class="block text-sm">
+          <label class="form-field">
             <span class="label">{{ t('assets.providerAccount') }}</span>
-            <select v-model="providerAccountId" class="field mt-1.5">
+            <select v-model="providerAccountId" class="field">
               <option value="">{{ t('assets.providerAccountAny') }}</option>
               <option v-for="a in accounts?.accounts" :key="a.id" :value="a.id">{{ a.label }}</option>
             </select>
           </label>
-          <label class="block text-sm sm:col-span-2">
+          <label class="form-field sm:col-span-2">
             <span class="label">{{ t('assets.description') }}</span>
-            <textarea v-model="description" rows="3" class="field mt-1.5" />
+            <textarea v-model="description" rows="3" class="field" />
           </label>
-          <label class="block text-sm">
+          <label class="form-field">
             <span class="label">{{ t('assets.adminUrl') }}</span>
-            <input v-model="adminUrl" type="url" class="field mt-1.5" />
+            <input v-model="adminUrl" type="url" class="field" inputmode="url" />
           </label>
-          <label class="block text-sm">
+          <label class="form-field">
             <span class="label">{{ t('assets.publicUrl', 'Public URL') }}</span>
-            <input v-model="publicUrl" type="url" class="field mt-1.5" />
+            <input v-model="publicUrl" type="url" class="field" inputmode="url" />
           </label>
-          <p class="flex flex-wrap items-center gap-2 text-sm text-stone-500 sm:col-span-2">
-            <span>{{ t('assets.status') }}: {{ t(`assets.statuses.${data.asset.status}`) }}</span>
-            <VerificationChip :status="data.asset.verificationStatus" />
-          </p>
+
+          <div class="form-section sm:col-span-2">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div class="space-y-1">
+                <p class="text-sm font-medium text-stone-900">{{ t('assets.verificationStatusLabel') }}</p>
+                <p class="text-xs text-stone-600">{{ t('assets.verificationStatusHint') }}</p>
+              </div>
+              <VerificationGuideLink inline />
+            </div>
+            <label class="form-field mt-4 max-w-md">
+              <span class="sr-only">{{ t('assets.verificationStatusLabel') }}</span>
+              <select v-model="verificationStatus" class="field">
+                <option v-for="s in VERIFICATION_STATUS_KEYS" :key="s" :value="s">
+                  {{ t(`verification.${s}`) }}
+                </option>
+              </select>
+            </label>
+            <p
+              v-if="verificationStatus === 'confirmed_by_human'"
+              class="mt-3 text-xs text-stone-600"
+            >
+              {{ t('assets.verificationConfirmedHint') }}
+            </p>
+            <p class="mt-3 flex flex-wrap items-center gap-2 text-xs text-stone-500">
+              <span>{{ t('assets.status') }}: {{ t(`assets.statuses.${data.asset.status}`) }}</span>
+              <VerificationChip :status="data.asset.verificationStatus" />
+            </p>
+          </div>
           <p v-if="saveError" class="error-text sm:col-span-2">{{ saveError }}</p>
           <button
             type="submit"
@@ -374,17 +518,56 @@ async function removeConfigEntry(id: string) {
             {{ t('assets.saveChanges') }}
           </button>
         </form>
+
+        <form v-if="showVaultLinkField" class="mt-6 border-t border-stone-100 pt-6" @submit.prevent="saveAssetVaultLink">
+          <PasswordManagerLinkField v-model="passwordManagerItemUrl" @save="saveAssetVaultLink" />
+        </form>
       </section>
+
+      <AssetTypeFieldsPanel
+        :asset-type="type"
+        :attributes="assetAttributes"
+        :project-website-url="primaryProjectWebsite"
+        @save="saveTypeAttributes"
+      />
+
+      <InfrastructureQuickLink
+        :asset-id="assetId"
+        :asset-type="type"
+        :project-asset-options="projectAssetOptions"
+        @linked="refresh"
+      />
 
       <section
         v-if="data.projects?.length"
         class="card mt-6 bg-stone-50/80 p-6"
       >
         <h2 class="text-sm font-medium text-stone-700">{{ t('assets.projectsLinked') }}</h2>
-        <ul class="mt-2 space-y-1 text-sm">
-          <li v-for="p in data.projects" :key="p.projectId">
-            <NuxtLink :to="`/projects/${p.projectId}`" class="font-medium underline">{{ p.projectName }}</NuxtLink>
-            <span v-if="p.environmentName" class="text-stone-500"> · {{ p.environmentName }}</span>
+        <ul class="mt-3 space-y-3 text-sm">
+          <li v-for="p in data.projects" :key="p.projectId" class="space-y-1">
+            <NuxtLink :to="`/projects/${p.projectId}`" class="font-medium text-stone-900 underline">
+              {{ p.projectName }}
+            </NuxtLink>
+            <label
+              v-if="p.projectId === primaryProjectId && projectGraphPack?.environments?.length"
+              class="block max-w-sm text-xs"
+            >
+              <span class="font-medium text-stone-500">{{ t('assets.environment') }}</span>
+              <select
+                class="field mt-1"
+                :value="p.environmentId ?? ''"
+                :disabled="envLinkSaving"
+                @change="setProjectEnvironment(p.projectId, ($event.target as HTMLSelectElement).value)"
+              >
+                <option value="">{{ t('assets.environmentAny') }}</option>
+                <option v-for="env in projectGraphPack.environments" :key="env.id" :value="env.id">
+                  {{ env.name }} ({{ t(`projects.envKinds.${env.kind}`) }})
+                </option>
+              </select>
+            </label>
+            <p v-else-if="p.environmentName" class="text-stone-600">
+              {{ t('assets.environment') }}: {{ p.environmentName }}
+            </p>
           </li>
         </ul>
       </section>
@@ -406,9 +589,16 @@ async function removeConfigEntry(id: string) {
         <p v-else class="mt-2 text-sm text-stone-500">{{ t('assets.noRoles') }}</p>
 
         <ul v-if="data.emails?.length" class="list-card mt-4 text-sm">
-          <li v-for="em in data.emails" :key="em.id" class="px-3 py-2">
-            {{ em.address }}
-            <span class="text-stone-500">({{ t(`assets.purposes.${em.purpose}`) }})</span>
+          <li v-for="em in data.emails" :key="em.id" class="space-y-2 px-3 py-3">
+            <div>
+              {{ em.address }}
+              <span class="text-stone-500">({{ t(`assets.purposes.${em.purpose}`) }})</span>
+            </div>
+            <PasswordManagerLinkField
+              v-model="emailPmUrls[em.emailId]"
+              hint-key="assets.emailPasswordManagerLink"
+              @save="saveEmailVaultLink(em.emailId)"
+            />
           </li>
         </ul>
         <p v-else class="mt-2 text-sm text-stone-500">{{ t('assets.noEmails') }}</p>
@@ -456,7 +646,9 @@ async function removeConfigEntry(id: string) {
 
       <template #dependencies>
       <AssetDependenciesPanel
-        v-if="data.dependencies"
+        v-if="data.dependencies && data.asset"
+        :asset-id="data.asset.id"
+        :asset-name="data.asset.name"
         :outbound="data.dependencies.outbound"
         :inbound="data.dependencies.inbound"
         :removing-id="depRemovingId"
@@ -472,6 +664,15 @@ async function removeConfigEntry(id: string) {
           <li v-for="vr in data.vaultReferences" :key="vr.id" class="px-3 py-2">
             <span class="font-medium">{{ vr.label }}</span>
             <span class="mt-1 block text-stone-600">{{ vr.locationHint }}</span>
+            <a
+              v-if="vr.itemUrl"
+              :href="vr.itemUrl"
+              class="mt-1 block text-xs text-stone-600 underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ vr.itemUrl }}
+            </a>
             <span v-if="vr.notes" class="text-stone-500">{{ vr.notes }}</span>
           </li>
         </ul>
@@ -537,7 +738,28 @@ async function removeConfigEntry(id: string) {
       <template #verifications>
       <section class="card p-6">
         <h2 class="sr-only">{{ t('assets.sectionVerifications') }}</h2>
-        <p class="lede">{{ t('assets.verificationsHint') }}</p>
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="max-w-2xl space-y-2">
+            <p class="lede">{{ t('assets.verificationsHint') }}</p>
+            <VerificationGuideLink />
+          </div>
+          <VerificationChip :status="data.asset.verificationStatus" />
+        </div>
+        <div
+          v-if="needsConfirmation"
+          class="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4"
+        >
+          <p class="text-sm font-medium text-stone-900">{{ t('assets.confirmControlTitle') }}</p>
+          <p class="mt-1 text-xs text-stone-600">{{ t('assets.confirmControlHint') }}</p>
+          <button
+            type="button"
+            class="btn-primary mt-3"
+            :disabled="verifyLoading"
+            @click="confirmControlQuick"
+          >
+            {{ t('assets.confirmControl') }}
+          </button>
+        </div>
         <ul v-if="data.verifications?.length" class="list-card mt-4 text-sm">
           <li v-for="v in data.verifications" :key="v.id" class="space-y-1 px-3 py-2">
             <span class="font-medium text-stone-900">{{ verificationMethodLabel(v.status) }}</span>

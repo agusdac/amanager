@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import AppIcon from './AppIcon.vue'
+import { X } from 'lucide-vue-next'
+import { UI_ICON_STROKE } from './uiIconDefaults'
+
+defineOptions({ inheritAttrs: false })
 </script>
 
 <template>
-  <AppIcon v-bind="$attrs">
-    <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
-  </AppIcon>
+  <X v-bind="$attrs" :stroke-width="UI_ICON_STROKE" class="shrink-0" aria-hidden="true" />
 </template>

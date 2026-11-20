@@ -13,6 +13,28 @@ const idProvider = ref('')
 const emailAddress = ref('')
 const accLabel = ref('')
 const accProvider = ref('')
+const emailPmUrls = ref<Record<string, string>>({})
+
+watch(
+  () => emails.value?.emails,
+  (list) => {
+    if (!list) return
+    const next: Record<string, string> = {}
+    for (const em of list) {
+      next[em.id] = (em as { passwordManagerItemUrl?: string | null }).passwordManagerItemUrl ?? ''
+    }
+    emailPmUrls.value = next
+  },
+  { immediate: true },
+)
+
+async function saveEmailPmLink(emailId: string) {
+  await $fetch(`/api/email-addresses/${emailId}`, {
+    method: 'PATCH',
+    body: { passwordManagerItemUrl: emailPmUrls.value[emailId]?.trim() || '' },
+  })
+  await refreshEmail()
+}
 
 const impactAssets = computed(() =>
   (assetList.value?.assets ?? []).map((a: { id: string; name: string }) => ({ id: a.id, label: a.name })),
@@ -49,8 +71,8 @@ async function addAccount() {
 }
 
 const accountTabs = computed(() => [
-  { id: 'identities', label: t('tabs.accounts.identities') },
   { id: 'emails', label: t('tabs.accounts.emails') },
+  { id: 'identities', label: t('tabs.accounts.identities') },
   { id: 'providerAccounts', label: t('tabs.accounts.providerAccounts') },
   { id: 'impact', label: t('tabs.accounts.impact') },
 ])
@@ -63,7 +85,11 @@ const accountTabs = computed(() => [
       <p class="lede">{{ t('accounts.subtitle') }}</p>
     </header>
 
-    <AppDetailTabs :tabs="accountTabs" default-tab="identities">
+    <AppCallout :title="t('accounts.emailsSpotlightTitle')" variant="info">
+      {{ t('accounts.emailsSpotlightBody') }}
+    </AppCallout>
+
+    <AppDetailTabs :tabs="accountTabs" default-tab="emails">
       <template #identities>
     <section class="card space-y-4 p-5">
       <h2 class="sr-only">{{ t('accounts.identities') }}</h2>
@@ -102,7 +128,8 @@ const accountTabs = computed(() => [
 
       <template #emails>
     <section class="card space-y-4 p-5">
-      <h2 class="sr-only">{{ t('accounts.emails') }}</h2>
+      <h2 class="text-sm font-semibold text-stone-900">{{ t('accounts.emails') }}</h2>
+      <p class="text-sm text-stone-600">{{ t('accounts.emailsHint') }}</p>
       <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="addEmail">
         <label class="block min-w-[14rem] flex-1 text-sm">
           <span class="label">{{ t('accounts.emailAddress') }}</span>
@@ -114,10 +141,17 @@ const accountTabs = computed(() => [
         <li
           v-for="item in emails.emails"
           :key="item.id"
-          class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
+          class="space-y-2 px-4 py-3 text-sm"
         >
-          <span class="font-medium text-stone-900">{{ item.address }}</span>
-          <VerificationChip v-if="item.verificationStatus" :status="item.verificationStatus" />
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="font-medium text-stone-900">{{ item.address }}</span>
+            <VerificationChip v-if="item.verificationStatus" :status="item.verificationStatus" />
+          </div>
+          <PasswordManagerLinkField
+            v-model="emailPmUrls[item.id]"
+            hint-key="assets.emailPasswordManagerLink"
+            @save="saveEmailPmLink(item.id)"
+          />
         </li>
       </ul>
       <p v-else class="text-sm text-stone-500">{{ t('accounts.emptyEmails') }}</p>

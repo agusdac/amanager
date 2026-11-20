@@ -25,6 +25,35 @@ export async function findOrCreateEmail(db: Db, workspaceId: string, address: st
   return created
 }
 
+export async function linkIdentityLoginEmail(
+  db: Db,
+  workspaceId: string,
+  identityId: string,
+  address: string,
+) {
+  const row = await findOrCreateEmail(db, workspaceId, address)
+  const [existing] = await db
+    .select()
+    .from(identityEmails)
+    .where(
+      and(
+        eq(identityEmails.workspaceId, workspaceId),
+        eq(identityEmails.identityId, identityId),
+        eq(identityEmails.emailId, row.id),
+        eq(identityEmails.purpose, 'login'),
+      ),
+    )
+    .limit(1)
+  if (!existing) {
+    await db.insert(identityEmails).values({
+      workspaceId,
+      identityId,
+      emailId: row.id,
+      purpose: 'login',
+    })
+  }
+}
+
 export async function linkAssetLoginEmail(
   db: Db,
   workspaceId: string,

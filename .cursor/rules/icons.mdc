@@ -1,19 +1,33 @@
 ---
-description: Custom SVG icon system — no emoji or third-party icon packs in UI
+description: UI icons (Lucide) vs brand icons (Simple Icons)
 globs: app/components/**/*.vue,app/layouts/**/*.vue,app/pages/**/*.vue
 alwaysApply: false
 ---
 
 # App icons
 
-All UI icons must be **project-owned SVG components** under `app/components/icons/`.
+## Two tracks (do not mix)
 
-## Rules
+| Kind | Source | Where |
+| --- | --- | --- |
+| **Brand / product logos** | [Simple Icons](https://simpleicons.org) | `app/constants/brandIcons.ts` → `BrandIcon.vue` |
+| **UI chrome** (expand, close, chevrons, …) | **[Lucide](https://lucide.dev)** (`lucide-vue-next`) | `app/components/icons/Icon*.vue` thin wrappers |
 
-1. **Never** use emoji (🔔, ☰, →, etc.) or icon font libraries (Heroicons, Lucide, Font Awesome) in product UI.
-2. **Base wrapper:** `AppIcon.vue` — stroke icons on 24×24 viewBox, `stroke-width` 1.75–2, `stroke-linecap="round"`.
-3. **Naming:** `Icon{Name}.vue` (e.g. `IconBell.vue`, `IconLink.vue`).
-4. **Usage:** `<IconBell class="h-5 w-5" />` — size via Tailwind on the component; color via `currentColor` / `text-*` parent.
-5. **New icon needed?** Add a new file in `app/components/icons/` matching existing stroke style before using inline SVG in pages.
-6. **Brand / social** exceptions: `IconInstagram`, `IconYouTube`, etc. — still our wrapper components, not raw `<img>` for UI chrome.
-7. **Accessibility:** decorative icons → `aria-hidden="true"` on the SVG (handled by `AppIcon`); interactive icons → `aria-label` on the button/link.
+Simple Icons is **brand-only** — never use it for expand/close/menu glyphs.
+
+## UI icons (Lucide)
+
+1. **Package:** `lucide-vue-next` (already in `package.json`).
+2. **Naming:** keep `Icon{Name}.vue` in `app/components/icons/` — one Lucide glyph per file (e.g. `IconExpand` → `Maximize2`, `IconMinimize` → `Minimize2`, `IconX` → `X`).
+3. **Stroke:** `UI_ICON_STROKE` in `uiIconDefaults.ts` (currently `2`).
+4. **Usage:** `<IconExpand class="h-4 w-4" />` — size via Tailwind; color via `currentColor` / parent `text-*`.
+5. **New basic icon?** Pick from [lucide.dev/icons](https://lucide.dev/icons), add wrapper `IconFoo.vue`; do not paste raw SVG in pages.
+6. **Accessibility:** decorative → `aria-hidden` on wrapper; controls → `aria-label` on the button.
+
+## Brand icons
+
+Follow `provider-brand-icon` skill → `brandIcons.ts`, not Lucide.
+
+## Legacy
+
+`AppIcon.vue` remains for one-off custom SVGs only if Lucide has no match; prefer Lucide for standard UI.

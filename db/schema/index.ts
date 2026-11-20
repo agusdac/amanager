@@ -15,6 +15,7 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   name: text('name').notNull(),
+  locale: text('locale').notNull().default('en'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
@@ -143,6 +144,8 @@ export const emailAddresses = pgTable(
     label: text('label'),
     mailboxType: text('mailbox_type'),
     verificationStatus: text('verification_status').notNull().default('declared'),
+    /** Deep link to vault item (metadata only — never a password). */
+    passwordManagerItemUrl: text('password_manager_item_url'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [uniqueIndex('email_workspace_address_idx').on(table.workspaceId, table.address)],
@@ -205,6 +208,8 @@ export const assets = pgTable('assets', {
   source: text('source').notNull().default('manual'),
   importBatchId: uuid('import_batch_id'),
   attributesJson: jsonb('attributes_json'),
+  /** Bitwarden/1Password item URL or URI scheme — metadata only. */
+  passwordManagerItemUrl: text('password_manager_item_url'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
@@ -297,6 +302,7 @@ export const vaultReferences = pgTable('vault_references', {
   label: text('label').notNull(),
   vaultProvider: text('vault_provider').notNull().default('bitwarden'),
   locationHint: text('location_hint').notNull(),
+  itemUrl: text('item_url'),
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-11-19T20:45:00+01:00",
-  "title": "Design System: AccessMap",
+  "title": "Design System: Hilko",
   "extensions": {
     "colorMeta": {
       "ink": {
@@ -199,7 +199,7 @@
       "kind": "nav",
       "refersTo": "button-primary",
       "description": "White header ruled off from the paper. No sidebar and no active fill.",
-      "html": "<header class=\"ds-nav\"><a class=\"ds-nav-brand\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" aria-hidden=\"true\"><path d=\"M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>AccessMap</a><nav class=\"ds-nav-links\"><a href=\"#\">Home</a><a href=\"#\">Projects</a><span class=\"ds-locale\"><button type=\"button\" class=\"ds-locale-on\">EN</button><button type=\"button\">ES</button></span></nav></header>",
+      "html": "<header class=\"ds-nav\"><a class=\"ds-nav-brand\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" aria-hidden=\"true\"><path d=\"M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>Hilko</a><nav class=\"ds-nav-links\"><a href=\"#\">Home</a><a href=\"#\">Projects</a><span class=\"ds-locale\"><button type=\"button\" class=\"ds-locale-on\">EN</button><button type=\"button\">ES</button></span></nav></header>",
       "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 16px; background: #ffffff; border-bottom: 1px solid #e7e5e4; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-nav-brand { display: inline-flex; align-items: center; gap: 8px; color: #1c1917; font-weight: 600; font-size: 0.875rem; text-decoration: none; } .ds-nav-links { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; } .ds-nav-links a { color: #57534e; font-size: 0.875rem; text-decoration: none; } .ds-nav-links a:hover { color: #1c1917; } .ds-nav-links a:focus-visible, .ds-nav-brand:focus-visible, .ds-locale button:focus-visible { outline: 2px solid #e7e5e4; outline-offset: 2px; } .ds-locale { display: inline-flex; gap: 4px; padding: 2px; background: #ffffff; border: 1px solid #e7e5e4; border-radius: 6px; } .ds-locale button { border: none; background: transparent; color: #57534e; border-radius: 4px; padding: 4px 8px; font: inherit; font-size: 0.875rem; cursor: pointer; } .ds-locale button:hover { background: #f5f5f4; } .ds-locale-on, .ds-locale-on:hover { background: #1c1917; color: #ffffff; }"
     },
     {
@@ -213,7 +213,7 @@
   ],
   "narrative": {
     "northStar": "The Field Notebook",
-    "overview": "AccessMap looks like a field notebook for infrastructure facts. The page is warm paper. Entries sit on white cards, separated from the page by a thin stone rule. Actions are written in ink. The voice is quiet, literal, and warm: the screen records a fact and does not sell it.\n\nDensity is comfortable. A page title is 24px and semibold. Working text is 14px. Sections stack on a 32px rhythm inside a 64rem column. There is no display size and no custom typeface. The system font is the hand of the notebook.\n\nColor is rationed. Ink is the only color that acts, and it is writing, not a brand accent. Green, amber, and red appear only when a state changes: confirmed, unfinished, or failed. Confirmed visual rejection: no chromatic brand accent, no gradient, and no colored app sidebar.",
+    "overview": "Hilko looks like a field notebook for infrastructure facts. The page is warm paper. Entries sit on white cards, separated from the page by a thin stone rule. Actions are written in ink. The voice is quiet, literal, and warm: the screen records a fact and does not sell it.\n\nDensity is comfortable. A page title is 24px and semibold. Working text is 14px. Sections stack on a 32px rhythm inside a 64rem column. There is no display size and no custom typeface. The system font is the hand of the notebook.\n\nColor is rationed. Ink is the only color that acts, and it is writing, not a brand accent. Green, amber, and red appear only when a state changes: confirmed, unfinished, or failed. Confirmed visual rejection: no chromatic brand accent, no gradient, and no colored app sidebar.",
     "keyCharacteristics": [
       "Warm paper with white cards and a 1px stone rule",
       "Ink as the only action color",

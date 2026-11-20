@@ -1,19 +1,45 @@
 {
   "app": {
-    "name": "AccessMap",
+    "name": "Hilko",
     "tagline": "Your digital infrastructure map"
   },
   "nav": {
     "home": "Home",
     "projects": "Projects",
-    "accounts": "Accounts",
+    "accounts": "Emails & access",
     "assets": "Assets",
     "onboarding": "Onboarding",
     "import": "Import",
     "checklist": "Dogfood",
+    "verificationGuide": "Verification guide",
+    "account": "Your account",
+    "sectionPrimary": "Workspace",
+    "sectionMore": "More",
+    "collapseSidebar": "Collapse",
     "login": "Log in",
     "logout": "Log out",
     "register": "Register"
+  },
+  "account": {
+    "title": "Your account",
+    "subtitle": "Profile and preferences for this workspace. Team and organization settings will live here later.",
+    "profileSection": "Profile",
+    "profileHint": "Your display name appears in the workspace. Language is saved to your account.",
+    "displayName": "Display name",
+    "email": "Email",
+    "emailHint": "Contact support to change your sign-in email (not available in-app yet).",
+    "language": "Language",
+    "languageHint": "Applied across Hilko on every device when you’re signed in.",
+    "saved": "Changes saved.",
+    "signOutHint": "End your session on this device. Your data stays in the workspace.",
+    "dangerTitle": "Delete account",
+    "deleteHint": "Permanently removes your user, personal workspace, and all inventory in it. This cannot be undone.",
+    "deleteButton": "Delete my account",
+    "deleteTitle": "Delete account permanently?",
+    "deleteDescription": "You will lose all projects, assets, dependencies, and verifications in your personal workspace. Export first if you need a copy.",
+    "deleteConfirmLabel": "Type your email to confirm",
+    "deleteConfirmAction": "Delete permanently",
+    "deleteEmailMismatch": "Email does not match your account."
   },
   "home": {
     "title": "Workspace overview",
@@ -21,11 +47,18 @@
     "assets": "Assets",
     "identities": "Identities",
     "dependencies": "Dependencies",
+    "emails": "Emails",
+    "emailsSpotlightTitle": "Email is your recovery map",
+    "emailsSpotlightBody": "Logins, billing, recovery, and notifications often share addresses. List every mailbox here and use Impact to see what breaks if you lose one.",
+    "manageEmails": "Manage emails",
+    "emailImpact": "Email impact",
     "resumeOnboarding": "Onboarding in progress (step {step}).",
     "continue": "Continue",
     "openChecklist": "Open dogfood checklist",
     "attentionTitle": "Needs confirmation",
-    "attentionHint": "{count} assets still marked unverified — review verification methods and impact."
+    "attentionHint": "{count} assets are declared or unverified — confirm control or document how you checked.",
+    "reviewVerificationQueue": "Open verification queue",
+    "attentionMore": "+ {count} more in the full queue"
   },
   "search": {
     "title": "Workspace search",
@@ -44,12 +77,15 @@
     "other": "Other method"
   },
   "accounts": {
-    "title": "Accounts & identities",
-    "subtitle": "Sign-in principals, emails, and provider accounts — metadata only.",
+    "title": "Emails & access",
+    "subtitle": "Mailboxes first — then who signs in and provider account labels. Metadata only.",
+    "emailsSpotlightTitle": "Start with mailboxes",
+    "emailsSpotlightBody": "Recovery and billing paths run through email. Register each address, link login/recovery purposes on assets and identities, then explore Impact.",
+    "emailsHint": "One row per address your team cares about (work inboxes, billing, recovery). Link them from asset and identity pages.",
     "identities": "Identities",
     "emails": "Email addresses",
     "providerAccounts": "Provider accounts",
-    "identityLabel": "Label (e.g. Google A)",
+    "identityLabel": "Label (e.g. Work Google admin)",
     "emailAddress": "Email address",
     "accountLabel": "Account label",
     "noProvider": "No provider",
@@ -63,7 +99,29 @@
     "assetsAccess": "Assets & roles",
     "assetsAccessHint": "Resources this identity is declared to access (from asset roles).",
     "noAssets": "No assets linked via roles yet.",
-    "noEmails": "No emails linked to this identity."
+    "noEmails": "No emails linked to this identity.",
+    "linkAsset": "Link to an asset",
+    "pickAsset": "Choose asset…",
+    "linkAccess": "Add access role",
+    "emailPlaceholder": "Login address (metadata only)",
+    "openAssetAccess": "Or open an asset",
+    "openAssetAccessHint": "Jump to the asset’s Access tab to manage roles and login email."
+  },
+  "setupChecklist": {
+    "title": "Initial setup checklist",
+    "subtitle": "Work through these once your project exists — mark items as you go (saved in this browser).",
+    "progress": "{done} of {total} marked",
+    "open": "Open",
+    "reviewAssets": "Review declared assets",
+    "reviewAssetsHint": "Open the verification queue and confirm control or document how you checked.",
+    "identities": "Confirm sign-in identities",
+    "identitiesHint": "Names and providers correct in Accounts.",
+    "linkAccess": "Link identities to assets",
+    "linkAccessHint": "From an identity or asset Access tab — who administers what.",
+    "dependencies": "Document dependencies",
+    "dependenciesHint": "Map DNS, deploy, auth, and billing edges on this project.",
+    "verify": "Verify what you can",
+    "verifyHint": "Use the verification guide — metadata only, no secrets."
   },
   "verification": {
     "unverified": "Unverified",
@@ -104,17 +162,44 @@
   },
   "graph": {
     "title": "Dependency map",
-    "hint": "Drag nodes, scroll to zoom, pan on the background. Arrows point to the dependency target.",
+    "hint": "Drag nodes, scroll to zoom, pan on the background. Use expand (top-right) for fullscreen. Click arrows or nodes for detail cards.",
     "search": "Find asset…",
     "focusNeighbors": "Neighborhood only",
     "onlyUnverified": "Unverified edges only",
     "resetLayout": "Reset layout",
     "fit": "Fit view",
+    "enlarge": "Expand map to full screen",
+    "shrink": "Exit full screen",
     "empty": "No dependencies match these filters.",
-    "openProjectMap": "Open full project map"
+    "openProjectMap": "Open full project map",
+    "popover": {
+      "edgeTitle": "Dependency",
+      "nodeTitle": "Asset",
+      "from": "From",
+      "to": "To (target)",
+      "verification": "Verification",
+      "openAsset": "Open asset"
+    },
+    "relationHelp": {
+      "depends_on": "The source asset needs the target to work (ordering, DNS, upstream API, etc.).",
+      "hosted_on": "The source runs on or inside the target (app on VPS, site on hosting).",
+      "deployed_from": "Deploys or releases originate from the source toward the target environment.",
+      "authenticated_by": "The source uses the target for login or tokens (OAuth client → identity).",
+      "stores_data_in": "Persistent data for the source lives in the target (DB, bucket, registry).",
+      "sends_email_via": "Outbound mail from the source goes through the target (SES, SMTP).",
+      "domain_registered_at": "Domain ownership is registered with the target registrar.",
+      "dns_managed_by": "DNS for the source is served or managed by the target.",
+      "verified_with": "Ownership or delivery verification ties the source to the target.",
+      "publishes_to": "The source publishes content or builds to the target.",
+      "billed_through": "Costs for the source are invoiced via the target account.",
+      "recovery_depends_on": "Recovery or backup of the source depends on the target.",
+      "other": "Custom relationship — document intent in dependency notes if needed."
+    }
   },
   "dependencies": {
     "confirmDelete": "Remove this dependency from the map?",
+    "confirmRemoveTitle": "Remove dependency?",
+    "confirmRemoveDescription": "Only the link between these two assets is deleted. Neither asset is removed from your inventory, passwords stay in your vault, and other dependencies are unchanged. The dependency map and impact analysis will stop showing this connection; any note on the link is lost.",
     "remove": "Remove",
     "relationTypes": {
       "depends_on": "Depends on",
@@ -149,7 +234,7 @@
   },
   "checklist": {
     "title": "Mini Críptico dogfood (§4.4)",
-    "subtitle": "Answer each question using data in AccessMap — no secrets stored.",
+    "subtitle": "Answer each question using data in Hilko — no secrets stored.",
     "progress": "{done} of {total} marked reviewed",
     "reset": "Clear marks",
     "whereToLook": "Where to look",
@@ -214,7 +299,53 @@
     "forgotPassword": "Forgot password",
     "resetPassword": "Reset password",
     "identity": "Identity",
+    "guideVerification": "Verification guide",
+    "account": "Your account",
     "loading": "Loading…"
+  },
+  "guide": {
+    "verification": {
+      "openGuide": "Verification guide",
+      "title": "Verification in Hilko",
+      "lede": "Hilko never stores secrets. Verification is how you record that a human checked control or ownership — or that the item is inventory-only until you check.",
+      "backToQueue": "← Back to verification queue",
+      "statusesTitle": "Verification statuses (summary)",
+      "statusesIntro": "Each asset, dependency, and role has one status. The home dashboard counts anything that is not Confirmed yet.",
+      "statusNames": {
+        "unverified": "Unverified",
+        "declared": "Declared",
+        "confirmed_by_human": "Confirmed"
+      },
+      "statusBodies": {
+        "unverified": "Not reviewed yet. Typical for new rows or seed/demo data.",
+        "declared": "You listed it in inventory (wizard, CSV, manual entry) but have not confirmed control.",
+        "confirmed_by_human": "You or someone on the team checked access, DNS, registrar, or console login and documented how."
+      },
+      "methodsTitle": "Verification methods (evidence log)",
+      "methodsIntro": "When you confirm control, add a verification record: pick how you checked and optional notes (hostnames, ticket IDs, no secrets). Methods are labels for humans — not automated probes (integrations come in a later phase).",
+      "methodBodies": {
+        "dns_txt": "Ownership proved via a DNS TXT record (domain, SES, Google site verification, etc.).",
+        "html_file": "HTML file uploaded to the site root or host.",
+        "meta_tag": "Meta tag placed in site HTML.",
+        "cname": "DNS CNAME points to a provider verification target.",
+        "registrar_lock": "Checked registrar WHOIS, lock, or auth codes policy.",
+        "provider_console": "Logged into vendor admin (AWS, Google, GitHub, hosting panel) and confirmed the asset exists.",
+        "manual_check": "Other documented check (screenshot ref, runbook step, ticket) — describe in the note.",
+        "other": "Catch-all; still add a short note."
+      },
+      "methodExamples": {
+        "dns_txt": "e.g. Note: TXT on _amazonses.example.com",
+        "provider_console": "e.g. Note: SES region eu-west-1, identity verified"
+      },
+      "flowTitle": "Recommended workflow",
+      "flowSteps": {
+        "0": "Open Home → verification queue or Assets → Needs confirmation.",
+        "1": "Open the asset → Verifications tab.",
+        "2": "Use “I control this” for a quick console check, or pick a method + evidence note.",
+        "3": "Status becomes Confirmed; the dashboard count goes down."
+      },
+      "flowNote": "You can also set status in Overview and save — use Confirmed only when you have actually checked."
+    }
   },
   "auth": {
     "email": "Email",
@@ -266,8 +397,16 @@
     },
     "addEnvironment": "Add environment",
     "noEnvironments": "No environments yet — add production and development to tag assets.",
+    "environmentsHint": "Each environment groups project assets (prod vs dev hosts, OAuth clients, etc.). Assign assets on the Assets tab or below.",
+    "envAssetCount": "{count} assets",
+    "envNoAssets": "No assets tagged for this environment.",
+    "unassignedAssetsTitle": "Not tagged to an environment",
+    "unassignedAssetsHint": "Assign an environment so deploy and OAuth rows are easier to tell apart.",
+    "assignEnvironment": "Assign…",
     "deleteEnvironment": "Remove",
     "confirmDeleteEnvironment": "Remove this environment? Assets linked to it will show «Not set».",
+    "confirmRemoveEnvironmentTitle": "Remove environment?",
+    "confirmRemoveEnvironmentDescription": "Deletes this environment tag from the project. Assets keep their data; linked assets will show «Not set» for environment until you pick another one.",
     "envDeleteError": "Could not remove the environment.",
     "envCreateError": "Could not add the environment."
   },
@@ -301,10 +440,16 @@
       "youtube_channel": "YouTube channel",
       "search_console": "Search Console",
       "google_ads": "Google Ads",
-      "vps": "VPS",
+      "vps": "VPS instance",
+      "server": "Dedicated / bare metal",
+      "hosting_account": "Hosting account",
       "mail_hosting": "Mail hosting",
       "object_storage": "Object storage",
-      "transactional_email": "Transactional email"
+      "transactional_email": "Transactional email",
+      "payment_service": "Payments",
+      "ai_service": "AI product",
+      "password_manager": "Password manager",
+      "design_tool": "Design tool"
     },
     "typeDescriptions": {
       "service": "A SaaS product or API you depend on.",
@@ -318,10 +463,42 @@
       "search_console": "Google Search Console property for a site.",
       "google_ads": "Google Ads billing and campaigns.",
       "vps": "Virtual server you operate (SSH, systemd, etc.).",
+      "server": "Physical or dedicated machine you manage.",
+      "hosting_account": "Shared hosting control panel (e.g. Hostinger, cPanel).",
       "mail_hosting": "Inbound mail or workspace email product.",
       "object_storage": "Buckets, R2, S3-compatible object storage.",
       "transactional_email": "Outbound mail API (e.g. SES, SendGrid).",
+      "payment_service": "Stripe, Paddle, or similar billing surface.",
+      "ai_service": "ChatGPT, Claude, or other AI workspace.",
+      "password_manager": "Org vault where team secrets live.",
+      "design_tool": "Canva, Figma, or team design libraries.",
       "other": "Anything that does not fit a standard type."
+    },
+    "typeSpecificFields": "Type-specific details",
+    "typeSpecificFieldsHint": "Metadata for this asset type — stored in the inventory, not in a vault.",
+    "saveTypeFields": "Save details",
+    "inheritProjectDomainHint": "Defaults from project site: {domain}",
+    "passwordManagerItemUrl": "Password manager item link",
+    "passwordManagerItemUrlHint": "Deep link to the vault item (URI or HTTPS). Never paste the password here.",
+    "savePasswordManagerLink": "Save vault link",
+    "emailPasswordManagerLink": "Vault link for this login email",
+    "infraLinkTitle": "Link infrastructure",
+    "infraLinkHint": "Quick dependency: this VPS/server runs on or depends on another project asset.",
+    "infraLinkTarget": "Other asset",
+    "infraLinkPick": "Choose asset…",
+    "infraLinkRelation": "Relation",
+    "infraLinkAdd": "Create link",
+    "attr": {
+      "ipv4": "IPv4",
+      "ipv6": "IPv6",
+      "hostname": "Hostname",
+      "region": "Region / datacenter",
+      "planLabel": "Plan name",
+      "siteDomain": "Site / property domain",
+      "siteDomainPlaceholder": "minicriptico.com",
+      "paymentAccountId": "Merchant / account ID (metadata)",
+      "aiModelHint": "Default model or workspace",
+      "designTeamId": "Team or file library"
     },
     "sectionDependencies": "Dependencies",
     "dependenciesHint": "Direct edges involving this asset — open linked assets to walk the map.",
@@ -333,6 +510,22 @@
     "vaultRefsHint": "Where humans store secrets (metadata only — never the secret itself).",
     "sectionVerifications": "Verification evidence",
     "verificationsHint": "How ownership or control was proved (e.g. DNS TXT, HTML file).",
+    "verificationQueueHint": "These items are not marked confirmed yet. Open each row to record evidence or confirm control.",
+    "verificationFilter": {
+      "all": "All assets",
+      "needsConfirmation": "Needs confirmation",
+      "confirmed": "Confirmed"
+    },
+    "verificationCalloutTitle": "This asset still needs confirmation",
+    "verificationCalloutBody": "Record how you checked control (console login, DNS, registrar) or confirm after a quick review.",
+    "verificationCalloutCta": "Go to verifications",
+    "openVerificationQueue": "View queue",
+    "verificationStatusLabel": "Verification status",
+    "verificationStatusHint": "Declared = inventory only. Confirmed = you checked access or ownership.",
+    "verificationConfirmedHint": "Optional: add a verification record below with method + evidence so the checklist stays auditable.",
+    "confirmControlTitle": "Confirm control",
+    "confirmControlHint": "Adds a provider-console check and marks the asset confirmed. Add a detailed note below if needed.",
+    "confirmControl": "I control this — mark confirmed",
     "verificationMethod": "Method",
     "verificationEvidence": "Evidence note",
     "verificationEvidencePlaceholder": "e.g. TXT record on _acme-challenge.minicriptico.com",
@@ -420,22 +613,31 @@
     "navWelcome": "Welcome",
     "navProject": "Project",
     "navTools": "Tools",
-    "navAccounts": "Accounts",
+    "navAccounts": "Sign-in",
+    "navAssets": "Resources",
+    "navConnections": "Links",
     "navReview": "Review",
     "welcomeTitle": "Your personal workspace",
-    "welcomeBody": "AccessMap organizes projects, tools, sign-in accounts, and how they connect. This wizard creates your first project and a starter map you can refine later.",
+    "welcomeBody": "Hilko organizes projects, tools, sign-in accounts, and how they connect. This wizard creates your first project and a starter map you can refine later.",
     "welcomeList1": "Projects group sites, apps, or clients.",
-    "welcomeList2": "Identities are labels like «Google A» — not passwords.",
+    "welcomeList2": "Sign-in identities are who logs in (e.g. work Google admin); assets are the things they control (repos, domains).",
     "welcomeList3": "You can pause anytime; progress is saved automatically.",
     "projectTitle": "First project",
-    "projectHint": "Use a real name (e.g. Mini Críptico or your main site). You can add more projects later.",
+    "projectHint": "Use your real product or client name. You can add more projects later.",
+    "sampleProject": "your project",
+    "websiteHostPlaceholder": "www.example.com",
+    "websiteUnverifiedPlaceholder": "example.com (not verified yet)",
+    "websiteUnverified": "Domain not verified yet — save without https://",
+    "websiteHint": "When you own the domain, keep https://; otherwise tick unverified until DNS is confirmed.",
     "toolsTitle": "Tools & providers",
     "toolsHint": "Pick what you use today. Optional — skip if you prefer to add things manually.",
     "toolsSearch": "Filter providers…",
     "toolsSelected": "{count} selected",
     "toolsEmpty": "No providers match your search.",
     "accountsTitle": "Sign-in identities",
-    "accountsHint": "How do you log into those tools? Use short labels your team already understands.",
+    "accountsHint": "Who signs in to each provider? Use names you will remember in the future.",
+    "identityLoginEmail": "Login email (metadata)",
+    "identityLoginEmailPlaceholder": "you{'@'}company.com",
     "identityLabel": "Label",
     "identityProvider": "Provider",
     "identityDefault": "{provider} account",
@@ -461,6 +663,85 @@
     "errorProjectName": "Enter a project name to continue.",
     "errorFinalize": "Could not finish setup. Try again.",
     "progressLabel": "Onboarding progress",
+    "assetsTitle": "Resources in the map",
+    "assetsHint": "Each provider becomes an asset row — e.g. GitHub login vs main repo are different names and types.",
+    "assetTypeLabel": "Inventory row",
+    "assetResourceName": "Resource name",
+    "connectionsTitle": "Connect sign-in to resources",
+    "connectionsHint": "When the same person uses one login for a tool, link identity → asset. Suggested dependencies reuse that pairing.",
+    "connectionsAccess": "Access links",
+    "connectionsAccessHint": "Creates an asset role (who can administer the resource).",
+    "connectionsAccessEmpty": "Add identities and enabled assets on previous steps to see links here.",
+    "connectionsDeps": "Suggested dependencies",
+    "connectionsDepsHint": "Common edges when tools share login or DNS/mail flows — adjust later on the project map.",
+    "connectionsDepsEmpty": "Pick more related providers (e.g. DNS + registrar) to see suggestions.",
+    "reviewNextSteps": "After create: setup checklist",
+    "reviewNextStepsHint": "You land on the project with next steps — confirm assets, finish links, document dependencies, then verify.",
+    "defaults": {
+      "generic": {
+        "identity": "Sign-in for {project}",
+        "asset": "{project} — primary resource",
+        "roleHint": "The person or account used to sign in — not the repo or domain itself."
+      },
+      "github": {
+        "identity": "GitHub org member (work)",
+        "asset": "{project} — main repository",
+        "roleHint": "GitHub login — distinct from the repository asset you deploy."
+      },
+      "gitlab": {
+        "identity": "GitLab maintainer account",
+        "asset": "{project} — main GitLab project",
+        "roleHint": "Account that signs in to GitLab — not the project URL."
+      },
+      "google": {
+        "identity": "Google Workspace admin (work)",
+        "asset": "{project} — Google OAuth client",
+        "roleHint": "Workspace or Cloud sign-in — separate from OAuth client IDs on assets."
+      },
+      "cloudflare": {
+        "identity": "Cloudflare account login",
+        "asset": "{project} — DNS zone",
+        "roleHint": "Who manages DNS — the zone is the asset."
+      },
+      "namecheap": {
+        "identity": "Namecheap account login",
+        "asset": "{project} — primary domain",
+        "roleHint": "Registrar login vs the domain asset."
+      },
+      "aws": {
+        "identity": "AWS IAM Identity Center user",
+        "asset": "{project} — AWS account (prod)",
+        "roleHint": "Human sign-in vs the AWS account / workload asset."
+      },
+      "hetzner": {
+        "identity": "Hetzner Cloud login",
+        "asset": "{project} — production VPS",
+        "roleHint": "Console login — the server is the asset."
+      },
+      "bitwarden": {
+        "identity": "Bitwarden vault login",
+        "asset": "{project} — shared vault collection",
+        "roleHint": "Who unlocks the vault — references only, no secrets stored."
+      },
+      "stripe": {
+        "identity": "Stripe Dashboard login",
+        "asset": "{project} — Stripe payments",
+        "roleHint": "Dashboard user vs the payment service asset."
+      },
+      "vercel": {
+        "identity": "Vercel team login",
+        "asset": "{project} — Vercel project",
+        "roleHint": "Team sign-in vs hosted app/project resource."
+      }
+    },
+    "suggestedDeps": {
+      "dnsManaged": "DNS hosted at registrar",
+      "deployedFrom": "App deployed from repo",
+      "deployedToVps": "App deployed to VPS",
+      "oauthLogin": "Repo OAuth via Google",
+      "awsDeploy": "Deploy from repo to AWS",
+      "vaultRecovery": "Recovery via password manager"
+    },
     "categories": {
       "cloud": "Cloud",
       "platform": "Platforms",
@@ -480,6 +761,7 @@
     "revert": "Revert batch"
   },
   "common": {
+    "close": "Close",
     "save": "Save",
     "cancel": "Cancel",
     "loading": "Loading…",

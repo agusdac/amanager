@@ -6,7 +6,7 @@ description: >-
 ---
 # Mini Críptico dogfood (Phase 1)
 
-Reference: [docs/ACCESSMAP_SPEC_CURSOR.md](../../../docs/ACCESSMAP_SPEC_CURSOR.md) §4, §4.4, §26.A.
+Reference: [docs/HILKO_SPEC_CURSOR.md](../../../docs/HILKO_SPEC_CURSOR.md) §4, §4.4, §26.A.
 
 ## Seed principles
 

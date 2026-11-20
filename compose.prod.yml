@@ -1,14 +1,14 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-accessmap}
+      POSTGRES_USER: ${POSTGRES_USER:-hilko}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB:-accessmap}
+      POSTGRES_DB: ${POSTGRES_DB:-hilko}
     volumes:
-      - accessmap_pg_prod:/var/lib/postgresql/data
+      - hilko_pg_prod:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-accessmap} -d ${POSTGRES_DB:-accessmap}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hilko} -d ${POSTGRES_DB:-hilko}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-accessmap}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-accessmap}
+      DATABASE_URL: postgres://${POSTGRES_USER:-hilko}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-hilko}
       NUXT_SESSION_SECRET: ${NUXT_SESSION_SECRET:?set NUXT_SESSION_SECRET}
       NUXT_PUBLIC_APP_URL: ${NUXT_PUBLIC_APP_URL:-https://localhost}
       NUXT_SMTP_HOST: ${NUXT_SMTP_HOST:-}
@@ -43,6 +43,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  accessmap_pg_prod:
+  hilko_pg_prod:
   caddy_data:
   caddy_config:

@@ -1,11 +1,44 @@
 <script setup lang="ts">
+import { VERIFICATION_STATUS_KEYS } from '~/constants/inventory'
+
+type VerificationFilter = '' | 'needs_confirmation' | (typeof VERIFICATION_STATUS_KEYS)[number]
+
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+
 useAppPageTitle('pageTitles.assets')
+
 const q = ref('')
 const page = ref(1)
-const { data } = await useFetch(() => `/api/assets?q=${encodeURIComponent(q.value)}&page=${page.value}&limit=25`, {
-  watch: [q, page],
+
+const verificationFilter = computed<VerificationFilter>(() => {
+  const v = route.query.verification
+  if (v === 'needs_confirmation') return 'needs_confirmation'
+  if (typeof v === 'string' && (VERIFICATION_STATUS_KEYS as readonly string[]).includes(v)) {
+    return v as VerificationFilter
+  }
+  return ''
 })
+
+function setVerificationFilter(value: VerificationFilter) {
+  const query = { ...route.query }
+  if (value) query.verification = value
+  else delete query.verification
+  page.value = 1
+  router.replace({ query })
+}
+
+const fetchUrl = computed(() => {
+  const params = new URLSearchParams()
+  params.set('page', String(page.value))
+  params.set('limit', '25')
+  if (q.value.trim()) params.set('q', q.value.trim())
+  if (verificationFilter.value) params.set('verification', verificationFilter.value)
+  return `/api/assets?${params.toString()}`
+})
+
+const { data } = await useFetch(fetchUrl, { watch: [fetchUrl] })
 const { data: identities } = await useFetch('/api/identities')
 
 const impactAssets = computed(() =>
@@ -22,7 +55,12 @@ const impactIdentities = computed(() =>
 <template>
   <div class="space-y-8">
     <header class="flex flex-wrap items-end justify-between gap-4">
-      <h1 class="page-title">{{ t('assets.inventoryTitle') }}</h1>
+      <div class="space-y-1">
+        <h1 class="page-title">{{ t('assets.inventoryTitle') }}</h1>
+        <p v-if="verificationFilter === 'needs_confirmation'" class="text-sm text-stone-600">
+          {{ t('assets.verificationQueueHint') }}
+        </p>
+      </div>
       <div class="flex flex-wrap gap-2">
         <input
           v-model="q"
@@ -36,6 +74,33 @@ const impactIdentities = computed(() =>
         </a>
       </div>
     </header>
+
+    <div class="flex flex-wrap gap-2 text-sm">
+      <button
+        type="button"
+        class="rounded-full border px-3 py-1 transition-colors"
+        :class="verificationFilter === '' ? 'border-stone-800 bg-stone-900 text-white' : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'"
+        @click="setVerificationFilter('')"
+      >
+        {{ t('assets.verificationFilter.all') }}
+      </button>
+      <button
+        type="button"
+        class="rounded-full border px-3 py-1 transition-colors"
+        :class="verificationFilter === 'needs_confirmation' ? 'border-stone-800 bg-stone-900 text-white' : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'"
+        @click="setVerificationFilter('needs_confirmation')"
+      >
+        {{ t('assets.verificationFilter.needsConfirmation') }}
+      </button>
+      <button
+        type="button"
+        class="rounded-full border px-3 py-1 transition-colors"
+        :class="verificationFilter === 'confirmed_by_human' ? 'border-emerald-700 bg-emerald-50 text-emerald-900' : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'"
+        @click="setVerificationFilter('confirmed_by_human')"
+      >
+        {{ t('assets.verificationFilter.confirmed') }}
+      </button>
+    </div>
 
     <div class="card overflow-x-auto">
       <table class="w-full min-w-[32rem] text-left text-sm">
@@ -57,7 +122,9 @@ const impactIdentities = computed(() =>
             </td>
             <td class="px-4 py-3 text-stone-600">{{ a.providerName ?? '—' }}</td>
             <td class="px-4 py-3">
-              <VerificationChip :status="a.verificationStatus" />
+              <NuxtLink :to="`/assets/${a.id}?tab=verifications`" class="inline-block hover:opacity-90">
+                <VerificationChip :status="a.verificationStatus" />
+              </NuxtLink>
             </td>
           </tr>
         </tbody>

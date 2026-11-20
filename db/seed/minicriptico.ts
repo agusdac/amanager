@@ -30,17 +30,17 @@ export async function seedMiniCriptico(db: NodePgDatabase<typeof schema>, worksp
     .from(projects)
     .where(eq(projects.workspaceId, workspaceId))
     .limit(20)
-  let projectId = existing.find((p) => p.slug === 'minicriptico')?.id
+  let projectId = existing.find((p) => p.slug === 'northline-demo')?.id
 
   if (!projectId) {
     const [project] = await db
       .insert(projects)
       .values({
         workspaceId,
-        slug: 'minicriptico',
-        name: 'Mini Críptico',
-        description: 'Fictional dogfood project — unverified placeholders',
-        websiteUrl: 'https://minicriptico.com',
+        slug: 'northline-demo',
+        name: 'Northline',
+        description: 'Fictional demo project — unverified placeholders',
+        websiteUrl: 'https://northline.example',
       })
       .returning()
     projectId = project.id
@@ -67,11 +67,11 @@ export async function seedMiniCriptico(db: NodePgDatabase<typeof schema>, worksp
       .returning()
   }
 
-  const emails = ['Email A', 'Email B', 'Email C', 'Email D']
+  const emails = ['Team inbox', 'Billing notices', 'Support', 'Personal backup']
   const emailIds: string[] = []
   const emailByLabel = new Map<string, string>()
   for (const label of emails) {
-    const address = `${label.toLowerCase().replace(' ', '-')}@example.invalid`
+    const address = `${label.toLowerCase().replaceAll(' ', '-')}@example.invalid`
     const [existing] = await db
       .select()
       .from(emailAddresses)
@@ -99,7 +99,7 @@ export async function seedMiniCriptico(db: NodePgDatabase<typeof schema>, worksp
     .values({
       workspaceId,
       providerId: prov.google,
-      label: 'Google A',
+      label: 'Work Google Workspace admin',
       verificationStatus: 'declared',
     })
     .returning()
@@ -108,7 +108,7 @@ export async function seedMiniCriptico(db: NodePgDatabase<typeof schema>, worksp
     .values({
       workspaceId,
       providerId: prov.google,
-      label: 'Google B',
+      label: 'Client Google Cloud billing',
       verificationStatus: 'declared',
     })
     .returning()
@@ -165,9 +165,9 @@ export async function seedMiniCriptico(db: NodePgDatabase<typeof schema>, worksp
   const ads = await mkAsset('Google Ads account', 'google_ads', 'google', accB.id)
   const repo1 = await mkAsset('GitHub repo 1 (placeholder)', 'repository', 'github')
   const repo2 = await mkAsset('GitHub repo 2 (placeholder)', 'repository', 'github')
-  const vps1 = await mkAsset('VPS-01 (placeholder)', 'vps', 'vps')
-  const vps2 = await mkAsset('VPS-02 (placeholder)', 'vps', 'vps')
-  const domain = await mkAsset('minicriptico.com domain', 'domain', 'namecheap')
+  const vps1 = await mkAsset('VPS-01 (placeholder)', 'vps', 'hetzner')
+  const vps2 = await mkAsset('VPS-02 (placeholder)', 'vps', 'digitalocean')
+  const domain = await mkAsset('northline.example domain', 'domain', 'namecheap')
   const mail = await mkAsset('OpenShip mail (placeholder)', 'mail_hosting', 'email')
   const cf = await mkAsset('Cloudflare storage (placeholder)', 'object_storage', 'cloudflare')
   const ses = await mkAsset('AWS SES (placeholder)', 'transactional_email', 'aws')
@@ -243,17 +243,20 @@ export async function seedMiniCriptico(db: NodePgDatabase<typeof schema>, worksp
     },
   ])
 
-  const emailA = emailByLabel.get('Email A')!
-  const emailB = emailByLabel.get('Email B')!
+  const emailTeamInbox = emailByLabel.get('Team inbox')
+  const emailBilling = emailByLabel.get('Billing notices')
+  if (!emailTeamInbox || !emailBilling) {
+    throw new Error('Seed emails missing: expected Team inbox and Billing notices')
+  }
   await db.insert(identityEmails).values([
-    { workspaceId, identityId: googleA.id, emailId: emailA, purpose: 'login' },
-    { workspaceId, identityId: googleB.id, emailId: emailB, purpose: 'login' },
+    { workspaceId, identityId: googleA.id, emailId: emailTeamInbox, purpose: 'login' },
+    { workspaceId, identityId: googleB.id, emailId: emailBilling, purpose: 'login' },
   ])
 
   await db.insert(assetEmails).values([
-    { workspaceId, assetId: youtube.id, emailId: emailA, purpose: 'login' },
-    { workspaceId, assetId: gsc.id, emailId: emailB, purpose: 'login' },
-    { workspaceId, assetId: oauth.id, emailId: emailA, purpose: 'login' },
+    { workspaceId, assetId: youtube.id, emailId: emailTeamInbox, purpose: 'login' },
+    { workspaceId, assetId: gsc.id, emailId: emailBilling, purpose: 'login' },
+    { workspaceId, assetId: oauth.id, emailId: emailTeamInbox, purpose: 'login' },
   ])
 
   const verificationTargets = [

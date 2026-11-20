@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
       vaultProvider: parsed.data.vaultProvider ?? 'bitwarden',
       assetId: parsed.data.assetId ?? null,
       projectId: parsed.data.projectId ?? null,
+      itemUrl: parsed.data.itemUrl?.trim() || null,
       notes: parsed.data.notes ?? null,
     })
     .returning()

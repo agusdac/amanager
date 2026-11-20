@@ -1,12 +1,12 @@
-# amanager (AccessMap)
+# amanager (Hilko)
 
 Digital infrastructure map — metadata only, no stored credentials.
 
 ## Docs
 
-- [Product spec](docs/ACCESSMAP_SPEC_CURSOR.md)
+- [Product spec](docs/HILKO_SPEC_CURSOR.md)
 - [Roadmap](docs/ROADMAP.md)
-- [Phase 0 pathfinder map](product/plans/accessmap-phase-0/map.md)
+- [Phase 0 pathfinder map](product/plans/hilko-phase-0/map.md)
 
 ## Local development (Fase 0)
 

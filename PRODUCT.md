@@ -18,7 +18,7 @@ Mini Críptico is a realistic example of the job. It is not the acceptance test.
 
 ## Product Purpose
 
-AccessMap is a map of the digital infrastructure a person or team already runs: what exists, where each thing is administered, which identity or account controls it, how resources depend on each other, and where a secret lives by reference to an external vault.
+Hilko is a map of the digital infrastructure a person or team already runs: what exists, where each thing is administered, which identity or account controls it, how resources depend on each other, and where a secret lives by reference to an external vault.
 
 It exists because those relationships are scattered across providers. Success means a freelancer or a small team can trust the map with no credentials stored in it. Setup guides and migration plans are part of that success and are not built yet. A person carries out any change. The product does not perform it.
 
@@ -38,7 +38,7 @@ The first registration creates the owner and a Personal workspace. Further signu
 
 ## Capabilities and Constraints
 
-Working name in the interface: AccessMap. That name is provisional and is not a brand commitment. The repository name is `amanager`.
+Working name in the interface: Hilko. That name is provisional and is not a brand commitment. The repository name is `amanager`.
 
 Shipped foundation and inventory:
 
@@ -70,10 +70,10 @@ Durable constraints:
 
 ## Evidence on Hand
 
-- Working product spec: `docs/ACCESSMAP_SPEC_CURSOR.md` (version 0.2, 2026-11-19).
+- Working product spec: `docs/HILKO_SPEC_CURSOR.md` (version 0.2, 2026-11-19).
 - Roadmap: `docs/ROADMAP.md`.
 - Shipped scope notes: `product/v0.1.0/` and `product/v0.2.0/`.
-- Interface copy: `i18n/locales/en.json` and `i18n/locales/es.json`. The app name string is AccessMap. The English tagline is "Your digital infrastructure map".
+- Interface copy: `i18n/locales/en.json` and `i18n/locales/es.json`. The app name string is Hilko. The English tagline is "Your digital infrastructure map".
 - Mini Críptico is an example. The repository seed is fictional and marked unverified. It is not a verified inventory and not customer proof.
 
 No logo, testimonials, case studies, press, pricing, or licensing claims exist. Future work must not invent them.

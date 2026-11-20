@@ -1,52 +1,19 @@
 <script setup lang="ts">
-const { t } = useI18n()
 const route = useRoute()
-const { data: session, refresh } = useSessionFetch()
+const { data: session } = useSessionFetch()
 
-function navClass(path: string) {
-  const current = path === '/home'
-    ? route.path === '/home'
-    : route.path === path || route.path.startsWith(`${path}/`)
-  return current ? 'font-medium text-stone-900' : 'hover:text-stone-900'
-}
-
-async function logout() {
-  await $fetch('/api/auth/logout', { method: 'POST' })
-  await refresh()
-  await navigateTo('/login')
-}
+const showShell = computed(() => {
+  if (!session.value?.user) return false
+  const bare = new Set(['/login', '/register', '/forgot-password', '/reset-password'])
+  return !bare.has(route.path)
+})
 </script>
 
 <template>
-  <div class="min-h-screen">
-    <header class="border-b border-stone-200 bg-white">
-      <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-        <NuxtLink to="/home" class="flex items-center gap-2 font-semibold text-stone-900">
-          <IconFolder class="h-5 w-5" />
-          <span>{{ t('app.name') }}</span>
-        </NuxtLink>
-        <nav class="flex flex-wrap items-center gap-4 text-sm text-stone-600">
-          <NuxtLink v-if="session?.user" to="/home" :class="navClass('/home')">{{ t('nav.home') }}</NuxtLink>
-          <NuxtLink v-if="session?.user" to="/projects" :class="navClass('/projects')">{{ t('nav.projects') }}</NuxtLink>
-          <NuxtLink v-if="session?.user" to="/accounts" :class="navClass('/accounts')">{{ t('nav.accounts') }}</NuxtLink>
-          <NuxtLink v-if="session?.user" to="/assets" :class="navClass('/assets')">{{ t('nav.assets') }}</NuxtLink>
-          <NuxtLink v-if="session?.user" to="/onboarding" :class="navClass('/onboarding')">{{ t('nav.onboarding') }}</NuxtLink>
-          <NuxtLink v-if="session?.user" to="/checklist" :class="navClass('/checklist')">{{ t('nav.checklist') }}</NuxtLink>
-          <LocaleSwitcher />
-          <button
-            v-if="session?.user"
-            type="button"
-            class="hover:text-stone-900"
-            @click="logout"
-          >
-            {{ t('nav.logout') }}
-          </button>
-          <NuxtLink v-else to="/login" class="hover:text-stone-900">{{ t('nav.login') }}</NuxtLink>
-        </nav>
-      </div>
-    </header>
-    <main class="mx-auto max-w-5xl px-4 py-8">
-      <slot />
-    </main>
+  <AppShell v-if="showShell">
+    <slot />
+  </AppShell>
+  <div v-else class="min-h-screen bg-stone-50">
+    <slot />
   </div>
 </template>

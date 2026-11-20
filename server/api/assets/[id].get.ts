@@ -46,6 +46,7 @@ export default defineEventHandler(async (event) => {
     .select({
       projectId: projects.id,
       projectName: projects.name,
+      projectWebsiteUrl: projects.websiteUrl,
       environmentId: projectAssets.environmentId,
       environmentName: projectEnvironments.name,
       environmentKind: projectEnvironments.kind,
@@ -74,6 +75,7 @@ export default defineEventHandler(async (event) => {
       purpose: assetEmails.purpose,
       address: emailAddresses.address,
       emailId: emailAddresses.id,
+      passwordManagerItemUrl: emailAddresses.passwordManagerItemUrl,
     })
     .from(assetEmails)
     .innerJoin(emailAddresses, eq(emailAddresses.id, assetEmails.emailId))

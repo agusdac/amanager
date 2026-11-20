@@ -1,7 +1,7 @@
-# AccessMap — Especificación de producto y desarrollo (Cursor)
+# Hilko — Especificación de producto y desarrollo (Cursor)
 
 > **Estado:** documento de trabajo inicial · **Versión:** 0.2 · **Fecha:** 2026-11-19  
-> **Nombre provisional:** AccessMap (comprobar marca antes de comercializar).  
+> **Nombre provisional:** Hilko (comprobar marca antes de comercializar).  
 > **i18n:** inglés (default) y español · `@nuxtjs/i18n` con `strategy: 'no_prefix'` (locale en cookie; sin `/es` en la URL).  
 > **Stack fijado:** Nuxt 4, PostgreSQL, Drizzle (`pg`), bun, Docker Compose (dev/prod).  
 > **Mercado inicial:** desarrolladores individuales, freelancers y pequeños equipos; después agencias digitales.  
@@ -35,9 +35,9 @@ Este documento define **qué** construir, **cómo** modelarlo y **cómo validar*
 
 ## 1. Visión
 
-**AccessMap es el mapa de control y configuración de todos los recursos digitales de una persona, proyecto, equipo o agencia.**
+**Hilko es el mapa de control y configuración de todos los recursos digitales de una persona, proyecto, equipo o agencia.**
 
-Una persona puede tener cuatro correos, dos servidores, múltiples cuentas de Google, herramientas de contenido, repositorios, un servicio de correo transaccional, un registrador y decenas de configuraciones. AccessMap responde:
+Una persona puede tener cuatro correos, dos servidores, múltiples cuentas de Google, herramientas de contenido, repositorios, un servicio de correo transaccional, un registrador y decenas de configuraciones. Hilko responde:
 
 - **Qué existe** y para qué se usa.
 - **Dónde se administra** cada cosa (enlace a consola, repositorio o documentación).
@@ -176,7 +176,7 @@ Crear cuatro registros `email_addresses` inicialmente identificados como:
 
 Son **etiquetas**, no atribuciones reales. El onboarding debe preguntar qué hace cada correo y qué cuentas usan cada uno. No deducir por defecto que las cuatro direcciones son cuatro Google Accounts, ni que el correo con el que se inicia sesión es el propietario de todos los productos de Google.
 
-### 4.4 Preguntas que AccessMap debe contestar en este caso
+### 4.4 Preguntas que Hilko debe contestar en este caso
 
 1. ¿Qué servicios de Mini Críptico se administran con la **Cuenta Google A** y cuáles con la **B**?
 2. Si mañana pierdo acceso al Email A, ¿qué recursos y procesos de recuperación quedan afectados?
@@ -197,7 +197,7 @@ Son **etiquetas**, no atribuciones reales. El onboarding debe preguntar qué hac
 - Consultar «impacto de perder Cuenta Google A» y «todo lo que depende de VPS-01».
 - Generar **un README de incorporación** usando el inventario.
 - Generar **un plan de migración GitHub → Bitbucket** y **otro para registrador Namecheap → Hostinger** sin hacer cambios reales.
-- Completar el producto sin introducir ninguna contraseña, token privado ni secreto en AccessMap.
+- Completar el producto sin introducir ninguna contraseña, token privado ni secreto en Hilko.
 
 ---
 
@@ -443,12 +443,12 @@ Un README exportado es una **instantánea** de un runbook en una versión. No mo
 
 ### Ejemplo detallado: incorporación de un desarrollador a Mini Críptico
 
-1. Leer arquitectura, repositorios y mapa de servicios en AccessMap.
+1. Leer arquitectura, repositorios y mapa de servicios en Hilko.
 2. Disponer de cuenta individual de GitHub. Solicitar permiso mínimo a los repositorios necesarios; no usar las credenciales personales del fundador.
 3. Localizar repositorios correctos y comprobar qué ramas y entornos existen.
 4. Instalar Node y gestor de paquetes en las versiones documentadas (`.nvmrc` / `packageManager` del repositorio). No inventar versiones.
 5. Clonar el repositorio autorizado y ejecutar instalación de dependencias según sus scripts reales.
-6. Generar `.env.local` desde `.env.example` **sin incluir secretos en AccessMap**; recuperar valores de Bitwarden únicamente cuando esté autorizado y según el entorno.
+6. Generar `.env.local` desde `.env.example` **sin incluir secretos en Hilko**; recuperar valores de Bitwarden únicamente cuando esté autorizado y según el entorno.
 7. Preparar la base de datos local con las migraciones y seeds disponibles en el repo; confirmar si hay datos personales o de producción que no se deban copiar.
 8. Configurar credenciales de desarrollo separadas de producción (OAuth, correo, storage) si corresponden.
 9. Ejecutar aplicación local y comprobar login, renderizado, conexión a datos y funcionalidades clave.
@@ -460,7 +460,7 @@ Un README exportado es una **instantánea** de un runbook en una versión. No mo
 ```markdown
 # Preparar entorno de desarrollo — Mini Críptico
 
-> Generado desde AccessMap. Revisado: FECHA. Este documento NO contiene secretos.
+> Generado desde Hilko. Revisado: FECHA. Este documento NO contiene secretos.
 
 ## Antes de empezar
 - [ ] Cuenta individual de GitHub con permisos concedidos.
@@ -487,7 +487,7 @@ Un README exportado es una **instantánea** de un runbook en una versión. No mo
 - [ ] No hay secretos en git ni en logs.
 ```
 
-Los nombres de variables de ejemplo deben ajustarse a las **variables reales** de los repositorios. Importante: **el nombre de una variable tampoco revela por sí solo dónde está configurada**; AccessMap necesita asociarlo al recurso y entorno adecuados.
+Los nombres de variables de ejemplo deben ajustarse a las **variables reales** de los repositorios. Importante: **el nombre de una variable tampoco revela por sí solo dónde está configurada**; Hilko necesita asociarlo al recurso y entorno adecuados.
 
 ### Ejemplo de estructura de plantilla (orientativo, no código ejecutable)
 
@@ -583,7 +583,7 @@ El plan distingue **impactos confirmados** (relaciones del inventario) de **comp
 
 ### Detección de impacto
 
-Ej.: si se cambia de GitHub a Bitbucket, AccessMap examina relaciones `deployed_from` y puede sugerir revisar CI/CD, webhooks, claves de despliegue, secretos y accesos. **No afirmar que detectó esos elementos** si no están documentados o no existe una integración que los verifique.
+Ej.: si se cambia de GitHub a Bitbucket, Hilko examina relaciones `deployed_from` y puede sugerir revisar CI/CD, webhooks, claves de despliegue, secretos y accesos. **No afirmar que detectó esos elementos** si no están documentados o no existe una integración que los verifique.
 
 ### Flujos de colaboración
 
@@ -591,7 +591,7 @@ Ej.: si se cambia de GitHub a Bitbucket, AccessMap examina relaciones `deployed_
 - Pasos con responsable y fecha opcional.
 - Exportación a Markdown legible y JSON estructurado.
 - Historial de quién marcó cada paso y cuándo.
-- La ejecución es un registro manual de cambios efectuados fuera de AccessMap, no una automatización operativa.
+- La ejecución es un registro manual de cambios efectuados fuera de Hilko, no una automatización operativa.
 
 ---
 
@@ -614,7 +614,7 @@ Ej.: si se cambia de GitHub a Bitbucket, AccessMap examina relaciones `deployed_
 1. Preparar workspace, repos y permisos en Bitbucket.
 2. Usar el importador oficial o un procedimiento de mirror **validado para el repositorio**; no asumir que importa PRs, issues, pipelines y secretos. Documentar explícitamente lo que no migra.
 3. Validar ramas, tags, commits, LFS y acceso del equipo.
-4. Rehacer CI/CD y secretos en el sistema de destino; no copiar secretos en AccessMap.
+4. Rehacer CI/CD y secretos en el sistema de destino; no copiar secretos en Hilko.
 5. Reconfigurar webhooks, deploy keys/SSH, remotes locales, documentación y automatizaciones.
 6. Ejecutar un despliegue de prueba desde Bitbucket y verificar el sistema.
 7. Cortar los cambios en origen según el plan; mantener el repositorio original archivado o de solo lectura si conviene.
@@ -645,7 +645,7 @@ Se pueden hacer por separado; no mezclar sus pasos automáticamente.
 **Plan:**
 
 1. Preparar cuenta destino y los datos requeridos.
-2. Solicitar/desbloquear transferencia siguiendo el proceso y el código de autorización del registrador **sin guardar el código en AccessMap**.
+2. Solicitar/desbloquear transferencia siguiendo el proceso y el código de autorización del registrador **sin guardar el código en Hilko**.
 3. Mantener DNS operativo durante la transferencia; cambiar nameservers solo si también es objetivo y está planificado.
 4. Si DNS cambia, copiar/verificar la zona antes del corte y revisar DNSSEC/DS, MX, SPF, DKIM, DMARC, CAA y registros de verificación.
 5. Probar web, correo entrante/saliente, envío transaccional, OAuth redirects y servicios afectados.
@@ -663,7 +663,7 @@ Se pueden hacer por separado; no mezclar sus pasos automáticamente.
 - **Google Analytics / GA4 (si existe):** revisar permisos por cuenta o propiedad; confirmar acceso de B en el alcance correcto.
 - **Google Cloud / OAuth:** añadir a B a los proyectos de Google Cloud usando IAM con permisos mínimos; revisar quién puede mantener la configuración OAuth, branding, client IDs, URIs, APIs y billing. **No tratar un OAuth client como algo que se puede «mover» entre proyectos con un clic**.
 - **Recovery:** revisar direcciones de recuperación y factores de seguridad sin copiar secretos.
-- **Servicios externos con «Sign in with Google»:** cada uno requiere revisión independiente; cambiar el email en AccessMap **no** cambia el login del servicio.
+- **Servicios externos con «Sign in with Google»:** cada uno requiere revisión independiente; cambiar el email en Hilko **no** cambia el login del servicio.
 
 **Criterios de finalización:** B entra realmente en cada producto, se confirma rol correcto, se garantiza continuidad/recuperación y solo entonces se retira A donde sea posible y deseado. Algunos recursos pueden no ser transferibles sin procesos adicionales.
 
@@ -674,7 +674,7 @@ Se pueden hacer por separado; no mezclar sus pasos automáticamente.
 1. Documentar Google Cloud project actual, OAuth client(s), tipo de cliente, consent/branding, scopes, test users si proceden, URIs autorizadas y APIs implicadas; sin secrets.
 2. Identificar recursos que dependen del OAuth client (frontend/backend, callback endpoints, entornos, dominios autorizados).
 3. Crear/configurar nuevo proyecto/cliente según documentación vigente y permisos autorizados.
-4. Registrar **nueva** referencia de secreto en Bitwarden y nuevos valores de configuración en los entornos pertinentes; nunca copiar el secreto en AccessMap.
+4. Registrar **nueva** referencia de secreto en Bitwarden y nuevos valores de configuración en los entornos pertinentes; nunca copiar el secreto en Hilko.
 5. Validar flujos de login, consentimientos, cuentas existentes, refresh/session behavior y posibles requisitos de verificación de app.
 6. Ejecutar cutover por entorno; monitorizar errores y disponer de una ventana para volver a la configuración anterior si sigue permitida.
 7. Retirar credenciales antiguas **solo después** de confirmar el estado de los consumidores.
@@ -686,13 +686,13 @@ Se pueden hacer por separado; no mezclar sus pasos automáticamente.
 1. Inventariar servicios, puertos, DNS, IP, certificados, procesos, systemd, Docker, cron, backups, discos, volúmenes, base de datos, firewall y usuarios SSH.
 2. Revisar las dependencias: repositorios/CI, correo, almacenamiento, callbacks, claves de despliegue, monitoring, webhooks.
 3. Aprovisionar servidor destino con acceso individual y SSH keys gestionadas externamente.
-4. Reproducir configuración a partir de scripts del repositorio y la guía, sin guardar secretos en AccessMap.
+4. Reproducir configuración a partir de scripts del repositorio y la guía, sin guardar secretos en Hilko.
 5. Restaurar datos y comprobar integridad, backups y permisos.
 6. Probar en destino; planificar corte de tráfico y sincronización final de datos si aplica.
 7. Confirmar health checks, SSL, rendimiento, colas, correos y escrituras.
 8. Conservar rollback y apagar origen solo tras periodo de observación.
 
-**No ejecutar `rsync`, `ssh`, DNS ni comandos destructivos desde AccessMap MVP.**
+**No ejecutar `rsync`, `ssh`, DNS ni comandos destructivos desde Hilko MVP.**
 
 ### 11.F — Cambiar envío transaccional de AWS SES a otro proveedor
 
@@ -727,7 +727,7 @@ Se pueden hacer por separado; no mezclar sus pasos automáticamente.
 2. Agrupar cambios por proveedor; revisar impacto de la pérdida de acceso al buzón original.
 3. Actualizar cada servicio en su interfaz correspondiente, respetando verificaciones y restricciones.
 4. Confirmar con la cuenta nueva y mantener trazabilidad.
-5. Actualizar referencias en AccessMap. Nunca afirmar que cambió el login del servicio al editar el registro local.
+5. Actualizar referencias en Hilko. Nunca afirmar que cambió el login del servicio al editar el registro local.
 
 ---
 
@@ -779,7 +779,7 @@ Las plantillas genéricas deben contener advertencias si faltan datos de entorno
 - Fecha de generación, versión de plantilla, proyecto/workspace y fecha de última verificación de los recursos incluidos.
 - Aviso si hay recursos `unverified`.
 - Fuente por elemento cuando se disponga (`manual`, `import`, integración).
-- El documento es un **snapshot**. Cambios en AccessMap no alteran automáticamente un README ya exportado.
+- El documento es un **snapshot**. Cambios en Hilko no alteran automáticamente un README ya exportado.
 
 **Edición:** permitir modificar runbooks en Markdown dentro del producto y regenerar solo secciones automáticas conservando bloques manuales. MVP: una versión más simple de *plantilla con campos + notas propias*; evitar un complejo editor WYSIWYG.
 
@@ -967,7 +967,7 @@ tests/
   integration/
   e2e/
 docs/
-  ACCESSMAP_SPEC_CURSOR.md
+  HILKO_SPEC_CURSOR.md
   ROADMAP.md
   ADR/
 ```
@@ -988,7 +988,7 @@ docs/
 
 **Principio rector: metadata, no credenciales.**
 
-### Nunca guardar en AccessMap
+### Nunca guardar en Hilko
 
 - Contraseñas, notas con passwords, tokens API, secret keys, claves SSH privadas, códigos de recuperación, códigos de transferencia de dominio, cookies de sesión, claves de firma o `.env` con secretos.
 - Nunca pedir al usuario que pegue su exportación completa de Bitwarden.
@@ -1126,7 +1126,7 @@ docs/
 
 ### Fase 6 — Integraciones opt-in
 
-Evaluar, por demanda: GitHub, Google Workspace/Cloud (según alcance), Cloudflare, AWS, DNS, repositorios y gestores externos de documentación. Una integración de login de AccessMap con Google **no** significa que tenga permisos para inspeccionar Google Ads, YouTube, Search Console o Google Cloud del usuario.
+Evaluar, por demanda: GitHub, Google Workspace/Cloud (según alcance), Cloudflare, AWS, DNS, repositorios y gestores externos de documentación. Una integración de login de Hilko con Google **no** significa que tenga permisos para inspeccionar Google Ads, YouTube, Search Console o Google Cloud del usuario.
 
 ---
 
@@ -1191,7 +1191,7 @@ Evaluar, por demanda: GitHub, Google Workspace/Cloud (según alcance), Cloudflar
 
 ## 24. Preguntas abiertas (no bloquear MVP)
 
-1. ¿El producto se llamará AccessMap? **Nombre provisional**; comprobar marca y dominio antes de comercializar.
+1. ¿El producto se llamará Hilko? **Nombre provisional**; comprobar marca y dominio antes de comercializar.
 2. **i18n:** `en` + `es`, default `en`, `no_prefix` — **cerrado**.
 3. **ORM / DB:** Drizzle + `pg` — **cerrado**.
 4. ¿Los workspaces personales tendrán límite de proyectos/recursos? Decidir al validar monetización.
@@ -1236,7 +1236,7 @@ Listo para inventariar Mini Críptico en una base de datos real cuando:
 - [ ] Registro GitHub, dos VPS, Namecheap, OpenShip, Cloudflare storage y AWS SES como recursos concretos (sin fingir que sus detalles están verificados).
 - [ ] Vinculo activos a proyectos y entornos y asigno responsables.
 - [ ] Veo qué servicios dependen de cada cuenta/identidad y qué activos se ven afectados al cambiar uno (vista de impacto en lista).
-- [ ] Nunca escribo secretos en AccessMap: solo referencias a Bitwarden.
+- [ ] Nunca escribo secretos en Hilko: solo referencias a Bitwarden.
 - [ ] Un segundo workspace no puede acceder a mis datos mediante URLs o API.
 - [ ] Hay tests de autorización, migraciones, seed ficticio y documentación de Compose dev/prod.
 
@@ -1248,14 +1248,14 @@ Además de 26.A:
 - [ ] Genero dos planes de migración específicos con advertencias, validaciones, rollback y estados (Fase 3).
 - [ ] Backups probados en el despliegue objetivo.
 
-**Regla de producto final:** AccessMap debe recordar la estructura de un proyecto y explicarla en el momento adecuado. Debe dar confianza, no una falsa sensación de automatización.
+**Regla de producto final:** Hilko debe recordar la estructura de un proyecto y explicarla en el momento adecuado. Debe dar confianza, no una falsa sensación de automatización.
 
 ---
 
 ## 27. Prompt sugerido para el primer mensaje en Cursor
 
 ```text
-Lee docs/ACCESSMAP_SPEC_CURSOR.md y docs/ROADMAP.md. Construye AccessMap desde cero.
+Lee docs/HILKO_SPEC_CURSOR.md y docs/ROADMAP.md. Construye Hilko desde cero.
 Implementa solo Fase 0 y Fase 1 hasta que se pida avanzar.
 
 Stack cerrado: Nuxt 4, bun, Drizzle (pg), sesiones propias, i18n en/es sin prefix en URL,

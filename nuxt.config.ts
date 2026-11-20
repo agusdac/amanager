@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   app: {
     head: {
-      title: 'AccessMap',
+      title: 'Hilko',
     },
   },
   devtools: { enabled: true },
@@ -19,7 +19,7 @@ export default defineNuxtConfig({
     allowSignup: process.env.NUXT_ALLOW_SIGNUP === 'true',
     smtpHost: process.env.NUXT_SMTP_HOST ?? 'localhost',
     smtpPort: process.env.NUXT_SMTP_PORT ?? '1025',
-    smtpFrom: process.env.NUXT_SMTP_FROM ?? 'AccessMap <noreply@accessmap.local>',
+    smtpFrom: process.env.NUXT_SMTP_FROM ?? 'Hilko <noreply@hilko.local>',
     public: {
       appUrl: process.env.NUXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
     },

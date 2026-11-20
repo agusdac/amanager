@@ -1,10 +1,10 @@
 ---
 name: nuxt-drizzle-stack
 description: >-
-  AccessMap stack conventions: Nuxt 4, bun, Drizzle pg, custom sessions, Compose.
+  Hilko stack conventions: Nuxt 4, bun, Drizzle pg, custom sessions, Compose.
   Use when scaffolding the app, database, auth, Docker, or server API routes.
 ---
-# Nuxt + Drizzle stack (AccessMap)
+# Nuxt + Drizzle stack (Hilko)
 
 See [docs/ROADMAP.md](../../../docs/ROADMAP.md) for PR order.
 

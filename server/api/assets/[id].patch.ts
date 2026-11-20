@@ -1,4 +1,5 @@
 import { and, eq } from 'drizzle-orm'
+import { mergeAssetAttributes } from '../../../shared/schemas/assetAttributes'
 import { patchAssetSchema } from '../../../shared/schemas/inventory'
 import { assets } from '../../../db/schema'
 import { useDb } from '../../utils/db'
@@ -20,8 +21,15 @@ export default defineEventHandler(async (event) => {
   assertSameWorkspace(session.workspaceId, existing.workspaceId)
 
   const updates: Record<string, unknown> = { updatedAt: new Date() }
-  for (const [k, v] of Object.entries(parsed.data)) {
-    if (v !== undefined) updates[k] = v === '' ? null : v
+  const { attributes, ...scalarPatch } = parsed.data
+  for (const [k, v] of Object.entries(scalarPatch)) {
+    if (v !== undefined) {
+      const key = k === 'passwordManagerItemUrl' ? 'passwordManagerItemUrl' : k
+      updates[key] = v === '' ? null : v
+    }
+  }
+  if (attributes !== undefined) {
+    updates.attributesJson = mergeAssetAttributes(existing.attributesJson, attributes)
   }
 
   const [asset] = await db

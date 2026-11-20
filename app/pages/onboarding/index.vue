@@ -1,5 +1,11 @@
 <script setup lang="ts">
-const TOTAL_STEPS = 5
+import { ASSET_TYPE_KEYS } from '~/constants/inventory'
+import { onboardingDefaultForProvider, suggestOnboardingDependencies } from '~/constants/onboardingDefaults'
+
+const ASSET_TYPES = ASSET_TYPE_KEYS
+import { ONBOARDING_MAX_STEP } from '../../../shared/schemas/inventory'
+
+const TOTAL_STEPS = ONBOARDING_MAX_STEP
 
 type ProviderRow = {
   slug: string
@@ -11,6 +17,21 @@ type IdentityDraft = {
   label: string
   providerSlug: string
   unsure: boolean
+  loginEmail: string
+}
+
+type AccessLinkDraft = {
+  identityLabel: string
+  providerSlug: string
+  roleType: string
+  enabled: boolean
+}
+
+type DependencyDraft = {
+  fromProviderSlug: string
+  toProviderSlug: string
+  relationType: string
+  enabled: boolean
 }
 
 type AssetDraft = {
@@ -30,22 +51,29 @@ const saving = ref(false)
 const finishing = ref(false)
 const lastSaved = ref(false)
 
-const { data: draftData, refresh } = await useFetch('/api/onboarding')
+const { data: draftData, refresh } = await useFetch('/api/onboarding', { key: 'onboarding-draft' })
+
+const draftHydrated = ref(false)
 const { data: providers } = await useFetch('/api/providers')
 
 const projectName = ref('')
-const websiteUrl = ref('')
+const websiteHost = ref('')
+const websiteDomainUnverified = ref(false)
 const description = ref('')
 const selectedProviders = ref<string[]>([])
 const providerSearch = ref('')
 const identityDrafts = ref<IdentityDraft[]>([])
 const assetDrafts = ref<AssetDraft[]>([])
+const accessLinks = ref<AccessLinkDraft[]>([])
+const dependencyDrafts = ref<DependencyDraft[]>([])
 
 const stepNavLabels = computed(() => [
   t('onboarding.navWelcome'),
   t('onboarding.navProject'),
   t('onboarding.navTools'),
   t('onboarding.navAccounts'),
+  t('onboarding.navAssets'),
+  t('onboarding.navConnections'),
   t('onboarding.navReview'),
 ])
 
@@ -80,34 +108,96 @@ function categoryLabel(category: string) {
 }
 
 function applyDraftFromServer() {
+  if (draftHydrated.value) return
   const draft = draftData.value?.draft
   if (!draft) return
+  draftHydrated.value = true
+
   step.value = Math.min(Math.max(draft.step, 1), TOTAL_STEPS)
   const p = draft.payload as Record<string, unknown>
   if (typeof p.projectName === 'string') projectName.value = p.projectName
-  if (typeof p.websiteUrl === 'string') websiteUrl.value = p.websiteUrl
+  if (typeof p.websiteUrl === 'string') {
+    const raw = p.websiteUrl as string
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      websiteHost.value = raw.replace(/^https?:\/\//, '')
+      websiteDomainUnverified.value = false
+    } else {
+      websiteHost.value = raw
+      websiteDomainUnverified.value = true
+    }
+  }
+  if (typeof p.websiteDomainUnverified === 'boolean') websiteDomainUnverified.value = p.websiteDomainUnverified
   if (typeof p.description === 'string') description.value = p.description
   if (Array.isArray(p.selectedProviders)) {
     selectedProviders.value = p.selectedProviders.map(String)
   }
   if (Array.isArray(p.identityDrafts)) {
-    identityDrafts.value = p.identityDrafts as IdentityDraft[]
+    identityDrafts.value = (p.identityDrafts as Partial<IdentityDraft>[]).map((i) => ({
+      label: String(i.label ?? ''),
+      providerSlug: String(i.providerSlug ?? ''),
+      unsure: Boolean(i.unsure),
+      loginEmail: typeof i.loginEmail === 'string' ? i.loginEmail : '',
+    }))
   }
   if (Array.isArray(p.assetDrafts)) {
-    assetDrafts.value = (p.assetDrafts as AssetDraft[]).map((a) => ({
-      ...a,
+    assetDrafts.value = (p.assetDrafts as Partial<AssetDraft>[]).map((a) => ({
+      name: String(a.name ?? ''),
+      type: String(a.type ?? 'service'),
+      providerSlug: String(a.providerSlug ?? ''),
+      unsure: Boolean(a.unsure),
       enabled: a.enabled ?? true,
     }))
   }
+  if (Array.isArray(p.accessLinks)) accessLinks.value = p.accessLinks as AccessLinkDraft[]
+  if (Array.isArray(p.dependencyDrafts)) dependencyDrafts.value = p.dependencyDrafts as DependencyDraft[]
 }
 
-onMounted(() => {
-  applyDraftFromServer()
-})
+watch(
+  () => draftData.value?.draft,
+  () => applyDraftFromServer(),
+  { immediate: true },
+)
+
+let autosaveTimer: ReturnType<typeof setTimeout> | undefined
+
+watch(
+  () => ({
+    step: step.value,
+    projectName: projectName.value,
+    websiteHost: websiteHost.value,
+    websiteDomainUnverified: websiteDomainUnverified.value,
+    description: description.value,
+    selectedProviders: selectedProviders.value,
+    identityDrafts: identityDrafts.value,
+    assetDrafts: assetDrafts.value,
+    accessLinks: accessLinks.value,
+    dependencyDrafts: dependencyDrafts.value,
+  }),
+  () => {
+    if (step.value < 2) return
+    if (saving.value || finishing.value) return
+    clearTimeout(autosaveTimer)
+    autosaveTimer = setTimeout(() => void saveDraft(), 900)
+  },
+  { deep: true },
+)
+
+onBeforeUnmount(() => clearTimeout(autosaveTimer))
+
+function resolvedWebsiteUrl(): string {
+  const host = websiteHost.value.trim().replace(/^https?:\/\//, '')
+  if (!host) return ''
+  if (websiteDomainUnverified.value) return host
+  return `https://${host}`
+}
 
 function defaultIdentityLabel(slug: string) {
-  const name = providerBySlug.value.get(slug)?.name ?? slug
-  return t('onboarding.identityDefault', { provider: name })
+  const defaults = onboardingDefaultForProvider(slug)
+  return t(defaults.identityLabelKey, { project: projectName.value.trim() || t('onboarding.sampleProject') })
+}
+
+function roleHintKey(slug: string) {
+  return onboardingDefaultForProvider(slug).roleHintKey
 }
 
 function syncIdentityDraftsFromProviders() {
@@ -121,12 +211,13 @@ function syncIdentityDraftsFromProviders() {
         label: defaultIdentityLabel(slug),
         providerSlug: slug,
         unsure: false,
+        loginEmail: '',
       },
     )
   }
   identityDrafts.value = [...next, ...customs]
   if (!identityDrafts.value.length) {
-    identityDrafts.value.push({ label: '', providerSlug: '', unsure: false })
+    identityDrafts.value.push({ label: '', providerSlug: '', unsure: false, loginEmail: '' })
   }
 }
 
@@ -135,12 +226,12 @@ function syncAssetDraftsFromProviders() {
   const bySlug = new Map(assetDrafts.value.map((a) => [a.providerSlug, a]))
   const next: AssetDraft[] = []
   for (const slug of slugs) {
-    const name = providerBySlug.value.get(slug)?.name ?? slug
+    const defaults = onboardingDefaultForProvider(slug)
     const existing = bySlug.get(slug)
     next.push(
       existing ?? {
-        name: `${name} — main`,
-        type: 'service',
+        name: t(defaults.assetNameKey, { project: projectName.value.trim() || t('onboarding.sampleProject') }),
+        type: defaults.assetType,
         providerSlug: slug,
         unsure: false,
         enabled: true,
@@ -150,7 +241,47 @@ function syncAssetDraftsFromProviders() {
   assetDrafts.value = next
 }
 
-async function saveDraft() {
+function syncAccessLinkDrafts() {
+  const next: AccessLinkDraft[] = []
+  for (const id of identityDrafts.value) {
+    if (id.unsure || !id.label.trim() || !id.providerSlug) continue
+    const asset = assetDrafts.value.find((a) => a.providerSlug === id.providerSlug && a.enabled)
+    if (!asset) continue
+    const existing = accessLinks.value.find(
+      (l) => l.identityLabel === id.label && l.providerSlug === id.providerSlug,
+    )
+    next.push(
+      existing ?? {
+        identityLabel: id.label,
+        providerSlug: id.providerSlug,
+        roleType: 'admin',
+        enabled: true,
+      },
+    )
+  }
+  accessLinks.value = next
+}
+
+function syncDependencyDrafts() {
+  const suggestions = suggestOnboardingDependencies(selectedProviders.value)
+  const next: DependencyDraft[] = []
+  for (const s of suggestions) {
+    const existing = dependencyDrafts.value.find(
+      (d) => d.fromProviderSlug === s.fromSlug && d.toProviderSlug === s.toSlug,
+    )
+    next.push(
+      existing ?? {
+        fromProviderSlug: s.fromSlug,
+        toProviderSlug: s.toSlug,
+        relationType: s.relationType,
+        enabled: true,
+      },
+    )
+  }
+  dependencyDrafts.value = next
+}
+
+async function saveDraft(): Promise<boolean> {
   saving.value = true
   lastSaved.value = false
   try {
@@ -160,16 +291,23 @@ async function saveDraft() {
         step: step.value,
         payload: {
           projectName: projectName.value,
-          websiteUrl: websiteUrl.value,
+          websiteUrl: resolvedWebsiteUrl(),
+          websiteDomainUnverified: websiteDomainUnverified.value,
           description: description.value,
           selectedProviders: selectedProviders.value,
           identityDrafts: identityDrafts.value,
           assetDrafts: assetDrafts.value,
+          accessLinks: accessLinks.value,
+          dependencyDrafts: dependencyDrafts.value,
         },
       },
     })
     await refresh()
     lastSaved.value = true
+    return true
+  } catch (e: unknown) {
+    stepError.value = formatApiError(e) || t('onboarding.errorFinalize')
+    return false
   } finally {
     saving.value = false
   }
@@ -188,13 +326,17 @@ async function goNext() {
   if (!validateStep()) return
   if (step.value === 3) syncIdentityDraftsFromProviders()
   if (step.value === 4) syncAssetDraftsFromProviders()
-  await saveDraft()
+  if (step.value === 5) {
+    syncAccessLinkDrafts()
+    syncDependencyDrafts()
+  }
+  if (!(await saveDraft())) return
   if (step.value < TOTAL_STEPS) step.value++
 }
 
 async function goBack() {
   stepError.value = ''
-  await saveDraft()
+  if (!(await saveDraft())) return
   if (step.value > 1) step.value--
 }
 
@@ -220,7 +362,7 @@ function addIdentityRow() {
 function removeIdentityRow(index: number) {
   identityDrafts.value.splice(index, 1)
   if (!identityDrafts.value.length) {
-    identityDrafts.value.push({ label: '', providerSlug: '', unsure: false })
+    identityDrafts.value.push({ label: '', providerSlug: '', unsure: false, loginEmail: '' })
   }
 }
 
@@ -250,13 +392,15 @@ async function finalize() {
       method: 'POST',
       body: {
         projectName: projectName.value.trim(),
-        websiteUrl: websiteUrl.value.trim() || undefined,
+        websiteUrl: resolvedWebsiteUrl() || undefined,
         description: description.value.trim() || undefined,
         identities: identityDrafts.value,
         assets,
+        accessLinks: accessLinks.value,
+        dependencies: dependencyDrafts.value,
       },
     })
-    await navigateTo(`/projects/${projectId}`)
+    await navigateTo(`/projects/${projectId}?setup=1`)
   } catch (e: unknown) {
     finalizeError.value = formatApiError(e) || t('onboarding.errorFinalize')
   } finally {
@@ -325,16 +469,32 @@ async function finalize() {
               class="field-wizard mt-1.5"
             />
           </label>
-          <label class="block text-sm">
+          <div class="block text-sm">
             <span class="font-medium text-stone-700">{{ t('projects.website') }}</span>
             <span class="ml-1 font-normal text-stone-400">· {{ t('common.optional') }}</span>
+            <div v-if="!websiteDomainUnverified" class="mt-1.5 flex rounded-lg border border-stone-300 bg-white focus-within:border-stone-500 focus-within:ring-2 focus-within:ring-stone-200">
+              <span class="flex items-center rounded-l-lg border-r border-stone-200 bg-stone-50 px-3 text-sm text-stone-500">https://</span>
+              <input
+                v-model="websiteHost"
+                type="text"
+                inputmode="url"
+                :placeholder="t('onboarding.websiteHostPlaceholder')"
+                class="field-wizard min-w-0 flex-1 rounded-none rounded-r-lg border-0 focus:ring-0"
+              />
+            </div>
             <input
-              v-model="websiteUrl"
-              type="url"
-              placeholder="https://"
+              v-else
+              v-model="websiteHost"
+              type="text"
+              :placeholder="t('onboarding.websiteUnverifiedPlaceholder')"
               class="field-wizard mt-1.5"
             />
-          </label>
+            <label class="mt-2 flex cursor-pointer items-center gap-2 text-sm text-stone-600">
+              <input v-model="websiteDomainUnverified" type="checkbox" class="rounded border-stone-300" />
+              {{ t('onboarding.websiteUnverified') }}
+            </label>
+            <p class="mt-1 text-xs text-stone-500">{{ t('onboarding.websiteHint') }}</p>
+          </div>
           <label class="block text-sm">
             <span class="font-medium text-stone-700">{{ t('projects.description') }}</span>
             <textarea
@@ -400,6 +560,9 @@ async function finalize() {
             :key="idx"
             class="rounded-lg border border-stone-200 bg-stone-50/80 p-3 sm:p-4"
           >
+            <p v-if="id.providerSlug && !id.unsure" class="mb-2 text-xs text-stone-500">
+              {{ t(roleHintKey(id.providerSlug)) }}
+            </p>
             <div class="grid gap-3 sm:grid-cols-[1fr,minmax(8rem,10rem),auto] sm:items-end">
               <label class="block text-sm">
                 <span class="font-medium text-stone-700">{{ t('onboarding.identityLabel') }}</span>
@@ -438,6 +601,16 @@ async function finalize() {
                 </button>
               </div>
             </div>
+            <label v-if="!id.unsure" class="mt-3 block text-sm">
+              <span class="font-medium text-stone-700">{{ t('onboarding.identityLoginEmail') }}</span>
+              <span class="ml-1 font-normal text-stone-400">· {{ t('common.optional') }}</span>
+              <input
+                v-model="id.loginEmail"
+                type="email"
+                class="field-wizard mt-1"
+                :placeholder="t('onboarding.identityLoginEmailPlaceholder')"
+              />
+            </label>
           </div>
         </div>
         <button
@@ -450,7 +623,84 @@ async function finalize() {
         </button>
       </div>
 
-      <!-- Step 5 -->
+      <!-- Step 5 — assets -->
+      <div v-else-if="step === 5" class="space-y-5 p-6 sm:p-8">
+        <div class="space-y-1">
+          <h2 class="text-lg font-semibold text-stone-900">{{ t('onboarding.assetsTitle') }}</h2>
+          <p class="text-sm text-stone-600">{{ t('onboarding.assetsHint') }}</p>
+        </div>
+        <div v-if="!selectedProviders.length" class="text-sm text-stone-500">{{ t('onboarding.noProvidersSelected') }}</div>
+        <div v-else class="space-y-3">
+          <div
+            v-for="asset in assetDrafts"
+            :key="asset.providerSlug"
+            class="rounded-lg border border-stone-200 p-4"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <label class="flex items-center gap-2 text-sm font-medium text-stone-800">
+                <input v-model="asset.enabled" type="checkbox" class="rounded border-stone-300" />
+                {{ providerBySlug.get(asset.providerSlug)?.name ?? asset.providerSlug }}
+              </label>
+              <span class="text-xs text-stone-500">{{ t('onboarding.assetTypeLabel') }}</span>
+            </div>
+            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+              <label class="block text-sm sm:col-span-2">
+                <span class="font-medium text-stone-700">{{ t('onboarding.assetResourceName') }}</span>
+                <input v-model="asset.name" type="text" :disabled="!asset.enabled" class="field-wizard mt-1" />
+              </label>
+              <label class="block text-sm sm:col-span-2">
+                <span class="font-medium text-stone-700">{{ t('assets.type') }}</span>
+                <select v-model="asset.type" :disabled="!asset.enabled" class="field-wizard mt-1">
+                  <option v-for="ty in ASSET_TYPES" :key="ty" :value="ty">{{ t(`assets.types.${ty}`) }}</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6 — connections -->
+      <div v-else-if="step === 6" class="space-y-6 p-6 sm:p-8">
+        <div class="space-y-1">
+          <h2 class="text-lg font-semibold text-stone-900">{{ t('onboarding.connectionsTitle') }}</h2>
+          <p class="text-sm text-stone-600">{{ t('onboarding.connectionsHint') }}</p>
+        </div>
+        <div v-if="accessLinks.length" class="space-y-2">
+          <h3 class="text-sm font-semibold text-stone-800">{{ t('onboarding.connectionsAccess') }}</h3>
+          <p class="text-xs text-stone-500">{{ t('onboarding.connectionsAccessHint') }}</p>
+          <ul class="list-card text-sm">
+            <li v-for="(link, idx) in accessLinks" :key="idx" class="flex flex-wrap items-center gap-3 px-3 py-2">
+              <label class="flex flex-1 cursor-pointer items-center gap-2">
+                <input v-model="link.enabled" type="checkbox" class="rounded border-stone-300" />
+                <span class="text-stone-800">
+                  <span class="font-medium">{{ link.identityLabel }}</span>
+                  <span class="text-stone-500"> → {{ providerBySlug.get(link.providerSlug)?.name ?? link.providerSlug }}</span>
+                </span>
+              </label>
+            </li>
+          </ul>
+        </div>
+        <p v-else class="text-sm text-stone-500">{{ t('onboarding.connectionsAccessEmpty') }}</p>
+        <div v-if="dependencyDrafts.length" class="space-y-2">
+          <h3 class="text-sm font-semibold text-stone-800">{{ t('onboarding.connectionsDeps') }}</h3>
+          <p class="text-xs text-stone-500">{{ t('onboarding.connectionsDepsHint') }}</p>
+          <ul class="list-card text-sm">
+            <li v-for="(dep, idx) in dependencyDrafts" :key="idx" class="px-3 py-2">
+              <label class="flex cursor-pointer items-start gap-2">
+                <input v-model="dep.enabled" type="checkbox" class="mt-1 rounded border-stone-300" />
+                <span class="text-stone-800">
+                  {{ providerBySlug.get(dep.fromProviderSlug)?.name ?? dep.fromProviderSlug }}
+                  → {{ t(`dependencies.relationTypes.${dep.relationType}`) }} →
+                  {{ providerBySlug.get(dep.toProviderSlug)?.name ?? dep.toProviderSlug }}
+                </span>
+              </label>
+            </li>
+          </ul>
+        </div>
+        <p v-else class="text-sm text-stone-500">{{ t('onboarding.connectionsDepsEmpty') }}</p>
+      </div>
+
+      <!-- Step 7 — review -->
       <div v-else class="space-y-6 p-6 sm:p-8">
         <div class="space-y-1">
           <h2 class="text-lg font-semibold text-stone-900">{{ t('onboarding.reviewTitle') }}</h2>
@@ -462,7 +712,7 @@ async function finalize() {
             <dt class="font-medium text-stone-500">{{ t('onboarding.reviewProject') }}</dt>
             <dd class="sm:col-span-2">
               <p class="font-semibold text-stone-900">{{ projectName || '—' }}</p>
-              <p v-if="websiteUrl" class="text-stone-600">{{ websiteUrl }}</p>
+              <p v-if="resolvedWebsiteUrl()" class="text-stone-600">{{ resolvedWebsiteUrl() }}</p>
               <p v-if="description" class="mt-1 text-stone-600">{{ description }}</p>
             </dd>
           </div>
@@ -497,29 +747,10 @@ async function finalize() {
           </div>
         </dl>
 
-        <div v-if="selectedProviders.length" class="space-y-3">
-          <h3 class="text-sm font-semibold text-stone-800">{{ t('onboarding.reviewAssets') }}</h3>
-          <div
-            v-for="asset in assetDrafts"
-            :key="asset.providerSlug"
-            class="flex flex-col gap-2 rounded-lg border border-stone-200 p-3 sm:flex-row sm:items-center"
-          >
-            <label class="flex flex-1 items-center gap-2 text-sm">
-              <input v-model="asset.enabled" type="checkbox" class="rounded border-stone-300" />
-              <span class="font-medium text-stone-700">
-                {{ providerBySlug.get(asset.providerSlug)?.name ?? asset.providerSlug }}
-              </span>
-            </label>
-            <input
-              v-model="asset.name"
-              type="text"
-              :disabled="!asset.enabled"
-              class="field-wizard flex-1"
-              :placeholder="t('onboarding.assetPlaceholder')"
-            />
-          </div>
+        <div class="rounded-lg border border-stone-200 bg-stone-50/80 p-4 text-sm text-stone-700">
+          <p class="font-medium text-stone-900">{{ t('onboarding.reviewNextSteps') }}</p>
+          <p class="mt-1 text-stone-600">{{ t('onboarding.reviewNextStepsHint') }}</p>
         </div>
-        <p v-else class="text-sm text-stone-500">{{ t('onboarding.noProvidersSelected') }}</p>
 
         <p v-if="finalizeError" class="text-sm text-red-600">{{ finalizeError }}</p>
       </div>

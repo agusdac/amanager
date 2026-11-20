@@ -1,4 +1,4 @@
-# accessmap-phase-0 — Foundation
+# hilko-phase-0 — Foundation
 
 ## Version
 
@@ -6,12 +6,12 @@
 
 ## Plan
 
-- [Map](../plans/accessmap-phase-0/map.md)
-- [Slim spec](../specs/accessmap-phase-0.md)
+- [Map](../plans/hilko-phase-0/map.md)
+- [Slim spec](../specs/hilko-phase-0.md)
 
 ## Description
 
-AccessMap (provisional name) gets a secure multi-tenant base: one user can sign up (first install only), receive a personal workspace, and create projects and assets stored in PostgreSQL.
+Hilko (provisional name) gets a secure multi-tenant base: one user can sign up (first install only), receive a personal workspace, and create projects and assets stored in PostgreSQL.
 
 ## Value
 
@@ -38,4 +38,4 @@ Proves workspace isolation, session auth, and real persistence before the larger
 
 ## Dependencies
 
-- Decisions in `product/plans/accessmap-phase-0/decisions/` (closed)
+- Decisions in `product/plans/hilko-phase-0/decisions/` (closed)

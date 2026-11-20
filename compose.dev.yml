@@ -1,16 +1,16 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     environment:
-      POSTGRES_USER: accessmap
-      POSTGRES_PASSWORD: accessmap_dev
-      POSTGRES_DB: accessmap
+      POSTGRES_USER: hilko
+      POSTGRES_PASSWORD: hilko_dev
+      POSTGRES_DB: hilko
     ports:
       - "5432:5432"
     volumes:
-      - accessmap_pg_dev:/var/lib/postgresql/data
+      - hilko_pg_dev:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U accessmap -d accessmap"]
+      test: ["CMD-SHELL", "pg_isready -U hilko -d hilko"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,4 +22,4 @@ services:
       - "1025:1025"
 
 volumes:
-  accessmap_pg_dev:
+  hilko_pg_dev:

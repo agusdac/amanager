@@ -9,4 +9,4 @@ Vertical slice: login → personal workspace → project → asset in PostgreSQL
 
 ## Features
 
-- [accessmap-phase-0](../features/accessmap-phase-0.md)
+- [hilko-phase-0](../features/hilko-phase-0.md)

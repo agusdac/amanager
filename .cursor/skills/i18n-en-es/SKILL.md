@@ -1,7 +1,7 @@
 ---
 name: i18n-en-es
 description: >-
-  AccessMap UI i18n (English default + Spanish). Use when adding pages, components,
+  Hilko UI i18n (English default + Spanish). Use when adding pages, components,
   validation messages, emails, or any user-visible string in the Nuxt app.
 ---
 # i18n: English + Spanish, no URL prefix

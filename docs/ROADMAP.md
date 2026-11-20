@@ -1,7 +1,7 @@
-# AccessMap — Roadmap de desarrollo
+# Hilko — Roadmap de desarrollo
 
-> **Nombre provisional:** AccessMap · **Repo:** `amanager`  
-> **Especificación:** [ACCESSMAP_SPEC_CURSOR.md](./ACCESSMAP_SPEC_CURSOR.md)  
+> **Nombre provisional:** Hilko · **Repo:** `amanager`  
+> **Especificación:** [HILKO_SPEC_CURSOR.md](./HILKO_SPEC_CURSOR.md)  
 > **Última actualización:** 2026-11-19 (v0.2)
 
 ## Visión del roadmap
@@ -58,7 +58,7 @@ Login → workspace personal → crear proyecto → crear un asset persistido en
 
 ## Fase 1 — Inventario usable (dogfood)
 
-**Pathfinder:** [product/plans/accessmap-phase-1/map.md](../product/plans/accessmap-phase-1/map.md) · contrato [product/specs/accessmap-phase-1.md](../product/specs/accessmap-phase-1.md) (v0.2.0).
+**Pathfinder:** [product/plans/hilko-phase-1/map.md](../product/plans/hilko-phase-1/map.md) · contrato [product/specs/hilko-phase-1.md](../product/specs/hilko-phase-1.md) (v0.2.0).
 
 **Objetivo:** inventario completo + onboarding + CSV; criterio **spec §26.A** y **§4.4**.
 
@@ -129,7 +129,7 @@ Clientes, permisos por cliente/proyecto, importación masiva, handover, escala (
 
 ## Fase 6 — Integraciones opt-in
 
-GitHub, Google Cloud (alcance mínimo), Cloudflare, AWS, DNS — solo lectura, consentimiento explícito. Login de AccessMap con Google ≠ inspección del inventario Google del usuario.
+GitHub, Google Cloud (alcance mínimo), Cloudflare, AWS, DNS — solo lectura, consentimiento explícito. Login de Hilko con Google ≠ inspección del inventario Google del usuario.
 
 ---
 

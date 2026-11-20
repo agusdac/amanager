@@ -1,12 +1,12 @@
 ---
 name: no-secrets
 description: >-
-  Enforce AccessMap metadata-only storage. Use when writing forms, CSV import/export,
+  Enforce Hilko metadata-only storage. Use when writing forms, CSV import/export,
   seeds, logs, API handlers, exports, config_entries, vault fields, or any user input.
 ---
-# No secrets in AccessMap
+# No secrets in Hilko
 
-**Principle:** metadata, not credentials. AccessMap is not a password manager.
+**Principle:** metadata, not credentials. Hilko is not a password manager.
 
 ## Never store, log, or export
 

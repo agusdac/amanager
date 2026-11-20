@@ -3,7 +3,7 @@ const { t } = useI18n()
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 
-const { data, pending } = await useFetch(() => `/api/identities/${id.value}`, { watch: [id] })
+const { data, pending, refresh } = await useFetch(() => `/api/identities/${id.value}`, { watch: [id] })
 
 const { data: assetList } = await useFetch('/api/assets?limit=100')
 const { data: identities } = await useFetch('/api/identities')
@@ -19,6 +19,10 @@ const impactIdentities = computed(() =>
 )
 
 const preselectIdentity = computed(() => id.value)
+
+const assetOptions = computed(() =>
+  (assetList.value?.assets ?? []).map((a: { id: string; name: string }) => ({ id: a.id, name: a.name })),
+)
 
 useAppPageTitle(
   computed(() =>
@@ -79,6 +83,18 @@ const identityTabs = computed(() => [
             </li>
           </ul>
           <p v-else class="mt-4 text-sm text-stone-500">{{ t('identityDetail.noAssets') }}</p>
+          <IdentityAccessForm :identity-id="id" @linked="refresh()" />
+          <div v-if="assetOptions.length" class="mt-6 border-t border-stone-100 pt-4">
+            <p class="text-sm font-medium text-stone-800">{{ t('identityDetail.openAssetAccess') }}</p>
+            <p class="mt-1 text-xs text-stone-500">{{ t('identityDetail.openAssetAccessHint') }}</p>
+            <ul class="mt-2 flex flex-wrap gap-2 text-sm">
+              <li v-for="a in assetOptions" :key="a.id">
+                <NuxtLink :to="`/assets/${a.id}?tab=access`" class="rounded-full bg-stone-100 px-3 py-1 text-stone-800 underline decoration-stone-300">
+                  {{ a.name }}
+                </NuxtLink>
+              </li>
+            </ul>
+          </div>
         </section>
       </template>
 

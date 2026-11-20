@@ -12,6 +12,7 @@ export default defineEventHandler(async (event) => {
   const search = (query.q as string | undefined)?.trim()
   const providerId = query.providerId as string | undefined
   const projectId = query.projectId as string | undefined
+  const verification = query.verification as string | undefined
 
   const db = useDb()
   let assetIds: string[] | undefined
@@ -28,6 +29,15 @@ export default defineEventHandler(async (event) => {
   }
 
   const filters = [eq(assets.workspaceId, session.workspaceId)]
+  if (verification === 'needs_confirmation') {
+    filters.push(inArray(assets.verificationStatus, ['unverified', 'declared']))
+  } else if (
+    verification === 'unverified' ||
+    verification === 'declared' ||
+    verification === 'confirmed_by_human'
+  ) {
+    filters.push(eq(assets.verificationStatus, verification))
+  }
   if (providerId) filters.push(eq(assets.providerId, providerId))
   if (assetIds) filters.push(inArray(assets.id, assetIds))
   if (search) {

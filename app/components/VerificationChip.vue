@@ -18,7 +18,7 @@ const tone = computed(() => {
     case 'confirmed':
       return 'border-emerald-200 bg-emerald-50 text-emerald-900'
     case 'unverified':
-      return 'border-amber-200 bg-amber-50 text-amber-950'
+      return 'border-stone-300 bg-stone-100 text-stone-700'
     default:
       return 'border-stone-200 bg-stone-100 text-stone-700'
   }

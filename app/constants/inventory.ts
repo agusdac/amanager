@@ -2,6 +2,8 @@ export const ASSET_TYPE_KEYS = [
   'service',
   'domain',
   'hosting',
+  'hosting_account',
+  'server',
   'repository',
   'dns',
   'email',
@@ -13,7 +15,25 @@ export const ASSET_TYPE_KEYS = [
   'mail_hosting',
   'object_storage',
   'transactional_email',
+  'payment_service',
+  'ai_service',
+  'password_manager',
+  'design_tool',
   'other',
+] as const
+
+/** Asset types that typically have vault/config secrets — show PM deep link field. */
+export const ASSET_TYPES_WITH_VAULT_HINT = [
+  'oauth_client',
+  'vps',
+  'server',
+  'hosting_account',
+  'repository',
+  'payment_service',
+  'ai_service',
+  'password_manager',
+  'domain',
+  'mail_hosting',
 ] as const
 
 export const CONFIG_ENTRY_KEY_PRESETS = [
@@ -42,6 +62,11 @@ export const RELATION_TYPE_KEYS = [
 ] as const
 
 export const ENVIRONMENT_KINDS = ['production', 'development', 'staging', 'other'] as const
+
+export const VERIFICATION_STATUS_KEYS = ['unverified', 'declared', 'confirmed_by_human'] as const
+
+/** Inventory items that still need a human confirmation pass. */
+export const NEEDS_CONFIRMATION_VERIFICATION_STATUSES = ['unverified', 'declared'] as const
 
 export const VERIFICATION_METHOD_KEYS = [
   'dns_txt',

@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ENVIRONMENT_KINDS, RELATION_TYPE_KEYS } from '~/constants/inventory'
+import { ASSET_TYPE_KEYS, ENVIRONMENT_KINDS, RELATION_TYPE_KEYS } from '~/constants/inventory'
 
-const ASSET_TYPES = ['service', 'domain', 'hosting', 'repository', 'dns', 'email', 'other'] as const
+const ASSET_TYPES = ASSET_TYPE_KEYS
 const ACCESS_ROLES = ['admin', 'operator', 'owner', 'developer', 'viewer', 'other'] as const
 
 const { t } = useI18n()
 const route = useRoute()
 const id = computed(() => String(route.params.id))
+const showSetupChecklist = computed(() => route.query.setup === '1')
 
 const { data, refresh, pending } = await useFetch(() => `/api/projects/${id.value}`, { watch: [id] })
 const { data: providers } = await useFetch('/api/providers')
@@ -30,12 +31,40 @@ const depFrom = ref('')
 const depTo = ref('')
 const depType = ref<(typeof RELATION_TYPE_KEYS)[number]>('depends_on')
 const depRemovingId = ref<string | null>(null)
+const depConfirmOpen = ref(false)
+const pendingDepId = ref<string | null>(null)
 
 const envName = ref('')
 const envKind = ref<(typeof ENVIRONMENT_KINDS)[number]>('development')
 const envError = ref('')
 const envLoading = ref(false)
 const envDeletingId = ref<string | null>(null)
+const envConfirmOpen = ref(false)
+const pendingEnvId = ref<string | null>(null)
+const envAssignLoading = ref<string | null>(null)
+
+const unassignedAssets = computed(() => (data.value?.assets ?? []).filter((a) => !a.environmentId))
+
+function assetsInEnvironment(envId: string) {
+  return (data.value?.assets ?? []).filter((a) => a.environmentId === envId)
+}
+
+async function assignAssetEnvironment(assetId: string, rawEnvId: string) {
+  envAssignLoading.value = assetId
+  try {
+    await $fetch('/api/project-assets', {
+      method: 'PATCH',
+      body: {
+        projectId: id.value,
+        assetId,
+        environmentId: rawEnvId || null,
+      },
+    })
+    await refresh()
+  } finally {
+    envAssignLoading.value = null
+  }
+}
 
 function resetAssetForm() {
   assetName.value = ''
@@ -60,14 +89,21 @@ async function addDependency() {
   await refresh()
 }
 
-async function removeDependency(dependencyId: string) {
-  if (!import.meta.client || !window.confirm(t('dependencies.confirmDelete'))) return
+function askRemoveDependency(dependencyId: string) {
+  pendingDepId.value = dependencyId
+  depConfirmOpen.value = true
+}
+
+async function confirmRemoveDependency() {
+  const dependencyId = pendingDepId.value
+  if (!dependencyId) return
   depRemovingId.value = dependencyId
   try {
     await $fetch(`/api/dependencies/${dependencyId}`, { method: 'DELETE' })
     await refresh()
   } finally {
     depRemovingId.value = null
+    pendingDepId.value = null
   }
 }
 
@@ -92,8 +128,14 @@ async function addEnvironment() {
   }
 }
 
-async function removeEnvironment(environmentId: string) {
-  if (!import.meta.client || !window.confirm(t('projects.confirmDeleteEnvironment'))) return
+function askRemoveEnvironment(environmentId: string) {
+  pendingEnvId.value = environmentId
+  envConfirmOpen.value = true
+}
+
+async function confirmRemoveEnvironment() {
+  const environmentId = pendingEnvId.value
+  if (!environmentId) return
   envDeletingId.value = environmentId
   envError.value = ''
   try {
@@ -103,6 +145,7 @@ async function removeEnvironment(environmentId: string) {
     envError.value = formatApiError(e) || t('projects.envDeleteError')
   } finally {
     envDeletingId.value = null
+    pendingEnvId.value = null
   }
 }
 
@@ -163,6 +206,28 @@ const assetNameById = computed(() => {
   return m
 })
 
+const pendingDepPreview = computed(() => {
+  const depId = pendingDepId.value
+  if (!depId) return null
+  const d = data.value?.dependencies?.find((row) => row.id === depId)
+  if (!d) return null
+  const names = assetNameById.value
+  return {
+    fromId: d.fromAssetId,
+    fromName: names.get(d.fromAssetId) ?? d.fromAssetId,
+    toId: d.toAssetId,
+    toName: names.get(d.toAssetId) ?? d.toAssetId,
+    relationType: d.relationType,
+    verificationStatus: d.verificationStatus,
+  }
+})
+
+const pendingEnvironment = computed(() => {
+  const envId = pendingEnvId.value
+  if (!envId) return null
+  return data.value?.environments?.find((env) => env.id === envId) ?? null
+})
+
 const projectTabs = computed(() => [
   { id: 'assets', label: t('tabs.projects.assets') },
   { id: 'environments', label: t('tabs.projects.environments') },
@@ -210,6 +275,37 @@ async function deleteProject() {
 <template>
   <div v-if="pending" class="text-stone-600">{{ t('common.loading') }}</div>
   <div v-else-if="data?.project" class="space-y-8">
+    <AppConfirmDialog
+      v-model:open="depConfirmOpen"
+      :title="t('dependencies.confirmRemoveTitle')"
+      :description="t('dependencies.confirmRemoveDescription')"
+      :confirm-label="t('dependencies.remove')"
+      @confirm="confirmRemoveDependency"
+    >
+      <div
+        v-if="pendingDepPreview"
+        class="rounded-lg border border-stone-200 bg-stone-50/90 px-3 py-2.5"
+      >
+        <DependencyListRow v-bind="pendingDepPreview" compact />
+      </div>
+    </AppConfirmDialog>
+    <AppConfirmDialog
+      v-model:open="envConfirmOpen"
+      :title="t('projects.confirmRemoveEnvironmentTitle')"
+      :description="t('projects.confirmRemoveEnvironmentDescription')"
+      :confirm-label="t('projects.deleteEnvironment')"
+      @confirm="confirmRemoveEnvironment"
+    >
+      <p
+        v-if="pendingEnvironment"
+        class="rounded-lg border border-stone-200 bg-stone-50/90 px-3 py-2.5 text-sm font-medium text-stone-900"
+      >
+        {{ pendingEnvironment.name }}
+        <span class="font-normal text-stone-500">
+          ({{ t(`projects.envKinds.${pendingEnvironment.kind}`) }})
+        </span>
+      </p>
+    </AppConfirmDialog>
     <header class="space-y-1">
       <h1 class="page-title">{{ data.project.name }}</h1>
       <p v-if="data.project.description" class="text-stone-600">{{ data.project.description }}</p>
@@ -223,6 +319,8 @@ async function deleteProject() {
         {{ data.project.websiteUrl }}
       </a>
     </header>
+
+    <ProjectSetupChecklist v-if="showSetupChecklist" :project-id="id" />
 
     <AppDetailTabs :tabs="projectTabs" default-tab="assets">
       <template #assets>
@@ -248,7 +346,7 @@ async function deleteProject() {
         class="card space-y-4 p-5"
         @submit.prevent="createAsset"
       >
-        <div class="grid gap-4 sm:grid-cols-2">
+        <div class="form-grid">
           <label class="block text-sm sm:col-span-2">
             <span class="label">{{ t('assets.name') }}</span>
             <input v-model="assetName" required class="field mt-1.5" />
@@ -351,10 +449,21 @@ async function deleteProject() {
             </span>
             <VerificationChip :status="asset.verificationStatus" />
           </div>
-          <p class="text-sm text-stone-600">
-            <span v-if="asset.providerName">{{ asset.providerName }}</span>
-            <span v-if="asset.environmentName" class="ml-2">· {{ asset.environmentName }}</span>
-          </p>
+          <p v-if="asset.providerName" class="text-sm text-stone-600">{{ asset.providerName }}</p>
+          <label class="mt-2 block max-w-sm text-xs">
+            <span class="font-medium text-stone-500">{{ t('assets.environment') }}</span>
+            <select
+              class="field mt-1 text-sm"
+              :value="asset.environmentId ?? ''"
+              :disabled="envAssignLoading === asset.id"
+              @change="assignAssetEnvironment(asset.id, ($event.target as HTMLSelectElement).value)"
+            >
+              <option value="">{{ t('assets.environmentAny') }}</option>
+              <option v-for="env in data.environments" :key="env.id" :value="env.id">
+                {{ env.name }} ({{ t(`projects.envKinds.${env.kind}`) }})
+              </option>
+            </select>
+          </label>
           <p v-if="asset.roles?.length" class="text-sm text-stone-600">
             <span class="font-medium text-stone-500">{{ t('assets.linkedIdentities') }}:</span>
             <span v-for="(role, ri) in asset.roles" :key="ri" class="ml-1">
@@ -402,27 +511,62 @@ async function deleteProject() {
             </button>
           </form>
           <p v-if="envError" class="error-text">{{ envError }}</p>
-          <ul v-if="data.environments?.length" class="list-card text-sm">
+          <p class="text-sm text-stone-600">{{ t('projects.environmentsHint') }}</p>
+          <ul v-if="data.environments?.length" class="space-y-4">
             <li
               v-for="env in data.environments"
               :key="env.id"
-              class="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+              class="list-card text-sm"
             >
-              <span>
-                <span class="font-medium text-stone-900">{{ env.name }}</span>
-                <span class="ml-2 text-stone-500">({{ t(`projects.envKinds.${env.kind}`) }})</span>
-              </span>
-              <button
-                type="button"
-                class="text-xs font-medium text-red-700 hover:underline"
-                :disabled="envDeletingId === env.id"
-                @click="removeEnvironment(env.id)"
-              >
-                {{ t('projects.deleteEnvironment') }}
-              </button>
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 px-4 py-3">
+                <span>
+                  <span class="font-medium text-stone-900">{{ env.name }}</span>
+                  <span class="ml-2 text-stone-500">({{ t(`projects.envKinds.${env.kind}`) }})</span>
+                  <span class="ml-2 text-xs text-stone-400">
+                    {{ t('projects.envAssetCount', { count: assetsInEnvironment(env.id).length }) }}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  class="text-xs font-medium text-red-800 hover:underline"
+                  :disabled="envDeletingId === env.id"
+                  @click="askRemoveEnvironment(env.id)"
+                >
+                  {{ t('projects.deleteEnvironment') }}
+                </button>
+              </div>
+              <ul v-if="assetsInEnvironment(env.id).length" class="divide-y divide-stone-100">
+                <li
+                  v-for="asset in assetsInEnvironment(env.id)"
+                  :key="asset.id"
+                  class="flex flex-wrap items-center justify-between gap-2 px-4 py-2"
+                >
+                  <NuxtLink :to="`/assets/${asset.id}`" class="font-medium text-stone-900 hover:underline">
+                    {{ asset.name }}
+                  </NuxtLink>
+                  <AssetTypeLabel :type="asset.type" :provider-slug="asset.providerSlug" />
+                </li>
+              </ul>
+              <p v-else class="px-4 py-3 text-xs text-stone-500">{{ t('projects.envNoAssets') }}</p>
             </li>
           </ul>
           <p v-else class="lede">{{ t('projects.noEnvironments') }}</p>
+          <section v-if="unassignedAssets.length" class="callout callout-neutral">
+            <p class="text-sm font-medium text-stone-800">{{ t('projects.unassignedAssetsTitle') }}</p>
+            <p class="mt-1 text-xs text-stone-600">{{ t('projects.unassignedAssetsHint') }}</p>
+            <ul class="mt-3 space-y-1 text-sm">
+              <li v-for="asset in unassignedAssets" :key="asset.id" class="flex flex-wrap items-center gap-2">
+                <NuxtLink :to="`/assets/${asset.id}`" class="font-medium underline">{{ asset.name }}</NuxtLink>
+                <select
+                  class="field max-w-[12rem] py-1 text-xs"
+                  @change="assignAssetEnvironment(asset.id, ($event.target as HTMLSelectElement).value)"
+                >
+                  <option value="">{{ t('projects.assignEnvironment') }}</option>
+                  <option v-for="env in data.environments" :key="env.id" :value="env.id">{{ env.name }}</option>
+                </select>
+              </li>
+            </ul>
+          </section>
         </div>
       </template>
 
@@ -455,21 +599,17 @@ async function deleteProject() {
         <button type="submit" class="btn-secondary">{{ t('common.add') }}</button>
       </form>
       <ul v-if="data.dependencies?.length" class="list-card text-sm">
-        <li v-for="d in data.dependencies" :key="d.id" class="flex flex-wrap items-center gap-2 px-4 py-2">
-          <span class="font-medium text-stone-800">{{ assetNameById.get(d.fromAssetId) ?? d.fromAssetId }}</span>
-          <span class="text-stone-400" aria-hidden="true">→</span>
-          <span class="font-medium text-stone-800">{{ assetNameById.get(d.toAssetId) ?? d.toAssetId }}</span>
-          <span class="text-stone-500">·</span>
-          <span class="text-stone-600">{{ t(`dependencies.relationTypes.${d.relationType}`) }}</span>
-          <VerificationChip :status="d.verificationStatus" />
-          <button
-            type="button"
-            class="ml-auto text-xs font-medium text-red-700 hover:underline disabled:opacity-50"
-            :disabled="depRemovingId === d.id"
-            @click="removeDependency(d.id)"
-          >
-            {{ t('dependencies.remove') }}
-          </button>
+        <li v-for="d in data.dependencies" :key="d.id" class="px-4 py-3">
+          <DependencyListRow
+            :from-id="d.fromAssetId"
+            :from-name="assetNameById.get(d.fromAssetId) ?? d.fromAssetId"
+            :to-id="d.toAssetId"
+            :to-name="assetNameById.get(d.toAssetId) ?? d.toAssetId"
+            :relation-type="d.relationType"
+            :verification-status="d.verificationStatus"
+            :removing="depRemovingId === d.id"
+            @remove="askRemoveDependency(d.id)"
+          />
         </li>
       </ul>
       <p v-else-if="data.assets?.length" class="lede">{{ t('projects.noDependencies') }}</p>
@@ -477,53 +617,46 @@ async function deleteProject() {
       </template>
 
       <template #danger>
-    <section class="rounded-xl border border-red-200 bg-red-50/50 p-5">
-      <h2 class="text-lg font-medium text-red-900">{{ t('projects.deleteTitle') }}</h2>
-      <p class="mt-1 text-sm text-red-800/90">{{ t('projects.deleteHint') }}</p>
-      <button
-        v-if="!showDeleteConfirm"
-        type="button"
-        class="mt-4 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50"
-        @click="showDeleteConfirm = true"
-      >
-        {{ t('projects.deleteProject') }}
-      </button>
-      <form v-else class="mt-4 max-w-md space-y-3" @submit.prevent="deleteProject">
-        <label class="block text-sm">
-          <span class="font-medium text-red-900">{{ t('projects.deleteConfirmLabel') }}</span>
-          <input
-            v-model="deleteConfirmName"
-            type="text"
-            :placeholder="data.project.name"
-            class="mt-1 w-full rounded-lg border border-red-200 bg-white px-3 py-2"
-            autocomplete="off"
-          />
-        </label>
-        <p v-if="deleteError" class="text-sm text-red-700">{{ deleteError }}</p>
-        <div class="flex flex-wrap gap-2">
-          <button
-            type="submit"
-            class="rounded-lg bg-red-800 px-4 py-2 text-sm text-white disabled:opacity-50"
-            :disabled="!canDelete || deleteLoading"
-          >
-            {{ t('projects.deleteConfirmButton') }}
+        <AppDangerZone :title="t('projects.deleteTitle')" :description="t('projects.deleteHint')">
+          <button v-if="!showDeleteConfirm" type="button" class="btn-danger" @click="showDeleteConfirm = true">
+            {{ t('projects.deleteProject') }}
           </button>
-          <button
-            type="button"
-            class="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm"
-            @click="
-              () => {
-                showDeleteConfirm = false
-                deleteConfirmName = ''
-                deleteError = ''
-              }
-            "
-          >
-            {{ t('common.cancel') }}
-          </button>
-        </div>
-      </form>
-    </section>
+          <form v-else class="max-w-md space-y-3" @submit.prevent="deleteProject">
+            <label class="block text-sm">
+              <span class="label">{{ t('projects.deleteConfirmLabel') }}</span>
+              <input
+                v-model="deleteConfirmName"
+                type="text"
+                :placeholder="data.project.name"
+                class="field mt-1.5"
+                autocomplete="off"
+              />
+            </label>
+            <p v-if="deleteError" class="error-text">{{ deleteError }}</p>
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="submit"
+                class="btn-danger-primary"
+                :disabled="!canDelete || deleteLoading"
+              >
+                {{ t('projects.deleteConfirmButton') }}
+              </button>
+              <button
+                type="button"
+                class="btn-secondary"
+                @click="
+                  () => {
+                    showDeleteConfirm = false
+                    deleteConfirmName = ''
+                    deleteError = ''
+                  }
+                "
+              >
+                {{ t('common.cancel') }}
+              </button>
+            </div>
+          </form>
+        </AppDangerZone>
       </template>
     </AppDetailTabs>
   </div>

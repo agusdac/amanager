@@ -17,6 +17,7 @@ export default defineEventHandler(async (event) => {
       step: parsed.data.step,
       payloadJson: parsed.data.payload,
       updatedAt: new Date(),
+      completedAt: null,
     })
     .onConflictDoUpdate({
       target: onboardingDrafts.workspaceId,
@@ -24,6 +25,7 @@ export default defineEventHandler(async (event) => {
         step: parsed.data.step,
         payloadJson: parsed.data.payload,
         updatedAt: new Date(),
+        completedAt: null,
       },
     })
     .returning()

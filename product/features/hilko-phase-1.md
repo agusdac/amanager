@@ -1,4 +1,4 @@
-# accessmap-phase-1 — Inventory (dogfood)
+# hilko-phase-1 — Inventory (dogfood)
 
 ## Version
 
@@ -6,9 +6,9 @@
 
 ## Plan
 
-- [Map](../plans/accessmap-phase-1/map.md)
-- [Slim spec](../specs/accessmap-phase-1.md)
-- [Phase 0 prerequisite](../features/accessmap-phase-0.md)
+- [Map](../plans/hilko-phase-1/map.md)
+- [Slim spec](../specs/hilko-phase-1.md)
+- [Phase 0 prerequisite](../features/hilko-phase-0.md)
 
 ## Description
 
@@ -45,5 +45,5 @@ Validates the core product hypothesis: a single place to see **what account cont
 
 ## Dependencies
 
-- accessmap-phase-0 (auth, workspace, minimal project/asset)
-- Closed decisions in `product/plans/accessmap-phase-1/decisions/`
+- hilko-phase-0 (auth, workspace, minimal project/asset)
+- Closed decisions in `product/plans/hilko-phase-1/decisions/`

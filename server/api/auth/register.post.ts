@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
         process.env.NODE_ENV !== 'production'
           ? {
               hint:
-                'AccessMap allows self-registration only for the first account (owner). Sign in if you already have one, set NUXT_ALLOW_SIGNUP=true in .env and restart dev for extra accounts, or remove stray users from the DB if you are bootstrapping locally.',
+                'Hilko allows self-registration only for the first account (owner). Sign in if you already have one, set NUXT_ALLOW_SIGNUP=true in .env and restart dev for extra accounts, or remove stray users from the DB if you are bootstrapping locally.',
             }
           : undefined,
     })
@@ -39,12 +39,16 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const localeCookie = getCookie(event, 'i18n_locale')
+    const locale = localeCookie === 'es' ? 'es' : 'en'
+
     const [user] = await db
       .insert(users)
       .values({
         email: parsed.data.email.toLowerCase(),
         passwordHash,
         name: parsed.data.name,
+        locale,
       })
       .returning()
 

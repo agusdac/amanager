@@ -10,7 +10,7 @@ Personal workspace inventory: identities, emails, provider accounts, assets, dep
 
 ## Features
 
-- [accessmap-phase-1](../features/accessmap-phase-1.md)
+- [hilko-phase-1](../features/hilko-phase-1.md)
 
 ## Out of scope (F2+)
 

@@ -106,6 +106,7 @@ export default defineEventHandler(async (event) => {
     ...row.asset,
     providerName: row.providerName,
     providerSlug: row.providerSlug,
+    environmentId: row.environmentId,
     environmentName: row.environmentId ? (envById.get(row.environmentId) ?? null) : null,
     roles: rolesByAsset.get(row.asset.id) ?? [],
     emails: emailsByAsset.get(row.asset.id) ?? [],
