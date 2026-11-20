@@ -91,6 +91,8 @@ Inventariar el demo Northline (manual, wizard o CSV) y responder las 10 pregunta
 
 ## Fase 2 — Runbooks y README
 
+Contrato: [product/v0.3.0/overview.md](../product/v0.3.0/overview.md) · OR-2a…OR-2g en [spec](../product/specs/hilko-phase-2.md).
+
 Copiar salidas de spec §21:
 
 - Plantillas de setup (≥3)
@@ -98,7 +100,7 @@ Copiar salidas de spec §21:
 - Pasos con DAG, ejecución manual, historial
 - Export Markdown en locale activo
 
-**Salida:** README de incorporación útil para Mini Críptico (sin contraseñas ni pasos inventados).
+**Salida:** README de incorporación útil para Northline (sin contraseñas ni pasos inventados); checklist §4.4 q9 in-app.
 
 ---
 

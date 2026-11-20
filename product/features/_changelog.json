@@ -1,8 +1,14 @@
 {
+  "v0.3.0": {
+    "status": "unreleased",
+    "date": null,
+    "theme": "Runbooks & setup README export",
+    "features": ["hilko-phase-2"]
+  },
   "v0.2.0": {
     "status": "unreleased",
     "date": null,
-    "theme": "Inventory — dogfood Mini Críptico",
+    "theme": "Inventory — dogfood Northline",
     "features": ["hilko-phase-1"]
   },
   "v0.1.0": {
