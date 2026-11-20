@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { ASSET_TYPE_KEYS } from '~/constants/inventory'
 import { onboardingDefaultForProvider, suggestOnboardingDependencies } from '~/constants/onboardingDefaults'
+import { compareOnboardingProviderCategories } from '~/constants/onboardingProviderLayout'
 
-const ASSET_TYPES = ASSET_TYPE_KEYS
 import { ONBOARDING_MAX_STEP } from '~/constants/onboarding'
+import type {
+  OnboardingResourceDraft,
+  PriorIdentityOption,
+} from '~/components/onboarding/OnboardingResourceStep.vue'
 
 const TOTAL_STEPS = ONBOARDING_MAX_STEP
 
@@ -13,32 +16,10 @@ type ProviderRow = {
   category: string | null
 }
 
-type IdentityDraft = {
-  label: string
-  providerSlug: string
-  unsure: boolean
-  loginEmail: string
-}
-
-type AccessLinkDraft = {
-  identityLabel: string
-  providerSlug: string
-  roleType: string
-  enabled: boolean
-}
-
 type DependencyDraft = {
   fromProviderSlug: string
   toProviderSlug: string
   relationType: string
-  enabled: boolean
-}
-
-type AssetDraft = {
-  name: string
-  type: string
-  providerSlug: string
-  unsure: boolean
   enabled: boolean
 }
 
@@ -62,20 +43,41 @@ const websiteDomainUnverified = ref(false)
 const description = ref('')
 const selectedProviders = ref<string[]>([])
 const providerSearch = ref('')
-const identityDrafts = ref<IdentityDraft[]>([])
-const assetDrafts = ref<AssetDraft[]>([])
-const accessLinks = ref<AccessLinkDraft[]>([])
+const resourceDrafts = ref<OnboardingResourceDraft[]>([])
 const dependencyDrafts = ref<DependencyDraft[]>([])
+const resourceCursor = ref(0)
 
 const stepNavLabels = computed(() => [
   t('onboarding.navWelcome'),
   t('onboarding.navProject'),
   t('onboarding.navTools'),
-  t('onboarding.navAccounts'),
   t('onboarding.navAssets'),
   t('onboarding.navConnections'),
   t('onboarding.navReview'),
 ])
+
+const activeResourceDrafts = computed(() => resourceDrafts.value.filter((r) => r.enabled))
+
+const continueLabel = computed(() => {
+  if (step.value === 4 && resourceCursor.value < resourceDrafts.value.length - 1) {
+    return t('onboarding.assetAccessNextResource')
+  }
+  return t('onboarding.continue')
+})
+
+const resourceStepperLabels = computed(() =>
+  resourceDrafts.value.map((r) => {
+    if (r.name.trim()) return r.name.trim()
+    if (r.providerSlug) return providerDisplayName(r.providerSlug)
+    return t('onboarding.customResource')
+  }),
+)
+
+async function goToResourceIndex(index: number) {
+  if (index < 0 || index >= resourceDrafts.value.length || index === resourceCursor.value) return
+  resourceCursor.value = index
+  await saveDraft()
+}
 
 const providerList = computed(() => (providers.value?.providers ?? []) as ProviderRow[])
 
@@ -98,13 +100,89 @@ const groupedProviders = computed(() => {
     list.push(p)
     groups.set(cat, list)
   }
-  return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b))
+  return [...groups.entries()]
+    .sort(([a], [b]) => compareOnboardingProviderCategories(a, b))
+    .map(([category, items]) => [
+      category,
+      [...items].sort((a, b) => a.name.localeCompare(b.name)),
+    ] as const)
 })
 
 function categoryLabel(category: string) {
   const key = `onboarding.categories.${category}` as const
   const translated = t(key)
   return translated !== key ? translated : category
+}
+
+function providerDisplayName(slug: string) {
+  return providerBySlug.value.get(slug)?.name ?? slug
+}
+
+function identityRefFor(r: OnboardingResourceDraft) {
+  return `${r.identityLabel.trim()}\0${r.providerSlug}`
+}
+
+function defaultResourceForProvider(slug: string): OnboardingResourceDraft {
+  const defaults = onboardingDefaultForProvider(slug)
+  return {
+    key: slug,
+    providerSlug: slug,
+    name: t(defaults.assetNameKey),
+    type: defaults.assetType,
+    enabled: true,
+    identitySource: 'new',
+    identityRef: '',
+    identityLabel: defaultIdentityLabel(slug),
+    loginEmail: '',
+    roleType: 'admin',
+    verificationStatus: 'declared',
+    linkLoginEmail: false,
+  }
+}
+
+function newCustomResource(): OnboardingResourceDraft {
+  return {
+    key: `custom-${crypto.randomUUID()}`,
+    providerSlug: '',
+    name: '',
+    type: 'other',
+    enabled: true,
+    identitySource: 'new',
+    identityRef: '',
+    identityLabel: '',
+    loginEmail: '',
+    roleType: 'admin',
+    verificationStatus: 'declared',
+    linkLoginEmail: false,
+  }
+}
+
+function migrateLegacyResourcePayload(p: Record<string, unknown>): OnboardingResourceDraft[] | null {
+  if (Array.isArray(p.resourceDrafts)) return p.resourceDrafts as OnboardingResourceDraft[]
+  const assets = Array.isArray(p.assetDrafts) ? (p.assetDrafts as Record<string, unknown>[]) : []
+  const setups = Array.isArray(p.assetSetupDrafts) ? (p.assetSetupDrafts as Record<string, unknown>[]) : []
+  const identities = Array.isArray(p.identityDrafts) ? (p.identityDrafts as Record<string, unknown>[]) : []
+  if (!assets.length && !setups.length) return null
+  return assets.map((a) => {
+    const slug = String(a.providerSlug ?? '')
+    const setup = setups.find((s) => s.providerSlug === slug)
+    const id = identities.find((i) => i.providerSlug === slug && !i.unsure)
+    return {
+      key: slug || `custom-${crypto.randomUUID()}`,
+      providerSlug: slug,
+      name: String(a.name ?? ''),
+      type: String(a.type ?? 'service'),
+      enabled: a.enabled !== false,
+      identitySource: 'new' as const,
+      identityRef: '',
+      identityLabel: String(id?.label ?? setup?.identityLabel ?? ''),
+      loginEmail: String(id?.loginEmail ?? ''),
+      roleType: (setup?.roleType as OnboardingResourceDraft['roleType']) ?? 'admin',
+      verificationStatus:
+        (setup?.verificationStatus as OnboardingResourceDraft['verificationStatus']) ?? 'declared',
+      linkLoginEmail: Boolean(setup?.linkLoginEmail),
+    }
+  })
 }
 
 function applyDraftFromServer() {
@@ -131,25 +209,14 @@ function applyDraftFromServer() {
   if (Array.isArray(p.selectedProviders)) {
     selectedProviders.value = p.selectedProviders.map(String)
   }
-  if (Array.isArray(p.identityDrafts)) {
-    identityDrafts.value = (p.identityDrafts as Partial<IdentityDraft>[]).map((i) => ({
-      label: String(i.label ?? ''),
-      providerSlug: String(i.providerSlug ?? ''),
-      unsure: Boolean(i.unsure),
-      loginEmail: typeof i.loginEmail === 'string' ? i.loginEmail : '',
-    }))
-  }
-  if (Array.isArray(p.assetDrafts)) {
-    assetDrafts.value = (p.assetDrafts as Partial<AssetDraft>[]).map((a) => ({
-      name: String(a.name ?? ''),
-      type: String(a.type ?? 'service'),
-      providerSlug: String(a.providerSlug ?? ''),
-      unsure: Boolean(a.unsure),
-      enabled: a.enabled ?? true,
-    }))
-  }
-  if (Array.isArray(p.accessLinks)) accessLinks.value = p.accessLinks as AccessLinkDraft[]
+  const migrated = migrateLegacyResourcePayload(p)
+  if (migrated) resourceDrafts.value = migrated
   if (Array.isArray(p.dependencyDrafts)) dependencyDrafts.value = p.dependencyDrafts as DependencyDraft[]
+  if (typeof p.resourceCursor === 'number') {
+    resourceCursor.value = Math.max(0, p.resourceCursor)
+  } else if (typeof p.assetSetupCursor === 'number') {
+    resourceCursor.value = Math.max(0, p.assetSetupCursor)
+  }
 }
 
 watch(
@@ -168,10 +235,9 @@ watch(
     websiteDomainUnverified: websiteDomainUnverified.value,
     description: description.value,
     selectedProviders: selectedProviders.value,
-    identityDrafts: identityDrafts.value,
-    assetDrafts: assetDrafts.value,
-    accessLinks: accessLinks.value,
+    resourceDrafts: resourceDrafts.value,
     dependencyDrafts: dependencyDrafts.value,
+    resourceCursor: resourceCursor.value,
   }),
   () => {
     if (step.value < 2) return
@@ -200,66 +266,119 @@ function roleHintKey(slug: string) {
   return onboardingDefaultForProvider(slug).roleHintKey
 }
 
-function syncIdentityDraftsFromProviders() {
-  const slugs = selectedProviders.value
-  const bySlug = new Map(identityDrafts.value.filter((i) => i.providerSlug).map((i) => [i.providerSlug, i]))
-  const customs = identityDrafts.value.filter((i) => !i.providerSlug)
-  const next: IdentityDraft[] = []
-  for (const slug of slugs) {
-    next.push(
-      bySlug.get(slug) ?? {
-        label: defaultIdentityLabel(slug),
-        providerSlug: slug,
-        unsure: false,
-        loginEmail: '',
-      },
-    )
+function syncResourceDraftsFromProviders() {
+  const customs = resourceDrafts.value.filter((r) => r.key.startsWith('custom-'))
+  const byKey = new Map(resourceDrafts.value.map((r) => [r.key, r]))
+  const fromProviders = selectedProviders.value.map(
+    (slug) => byKey.get(slug) ?? defaultResourceForProvider(slug),
+  )
+  resourceDrafts.value = [...fromProviders, ...customs]
+  if (!resourceDrafts.value.length) {
+    resourceDrafts.value.push(newCustomResource())
   }
-  identityDrafts.value = [...next, ...customs]
-  if (!identityDrafts.value.length) {
-    identityDrafts.value.push({ label: '', providerSlug: '', unsure: false, loginEmail: '' })
+  if (resourceCursor.value >= resourceDrafts.value.length) {
+    resourceCursor.value = Math.max(0, resourceDrafts.value.length - 1)
   }
 }
 
-function syncAssetDraftsFromProviders() {
-  const slugs = selectedProviders.value
-  const bySlug = new Map(assetDrafts.value.map((a) => [a.providerSlug, a]))
-  const next: AssetDraft[] = []
-  for (const slug of slugs) {
-    const defaults = onboardingDefaultForProvider(slug)
-    const existing = bySlug.get(slug)
-    next.push(
-      existing ?? {
-        name: t(defaults.assetNameKey, { project: projectName.value.trim() || t('onboarding.sampleProject') }),
-        type: defaults.assetType,
-        providerSlug: slug,
-        unsure: false,
-        enabled: true,
-      },
-    )
-  }
-  assetDrafts.value = next
+function patchResource(key: string, patch: Partial<OnboardingResourceDraft>) {
+  const idx = resourceDrafts.value.findIndex((r) => r.key === key)
+  if (idx < 0) return
+  resourceDrafts.value[idx] = { ...resourceDrafts.value[idx], ...patch }
 }
 
-function syncAccessLinkDrafts() {
-  const next: AccessLinkDraft[] = []
-  for (const id of identityDrafts.value) {
-    if (id.unsure || !id.label.trim() || !id.providerSlug) continue
-    const asset = assetDrafts.value.find((a) => a.providerSlug === id.providerSlug && a.enabled)
-    if (!asset) continue
-    const existing = accessLinks.value.find(
-      (l) => l.identityLabel === id.label && l.providerSlug === id.providerSlug,
-    )
-    next.push(
-      existing ?? {
-        identityLabel: id.label,
-        providerSlug: id.providerSlug,
-        roleType: 'admin',
-        enabled: true,
-      },
-    )
+function priorIdentitiesForIndex(index: number): PriorIdentityOption[] {
+  const seen = new Map<string, PriorIdentityOption>()
+  for (let i = 0; i < index; i++) {
+    const r = resourceDrafts.value[i]
+    if (!r?.enabled || !r.identityLabel.trim()) continue
+    const ref = identityRefFor(r)
+    seen.set(ref, {
+      ref,
+      label: r.identityLabel.trim(),
+      providerSlug: r.providerSlug,
+      loginEmail: r.loginEmail,
+      fromResourceName: r.name.trim() || providerDisplayName(r.providerSlug),
+    })
   }
-  accessLinks.value = next
+  return [...seen.values()]
+}
+
+function copyPreviousResource() {
+  const cur = resourceCursor.value
+  if (cur < 1) return
+  const prev = resourceDrafts.value[cur - 1]
+  const row = resourceDrafts.value[cur]
+  if (!prev || !row) return
+  patchResource(row.key, {
+    identitySource: prev.identitySource,
+    identityRef: prev.identityRef,
+    identityLabel: prev.identityLabel,
+    loginEmail: prev.loginEmail,
+    roleType: prev.roleType,
+    verificationStatus: prev.verificationStatus,
+    linkLoginEmail: prev.linkLoginEmail,
+  })
+}
+
+function applyVerifyDeclaredToRemaining() {
+  for (let i = resourceCursor.value; i < resourceDrafts.value.length; i++) {
+    resourceDrafts.value[i] = { ...resourceDrafts.value[i], verificationStatus: 'declared' }
+  }
+}
+
+function applyVerifyConfirmedToRemaining() {
+  for (let i = resourceCursor.value; i < resourceDrafts.value.length; i++) {
+    resourceDrafts.value[i] = { ...resourceDrafts.value[i], verificationStatus: 'confirmed_by_human' }
+  }
+}
+
+function addCustomResource() {
+  resourceDrafts.value.push(newCustomResource())
+}
+
+function removeCurrentCustomResource() {
+  const row = resourceDrafts.value[resourceCursor.value]
+  if (!row?.key.startsWith('custom-')) return
+  resourceDrafts.value.splice(resourceCursor.value, 1)
+  if (!resourceDrafts.value.length) resourceDrafts.value.push(newCustomResource())
+  resourceCursor.value = Math.min(resourceCursor.value, resourceDrafts.value.length - 1)
+}
+
+function buildFinalizeBundles() {
+  const enabled = resourceDrafts.value.filter((r) => r.enabled && r.name.trim())
+  const identitySeen = new Set<string>()
+  const identities: { label: string; providerSlug: string; unsure: boolean; loginEmail: string }[] = []
+  for (const r of enabled) {
+    if (!r.identityLabel.trim()) continue
+    const ref = identityRefFor(r)
+    if (identitySeen.has(ref)) continue
+    identitySeen.add(ref)
+    identities.push({
+      label: r.identityLabel.trim(),
+      providerSlug: r.providerSlug,
+      unsure: false,
+      loginEmail: r.loginEmail.trim(),
+    })
+  }
+  const assets = enabled.map((r) => ({
+    draftKey: r.key,
+    name: r.name.trim(),
+    type: r.type,
+    providerSlug: r.providerSlug || null,
+    unsure: false,
+  }))
+  const assetSetups = enabled
+    .filter((r) => r.identityLabel.trim())
+    .map((r) => ({
+      draftKey: r.key,
+      providerSlug: r.providerSlug || undefined,
+      identityLabel: r.identityLabel.trim(),
+      roleType: r.roleType,
+      verificationStatus: r.verificationStatus,
+      linkLoginEmail: r.linkLoginEmail,
+    }))
+  return { identities, assets, assetSetups }
 }
 
 function syncDependencyDrafts() {
@@ -295,10 +414,9 @@ async function saveDraft(): Promise<boolean> {
           websiteDomainUnverified: websiteDomainUnverified.value,
           description: description.value,
           selectedProviders: selectedProviders.value,
-          identityDrafts: identityDrafts.value,
-          assetDrafts: assetDrafts.value,
-          accessLinks: accessLinks.value,
+          resourceDrafts: resourceDrafts.value,
           dependencyDrafts: dependencyDrafts.value,
+          resourceCursor: resourceCursor.value,
         },
       },
     })
@@ -324,25 +442,71 @@ function validateStep(): boolean {
 
 async function goNext() {
   if (!validateStep()) return
-  if (step.value === 3) syncIdentityDraftsFromProviders()
-  if (step.value === 4) syncAssetDraftsFromProviders()
-  if (step.value === 5) {
-    syncAccessLinkDrafts()
-    syncDependencyDrafts()
+  if (step.value === 3) {
+    syncResourceDraftsFromProviders()
+    resourceCursor.value = 0
   }
+  if (step.value === 4 && resourceCursor.value < resourceDrafts.value.length - 1) {
+    if (!(await saveDraft())) return
+    resourceCursor.value++
+    return
+  }
+  if (step.value === 4) syncDependencyDrafts()
   if (!(await saveDraft())) return
   if (step.value < TOTAL_STEPS) step.value++
 }
 
 async function goBack() {
   stepError.value = ''
+  if (step.value === 4 && resourceCursor.value > 0) {
+    if (!(await saveDraft())) return
+    resourceCursor.value--
+    return
+  }
   if (!(await saveDraft())) return
   if (step.value > 1) step.value--
+  if (step.value === 4) {
+    resourceCursor.value = Math.max(0, resourceDrafts.value.length - 1)
+  }
+}
+
+const FIRST_STEP_NEEDING_PROJECT = 3
+
+function canNavigateToStep(target: number) {
+  if (target < 1 || target > TOTAL_STEPS) return false
+  if (target === step.value) return false
+  if (target < step.value) return true
+  if (target >= FIRST_STEP_NEEDING_PROJECT && !projectName.value.trim()) return false
+  return true
+}
+
+function navigateBlockReason(target: number) {
+  if (target >= FIRST_STEP_NEEDING_PROJECT && !projectName.value.trim() && target > step.value) {
+    return t('onboarding.stepNavNeedProject')
+  }
+  return null
+}
+
+async function goToStep(target: number) {
+  if (!canNavigateToStep(target)) return
+  stepError.value = ''
+  if (target > step.value) {
+    if (target >= 4 && step.value < 4) {
+      syncResourceDraftsFromProviders()
+      resourceCursor.value = 0
+    }
+    if (target >= 5 && step.value < 5) syncDependencyDrafts()
+  }
+  step.value = target
+  if (target === 4) syncResourceDraftsFromProviders()
+  if (target < 4) resourceCursor.value = 0
+  await saveDraft()
 }
 
 async function skipTools() {
   stepError.value = ''
-  syncIdentityDraftsFromProviders()
+  syncResourceDraftsFromProviders()
+  resourceCursor.value = 0
   step.value = 4
   await saveDraft()
 }
@@ -352,17 +516,6 @@ function toggleProvider(slug: string) {
     selectedProviders.value = selectedProviders.value.filter((s) => s !== slug)
   } else {
     selectedProviders.value = [...selectedProviders.value, slug]
-  }
-}
-
-function addIdentityRow() {
-  identityDrafts.value.push({ label: '', providerSlug: '', unsure: false })
-}
-
-function removeIdentityRow(index: number) {
-  identityDrafts.value.splice(index, 1)
-  if (!identityDrafts.value.length) {
-    identityDrafts.value.push({ label: '', providerSlug: '', unsure: false, loginEmail: '' })
   }
 }
 
@@ -376,17 +529,8 @@ async function finalize() {
 
   finishing.value = true
   try {
-    syncAssetDraftsFromProviders()
-    const assets = assetDrafts.value
-      .filter((a) => a.enabled && !a.unsure && a.name.trim())
-      .map(({ name, type, providerSlug, unsure }) => ({ name, type, providerSlug, unsure }))
-
-    for (const slug of selectedProviders.value) {
-      if (!assets.find((a) => a.providerSlug === slug)) {
-        const name = providerBySlug.value.get(slug)?.name ?? slug
-        assets.push({ name: `${name} — main`, type: 'service', providerSlug: slug, unsure: false })
-      }
-    }
+    syncResourceDraftsFromProviders()
+    const { identities, assets, assetSetups } = buildFinalizeBundles()
 
     const { projectId } = await $fetch('/api/onboarding/finalize', {
       method: 'POST',
@@ -394,9 +538,9 @@ async function finalize() {
         projectName: projectName.value.trim(),
         websiteUrl: resolvedWebsiteUrl() || undefined,
         description: description.value.trim() || undefined,
-        identities: identityDrafts.value,
+        identities,
         assets,
-        accessLinks: accessLinks.value,
+        assetSetups,
         dependencies: dependencyDrafts.value,
       },
     })
@@ -421,7 +565,14 @@ async function finalize() {
       </div>
     </header>
 
-    <OnboardingStepper :current="step" :total="TOTAL_STEPS" :labels="stepNavLabels" />
+    <OnboardingStepper
+      :current="step"
+      :total="TOTAL_STEPS"
+      :labels="stepNavLabels"
+      :can-navigate-to="canNavigateToStep"
+      :navigate-block-reason="navigateBlockReason"
+      @navigate="goToStep"
+    />
 
     <section class="onboarding-panel">
       <!-- Step 1 -->
@@ -548,139 +699,74 @@ async function finalize() {
         </div>
       </div>
 
-      <!-- Step 4 -->
+      <!-- Step 4 — resources -->
       <div v-else-if="step === 4" class="space-y-5 p-6 sm:p-8">
         <div class="space-y-1">
-          <h2 class="text-lg font-semibold text-ink">{{ t('onboarding.accountsTitle') }}</h2>
-          <p class="text-sm text-muted">{{ t('onboarding.accountsHint') }}</p>
+          <h2 class="text-lg font-semibold text-ink">{{ t('onboarding.resourcesTitle') }}</h2>
+          <p class="text-sm text-muted">{{ t('onboarding.resourcesHint') }}</p>
         </div>
-        <div class="space-y-3">
-          <div
-            v-for="(id, idx) in identityDrafts"
-            :key="idx"
-            class="rounded-lg border border-rule bg-stone-50/80 dark:bg-stone-900/80 dark:bg-stone-900/80 p-3 sm:p-4"
+        <div class="flex flex-wrap gap-2">
+          <button type="button" class="inline-flex items-center gap-2 btn-quiet text-sm" @click="addCustomResource">
+            <IconPlus class="h-4 w-4" />
+            {{ t('onboarding.addOtherResource') }}
+          </button>
+          <button
+            v-if="resourceDrafts[resourceCursor]?.key.startsWith('custom-')"
+            type="button"
+            class="inline-flex items-center gap-2 btn-quiet text-sm"
+            @click="removeCurrentCustomResource"
           >
-            <p v-if="id.providerSlug && !id.unsure" class="mb-2 text-xs text-subtle">
-              {{ t(roleHintKey(id.providerSlug)) }}
-            </p>
-            <div class="grid gap-3 sm:grid-cols-[1fr,minmax(8rem,10rem),auto] sm:items-end">
-              <label class="block text-sm">
-                <span class="font-medium text-ink-secondary">{{ t('onboarding.identityLabel') }}</span>
-                <input
-                  v-model="id.label"
-                  type="text"
-                  :placeholder="t('accounts.identityLabel')"
-                  :disabled="id.unsure"
-                  class="field-wizard mt-1"
-                />
-              </label>
-              <label class="block text-sm">
-                <span class="font-medium text-ink-secondary">{{ t('onboarding.identityProvider') }}</span>
-                <select
-                  v-model="id.providerSlug"
-                  :disabled="id.unsure"
-                  class="field-wizard mt-1"
-                >
-                  <option value="">{{ t('accounts.noProvider') }}</option>
-                  <option v-for="p in providerList" :key="p.slug" :value="p.slug">{{ p.name }}</option>
-                </select>
-              </label>
-              <div class="flex items-center justify-between gap-2 sm:flex-col sm:items-stretch">
-                <label class="flex cursor-pointer items-center gap-2 text-sm text-muted">
-                  <input v-model="id.unsure" type="checkbox" class="checkbox" />
-                  {{ t('onboarding.notSure') }}
-                </label>
-                <button
-                  v-if="identityDrafts.length > 1"
-                  type="button"
-                  class="inline-flex items-center justify-center gap-1 rounded border border-rule bg-surface px-2 py-1.5 text-xs text-muted hover:bg-surface-muted"
-                  @click="removeIdentityRow(idx)"
-                >
-                  <IconX class="h-3.5 w-3.5" />
-                  {{ t('onboarding.removeIdentity') }}
-                </button>
-              </div>
-            </div>
-            <label v-if="!id.unsure" class="mt-3 block text-sm">
-              <span class="font-medium text-ink-secondary">{{ t('onboarding.identityLoginEmail') }}</span>
-              <span class="ml-1 font-normal text-faint">· {{ t('common.optional') }}</span>
-              <input
-                v-model="id.loginEmail"
-                type="email"
-                class="field-wizard mt-1"
-                :placeholder="t('onboarding.identityLoginEmailPlaceholder')"
-              />
-            </label>
-          </div>
+            <IconX class="h-4 w-4" />
+            {{ t('onboarding.removeResource') }}
+          </button>
         </div>
-        <button
-          type="button"
-          class="inline-flex items-center gap-2 text-sm font-medium text-ink-secondary hover:text-ink"
-          @click="addIdentityRow"
-        >
-          <IconPlus class="h-4 w-4" />
-          {{ t('onboarding.addIdentity') }}
-        </button>
+        <p v-if="!resourceDrafts.length" class="text-sm text-subtle">{{ t('onboarding.resourcesEmpty') }}</p>
+        <template v-else>
+          <OnboardingResourceStepper
+            :current="resourceCursor"
+            :labels="resourceStepperLabels"
+            @navigate="goToResourceIndex"
+          />
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="btn-quiet text-xs" @click="applyVerifyConfirmedToRemaining">
+              {{ t('onboarding.assetAccessConfirmAllRemaining') }}
+            </button>
+            <button type="button" class="btn-quiet text-xs" @click="applyVerifyDeclaredToRemaining">
+              {{ t('onboarding.assetAccessDeclareAllRemaining') }}
+            </button>
+          </div>
+          <OnboardingResourceStep
+            v-if="resourceDrafts[resourceCursor]"
+            :resource="resourceDrafts[resourceCursor]"
+            :provider-name="providerBySlug.get(resourceDrafts[resourceCursor].providerSlug)?.name ?? ''"
+            :index="resourceCursor"
+            :total="resourceDrafts.length"
+            :role-hint="
+              resourceDrafts[resourceCursor].providerSlug
+                ? t(roleHintKey(resourceDrafts[resourceCursor].providerSlug))
+                : undefined
+            "
+            :default-identity-label="
+              resourceDrafts[resourceCursor].providerSlug
+                ? defaultIdentityLabel(resourceDrafts[resourceCursor].providerSlug)
+                : ''
+            "
+            :prior-identities="priorIdentitiesForIndex(resourceCursor)"
+            :provider-options="providerList.map((p) => ({ slug: p.slug, name: p.name }))"
+            :is-custom="resourceDrafts[resourceCursor].key.startsWith('custom-')"
+            :can-copy-previous="resourceCursor > 0"
+            @update:resource="patchResource(resourceDrafts[resourceCursor].key, $event)"
+            @copy-previous="copyPreviousResource"
+          />
+        </template>
       </div>
 
-      <!-- Step 5 — assets -->
-      <div v-else-if="step === 5" class="space-y-5 p-6 sm:p-8">
-        <div class="space-y-1">
-          <h2 class="text-lg font-semibold text-ink">{{ t('onboarding.assetsTitle') }}</h2>
-          <p class="text-sm text-muted">{{ t('onboarding.assetsHint') }}</p>
-        </div>
-        <div v-if="!selectedProviders.length" class="text-sm text-subtle">{{ t('onboarding.noProvidersSelected') }}</div>
-        <div v-else class="space-y-3">
-          <div
-            v-for="asset in assetDrafts"
-            :key="asset.providerSlug"
-            class="rounded-lg border border-rule p-4"
-          >
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <label class="flex items-center gap-2 text-sm font-medium text-ink">
-                <input v-model="asset.enabled" type="checkbox" class="checkbox" />
-                {{ providerBySlug.get(asset.providerSlug)?.name ?? asset.providerSlug }}
-              </label>
-              <span class="text-xs text-subtle">{{ t('onboarding.assetTypeLabel') }}</span>
-            </div>
-            <div class="mt-3 grid gap-3 sm:grid-cols-2">
-              <label class="block text-sm sm:col-span-2">
-                <span class="font-medium text-ink-secondary">{{ t('onboarding.assetResourceName') }}</span>
-                <input v-model="asset.name" type="text" :disabled="!asset.enabled" class="field-wizard mt-1" />
-              </label>
-              <label class="block text-sm sm:col-span-2">
-                <span class="font-medium text-ink-secondary">{{ t('assets.type') }}</span>
-                <select v-model="asset.type" :disabled="!asset.enabled" class="field-wizard mt-1">
-                  <option v-for="ty in ASSET_TYPES" :key="ty" :value="ty">{{ t(`assets.types.${ty}`) }}</option>
-                </select>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 6 — connections -->
-      <div v-else-if="step === 6" class="space-y-6 p-6 sm:p-8">
+      <!-- Step 5 — dependencies -->
+      <div v-else-if="step === 5" class="space-y-6 p-6 sm:p-8">
         <div class="space-y-1">
           <h2 class="text-lg font-semibold text-ink">{{ t('onboarding.connectionsTitle') }}</h2>
           <p class="text-sm text-muted">{{ t('onboarding.connectionsHint') }}</p>
         </div>
-        <div v-if="accessLinks.length" class="space-y-2">
-          <h3 class="text-sm font-semibold text-ink">{{ t('onboarding.connectionsAccess') }}</h3>
-          <p class="text-xs text-subtle">{{ t('onboarding.connectionsAccessHint') }}</p>
-          <ul class="list-card text-sm">
-            <li v-for="(link, idx) in accessLinks" :key="idx" class="flex flex-wrap items-center gap-3 px-3 py-2">
-              <label class="flex flex-1 cursor-pointer items-center gap-2">
-                <input v-model="link.enabled" type="checkbox" class="checkbox" />
-                <span class="text-ink">
-                  <span class="font-medium">{{ link.identityLabel }}</span>
-                  <span class="text-subtle"> → {{ providerBySlug.get(link.providerSlug)?.name ?? link.providerSlug }}</span>
-                </span>
-              </label>
-            </li>
-          </ul>
-        </div>
-        <p v-else class="text-sm text-subtle">{{ t('onboarding.connectionsAccessEmpty') }}</p>
         <div v-if="dependencyDrafts.length" class="space-y-2">
           <h3 class="text-sm font-semibold text-ink">{{ t('onboarding.connectionsDeps') }}</h3>
           <p class="text-xs text-subtle">{{ t('onboarding.connectionsDepsHint') }}</p>
@@ -700,7 +786,7 @@ async function finalize() {
         <p v-else class="text-sm text-subtle">{{ t('onboarding.connectionsDepsEmpty') }}</p>
       </div>
 
-      <!-- Step 7 — review -->
+      <!-- Step 6 — review -->
       <div v-else class="space-y-6 p-6 sm:p-8">
         <div class="space-y-1">
           <h2 class="text-lg font-semibold text-ink">{{ t('onboarding.reviewTitle') }}</h2>
@@ -732,17 +818,19 @@ async function finalize() {
             </dd>
           </div>
           <div class="grid gap-1 p-4 sm:grid-cols-3">
-            <dt class="font-medium text-subtle">{{ t('onboarding.reviewIdentities') }}</dt>
+            <dt class="font-medium text-subtle">{{ t('onboarding.reviewResources') }}</dt>
             <dd class="sm:col-span-2">
-              <ul class="space-y-1">
-                <li v-for="(id, idx) in identityDrafts" :key="idx" class="text-ink">
-                  <span v-if="id.unsure || !id.label.trim()" class="text-faint">{{ t('onboarding.reviewSkipped') }}</span>
-                  <span v-else>{{ id.label }}</span>
-                  <span v-if="id.providerSlug && !id.unsure" class="text-subtle">
-                    — {{ providerBySlug.get(id.providerSlug)?.name ?? id.providerSlug }}
+              <ul v-if="activeResourceDrafts.length" class="space-y-2 text-sm">
+                <li v-for="r in activeResourceDrafts" :key="r.key">
+                  <span class="font-medium text-ink">{{ r.name }}</span>
+                  <span class="text-subtle"> · {{ t(`assets.types.${r.type}`, r.type) }}</span>
+                  <span v-if="r.identityLabel.trim()" class="text-muted">
+                    · {{ r.identityLabel }} ({{ t(`assets.roles.${r.roleType}`) }})
+                    · {{ t(`verification.${r.verificationStatus}`) }}
                   </span>
                 </li>
               </ul>
+              <p v-else class="text-subtle">{{ t('onboarding.reviewNone') }}</p>
             </dd>
           </div>
         </dl>
@@ -787,7 +875,7 @@ async function finalize() {
           :disabled="saving"
           @click="goNext"
         >
-          {{ t('onboarding.continue') }}
+          {{ continueLabel }}
           <IconChevronRight class="h-4 w-4" />
         </button>
         <button

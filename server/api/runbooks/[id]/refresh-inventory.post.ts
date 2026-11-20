@@ -8,9 +8,11 @@ import { loadRunbookContext } from '../../../utils/runbooks/context'
 import { generateStepBody } from '../../../utils/runbooks/generator'
 import { listAllRunbookSteps, templateStepsForRunbook } from '../../../utils/runbooks/queries'
 import { requireSession } from '../../../utils/session'
+import { requireEditor } from '../../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const id = getRouterParam(event, 'id')
   if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing id' })
 

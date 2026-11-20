@@ -1,4 +1,10 @@
 {
+  "v0.4.0": {
+    "status": "unreleased",
+    "date": null,
+    "theme": "Team workspaces & deliberate sharing",
+    "features": ["hilko-phase-4"]
+  },
   "v0.3.0": {
     "status": "unreleased",
     "date": null,

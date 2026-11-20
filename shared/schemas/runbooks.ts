@@ -52,6 +52,7 @@ export const patchRunbookStepSchema = z.object({
   dependsOn: z.array(z.string()).optional(),
   hidden: z.boolean().optional(),
   position: z.number().int().min(0).optional(),
+  defaultAssigneeUserId: z.string().uuid().optional().nullable(),
 })
 
 export const startExecutionSchema = z.object({
@@ -63,8 +64,9 @@ export const patchExecutionSchema = z.object({
 })
 
 export const patchStepResultSchema = z.object({
-  status: z.enum(STEP_RESULT_STATUSES),
+  status: z.enum(STEP_RESULT_STATUSES).optional(),
   resultNote: z.string().max(8000).optional(),
+  assigneeUserId: z.string().uuid().optional().nullable(),
 })
 
 export const refreshInventorySchema = z.object({

@@ -2,11 +2,27 @@
 definePageMeta({ layout: 'auth' })
 
 const { t } = useI18n()
+const route = useRoute()
+const { data: authConfig } = await useFetch('/api/auth/config')
 useAppPageTitle('pageTitles.login')
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+
+const redirectTarget = computed(() => {
+  const raw = route.query.redirect
+  const path = typeof raw === 'string' ? raw : ''
+  if (path.startsWith('/') && !path.startsWith('//')) return path
+  return '/home'
+})
+
+onMounted(() => {
+  const prefill = route.query.email
+  if (typeof prefill === 'string' && prefill.includes('@')) {
+    email.value = prefill
+  }
+})
 
 async function submit() {
   error.value = ''
@@ -14,7 +30,7 @@ async function submit() {
   try {
     await $fetch('/api/auth/login', { method: 'POST', body: { email: email.value, password: password.value } })
     await refreshNuxtData('session')
-    await navigateTo('/home')
+    await navigateTo(redirectTarget.value)
   } catch (e: unknown) {
     error.value = formatApiError(e)
   } finally {
@@ -44,10 +60,11 @@ async function submit() {
         {{ t('auth.submitLogin') }}
       </button>
     </form>
-    <p class="text-sm text-muted">
+    <p v-if="authConfig?.allowPublicRegister !== false" class="text-sm text-muted">
       {{ t('auth.noAccount') }}
       <NuxtLink to="/register" class="font-medium text-ink underline">{{ t('nav.register') }}</NuxtLink>
     </p>
+    <p v-else class="text-sm text-muted">{{ t('auth.registerInviteOnlyHint') }}</p>
     <p class="text-sm">
       <NuxtLink to="/forgot-password" class="text-muted underline">{{ t('auth.forgotTitle') }}</NuxtLink>
     </p>

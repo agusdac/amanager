@@ -4,6 +4,7 @@ import { useDb } from '../../utils/db'
 import { exportLocaleFromEvent } from '../../utils/runbooks/queries'
 import { previewWorkspaceStep } from '../../utils/runbooks/preview-step'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 
 const previewWorkspaceTemplateStepSchema = z.object({
   step: workspaceTemplateStepSchema,
@@ -15,6 +16,7 @@ const previewWorkspaceTemplateStepSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const body = previewWorkspaceTemplateStepSchema.parse(await readBody(event))
   const locale = body.locale ?? (exportLocaleFromEvent(event) === 'es' ? 'es' : 'en')
 

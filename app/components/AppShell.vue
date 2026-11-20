@@ -6,9 +6,26 @@ useSyncUserLocale()
 useSyncUserTheme()
 const { collapsed, toggle } = useSidebarCollapsed()
 const { data: session } = useSessionFetch()
-const { projectId, setProject } = useWorkspaceScope()
+const { projectId, setProject, validateProjectInList } = useWorkspaceScope()
 
 const { data: projects } = await useFetch('/api/projects')
+
+const projectIds = computed(() => new Set((projects.value?.projects ?? []).map((p) => p.id)))
+
+const showProjectSwitcher = computed(() => {
+  const list = projects.value?.projects ?? []
+  if (list.length <= 1) return false
+  if (projectId.value && !projectIds.value.has(projectId.value)) return false
+  return true
+})
+
+watch(
+  projectIds,
+  (ids) => {
+    if (ids.size) validateProjectInList(ids)
+  },
+  { immediate: true },
+)
 
 const userInitial = computed(() => {
   const name = session.value?.user?.name?.trim()
@@ -43,7 +60,8 @@ const userInitial = computed(() => {
         />
       </nav>
 
-      <div class="app-shell__sidebar-footer">
+      <div class="app-shell__sidebar-footer space-y-2">
+        <WorkspaceSwitcher :collapsed="collapsed" />
         <button type="button" class="app-shell__collapse-btn" @click="toggle">
           <IconPanelLeft class="h-[1.125rem] w-[1.125rem]" />
           <span v-if="!collapsed">{{ t('nav.collapseSidebar') }}</span>
@@ -53,11 +71,13 @@ const userInitial = computed(() => {
 
     <div class="app-shell__main">
       <header class="app-shell__topbar">
-        <label class="app-shell__project-focus">
+        <WorkspaceSwitcher compact class="shrink-0 md:hidden" />
+        <label v-if="showProjectSwitcher" class="app-shell__project-focus">
           <span class="sr-only">{{ t('workspaceScope.project') }}</span>
           <select
             class="field max-w-[min(100%,14rem)] py-1.5 text-sm"
             :value="projectId"
+            :aria-label="t('workspaceScope.project')"
             @change="setProject(($event.target as HTMLSelectElement).value)"
           >
             <option value="">{{ t('workspaceScope.allProjects') }}</option>

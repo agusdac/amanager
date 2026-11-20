@@ -36,6 +36,41 @@ export const ASSET_TYPES_WITH_VAULT_HINT = [
   'mail_hosting',
 ] as const
 
+/** Console / provider panel links. */
+export const ASSET_TYPES_WITH_ADMIN_URL = [
+  'service',
+  'domain',
+  'hosting',
+  'hosting_account',
+  'server',
+  'repository',
+  'dns',
+  'oauth_client',
+  'youtube_channel',
+  'search_console',
+  'google_ads',
+  'vps',
+  'mail_hosting',
+  'object_storage',
+  'transactional_email',
+  'payment_service',
+  'ai_service',
+  'password_manager',
+  'design_tool',
+  'other',
+] as const
+
+/** Customer-facing site or app URL. */
+export const ASSET_TYPES_WITH_PUBLIC_URL = ['service', 'domain', 'hosting', 'repository', 'youtube_channel', 'other'] as const
+
+export function assetTypeShowsAdminUrl(type: string) {
+  return (ASSET_TYPES_WITH_ADMIN_URL as readonly string[]).includes(type)
+}
+
+export function assetTypeShowsPublicUrl(type: string) {
+  return (ASSET_TYPES_WITH_PUBLIC_URL as readonly string[]).includes(type)
+}
+
 export const CONFIG_ENTRY_KEY_PRESETS = [
   'oauth_client_id',
   'redirect_uri_production',

@@ -14,10 +14,12 @@ import { scanCsvHeaders, rowHasSuspiciousSecret } from '../../utils/secret-scan'
 import { recordAudit } from '../../utils/audit'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 import { slugify } from '../../utils/slug'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const body = await readBody(event)
   const parsed = csvImportSchema.safeParse(body)
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Invalid input' })

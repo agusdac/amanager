@@ -2,6 +2,7 @@ import { csvImportSchema } from '../../../shared/schemas/inventory'
 import { parseCsv } from '../../utils/csv'
 import { scanCsvHeaders, rowHasSuspiciousSecret } from '../../utils/secret-scan'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 
 const EXPECTED_HEADERS = [
   'project',
@@ -15,7 +16,8 @@ const EXPECTED_HEADERS = [
 ]
 
 export default defineEventHandler(async (event) => {
-  await requireSession(event)
+  const session = await requireSession(event)
+  requireEditor(session)
   const body = await readBody(event)
   const parsed = csvImportSchema.safeParse(body)
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Invalid input' })

@@ -18,6 +18,7 @@ const { data, pending, refresh } = await useFetch(() => `/api/runbook-executions
 })
 
 const noteByStep = ref<Record<string, string>>({})
+const assigneeByStep = ref<Record<string, string | null>>({})
 const updating = ref<string | null>(null)
 
 watch(
@@ -25,8 +26,9 @@ watch(
   (steps) => {
     if (!steps) return
     for (const s of steps) {
-      const refId = s.binding === 'snapshot' ? s.id : s.id
+      const refId = s.id
       if (s.result?.resultNote) noteByStep.value[refId] = s.result.resultNote
+      assigneeByStep.value[refId] = s.assigneeUserId ?? null
     }
   },
   { immediate: true },
@@ -34,6 +36,20 @@ watch(
 
 function stepRef(step: { id: string; binding?: string }) {
   return step.id
+}
+
+async function saveAssignee(step: { id: string; orphaned?: boolean }) {
+  if (step.orphaned) return
+  updating.value = step.id
+  try {
+    await $fetch(`/api/runbook-executions/${executionId.value}/steps/${stepRef(step)}`, {
+      method: 'PATCH',
+      body: { assigneeUserId: assigneeByStep.value[step.id] ?? null },
+    })
+    await refresh()
+  } finally {
+    updating.value = null
+  }
 }
 
 async function patchStep(
@@ -132,6 +148,18 @@ async function closeExecution(status: 'completed' | 'cancelled') {
             class="field w-full text-sm"
             :placeholder="t('guides.resultNotePlaceholder')"
           />
+          <label class="block text-sm">
+            <span class="label">{{ t('assignee.executionStep') }}</span>
+            <WorkspaceMemberSelect
+              :model-value="assigneeByStep[step.id] ?? null"
+              @update:model-value="
+                (v) => {
+                  assigneeByStep[step.id] = v
+                  saveAssignee(step)
+                }
+              "
+            />
+          </label>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="st in STEP_RESULT_STATUSES"

@@ -14,14 +14,18 @@ const { data: assets } = await useFetch('/api/assets?limit=200')
 
 const assetId = ref('')
 const roleType = ref<(typeof ACCESS_ROLES)[number]>('admin')
-const loginEmail = ref('')
+const warning = ref('')
 const error = ref('')
 
 const assetOptions = computed(() => assets.value?.assets ?? [])
 
 async function linkRole() {
+  warning.value = ''
   error.value = ''
-  if (!assetId.value) return
+  if (!assetId.value) {
+    warning.value = t('identityDetail.pickAssetRequired')
+    return
+  }
   try {
     await $fetch('/api/asset-roles', {
       method: 'POST',
@@ -33,26 +37,10 @@ async function linkRole() {
     error.value = formatApiError(e)
   }
 }
-
-async function linkEmail() {
-  error.value = ''
-  const address = loginEmail.value.trim()
-  if (!address) return
-  try {
-    await $fetch('/api/email-addresses', {
-      method: 'POST',
-      body: { address, identityId: props.identityId, purpose: 'login' },
-    })
-    loginEmail.value = ''
-    emit('linked')
-  } catch (e: unknown) {
-    error.value = formatApiError(e)
-  }
-}
 </script>
 
 <template>
-  <div class="mt-4 grid gap-4 border-t border-rule-light pt-4 sm:grid-cols-2">
+  <div class="grid gap-4 sm:grid-cols-2">
     <label class="block text-sm sm:col-span-2">
       <span class="label">{{ t('identityDetail.linkAsset') }}</span>
       <select v-model="assetId" class="field mt-1.5">
@@ -67,17 +55,11 @@ async function linkEmail() {
       </select>
     </label>
     <div class="flex items-end">
-      <button type="button" class="btn-secondary" :disabled="!assetId" @click="linkRole">
+      <button type="button" class="btn-secondary" @click="linkRole">
         {{ t('identityDetail.linkAccess') }}
       </button>
     </div>
-    <label class="block text-sm sm:col-span-2">
-      <span class="label">{{ t('assets.loginEmail') }}</span>
-      <input v-model="loginEmail" type="email" class="field mt-1.5" :placeholder="t('identityDetail.emailPlaceholder')" />
-    </label>
-    <button type="button" class="btn-primary sm:col-span-2 sm:w-fit" :disabled="!loginEmail.trim()" @click="linkEmail">
-      {{ t('assets.linkLoginEmail') }}
-    </button>
+    <p v-if="warning" class="text-sm text-amber-800 dark:text-amber-300 sm:col-span-2">{{ warning }}</p>
     <p v-if="error" class="error-text sm:col-span-2">{{ error }}</p>
   </div>
 </template>

@@ -22,6 +22,29 @@ const deleteConfirmEmail = ref('')
 const deleteLoading = ref(false)
 const deleteError = ref('')
 
+const { data: workspacesData, refresh: refreshWorkspaces } = await useFetch('/api/me/workspaces')
+const hasPersonalWorkspace = computed(() =>
+  (workspacesData.value?.workspaces ?? []).some((w) => w.type === 'personal'),
+)
+const personalCreating = ref(false)
+const personalError = ref('')
+const personalDone = ref(false)
+
+async function createPersonalWorkspace() {
+  personalError.value = ''
+  personalDone.value = false
+  personalCreating.value = true
+  try {
+    await $fetch('/api/me/personal-workspace', { method: 'POST' })
+    await Promise.all([refreshWorkspaces(), refreshNuxtData('session')])
+    personalDone.value = true
+  } catch (e: unknown) {
+    personalError.value = formatApiError(e)
+  } finally {
+    personalCreating.value = false
+  }
+}
+
 watch(
   data,
   (pack) => {
@@ -163,6 +186,23 @@ async function confirmDeleteAccount() {
           {{ t('common.save') }}
         </button>
       </form>
+    </section>
+
+    <section v-if="!hasPersonalWorkspace" class="card p-6">
+      <h2 class="section-title">{{ t('account.personalWorkspaceTitle') }}</h2>
+      <p class="lede mt-1">{{ t('account.personalWorkspaceHint') }}</p>
+      <p v-if="personalError" class="error-text mt-3">{{ personalError }}</p>
+      <p v-else-if="personalDone" class="mt-3 text-sm text-emerald-700 dark:text-emerald-400">
+        {{ t('account.personalWorkspaceDone') }}
+      </p>
+      <button
+        type="button"
+        class="btn-primary mt-4"
+        :disabled="personalCreating"
+        @click="createPersonalWorkspace"
+      >
+        {{ t('account.personalWorkspaceCreate') }}
+      </button>
     </section>
 
     <section class="card p-6">

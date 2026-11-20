@@ -30,6 +30,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     databaseUrl: process.env.DATABASE_URL ?? '',
     allowSignup: process.env.NUXT_ALLOW_SIGNUP === 'true',
+    allowPublicRegister:
+      process.env.HILKO_ALLOW_PUBLIC_REGISTER !== 'false' &&
+      process.env.NUXT_ALLOW_SIGNUP !== 'false',
     smtpHost: process.env.NUXT_SMTP_HOST ?? 'localhost',
     smtpPort: process.env.NUXT_SMTP_PORT ?? '1025',
     smtpFrom: process.env.NUXT_SMTP_FROM ?? 'Hilko <noreply@hilko.local>',

@@ -10,33 +10,16 @@ const { data: assetList } = await useFetch('/api/assets?limit=100')
 
 const idLabel = ref('')
 const idProvider = ref('')
+const idLoginEmail = ref('')
+const quickIdLabel = ref('')
+const quickIdProvider = ref('')
+const quickIdLoginEmail = ref('')
+const identityFormMessage = ref('')
+const quickFormMessage = ref('')
 const emailAddress = ref('')
 const emailLabel = ref('')
 const accLabel = ref('')
 const accProvider = ref('')
-const emailPmUrls = ref<Record<string, string>>({})
-
-watch(
-  () => emails.value?.emails,
-  (list) => {
-    if (!list) return
-    const next: Record<string, string> = {}
-    for (const em of list) {
-      next[em.id] = (em as { passwordManagerItemUrl?: string | null }).passwordManagerItemUrl ?? ''
-    }
-    emailPmUrls.value = next
-  },
-  { immediate: true },
-)
-
-async function saveEmailPmLink(emailId: string) {
-  await $fetch(`/api/email-addresses/${emailId}`, {
-    method: 'PATCH',
-    body: { passwordManagerItemUrl: emailPmUrls.value[emailId]?.trim() || '' },
-  })
-  await refreshEmail()
-}
-
 const impactAssets = computed(() =>
   (assetList.value?.assets ?? []).map((a: { id: string; name: string }) => ({ id: a.id, label: a.name })),
 )
@@ -47,13 +30,63 @@ const impactIdentities = computed(() =>
   })),
 )
 
-async function addIdentity() {
-  await $fetch('/api/identities', {
+async function createIdentityWithOptionalEmail(body: {
+  label: string
+  providerId: string | null
+  loginEmail?: string
+}) {
+  const res = await $fetch<{ loginEmailLinked?: boolean; loginEmail?: string | null }>('/api/identities', {
     method: 'POST',
-    body: { label: idLabel.value, providerId: idProvider.value || null },
+    body: {
+      label: body.label,
+      providerId: body.providerId,
+      loginEmail: body.loginEmail?.trim() || null,
+    },
+  })
+  await Promise.all([refreshId(), refreshEmail()])
+  return res
+}
+
+async function addIdentity() {
+  identityFormMessage.value = ''
+  const label = idLabel.value.trim()
+  if (!label) return
+  const res = await createIdentityWithOptionalEmail({
+    label,
+    providerId: idProvider.value || null,
+    loginEmail: idLoginEmail.value,
   })
   idLabel.value = ''
-  await refreshId()
+  idLoginEmail.value = ''
+  if (res.loginEmailLinked && res.loginEmail) {
+    identityFormMessage.value = t('accounts.identityCreatedWithEmail', { email: res.loginEmail })
+  }
+}
+
+async function quickAddIdentity() {
+  quickFormMessage.value = ''
+  const label = quickIdLabel.value.trim()
+  const email = quickIdLoginEmail.value.trim()
+  if (!label) {
+    quickFormMessage.value = t('accounts.quickAddNeedLabel')
+    return
+  }
+  if (!email) {
+    quickFormMessage.value = t('accounts.quickAddNeedEmail')
+    return
+  }
+  const res = await createIdentityWithOptionalEmail({
+    label,
+    providerId: quickIdProvider.value || null,
+    loginEmail: email,
+  })
+  quickIdLabel.value = ''
+  quickIdLoginEmail.value = ''
+  quickIdProvider.value = ''
+  quickFormMessage.value = t('accounts.quickAddSuccess', {
+    label,
+    email: res.loginEmail ?? email,
+  })
 }
 
 async function addEmail() {
@@ -93,28 +126,65 @@ const accountTabs = computed(() => [
       <p class="lede">{{ t('accounts.subtitle') }}</p>
     </header>
 
-    <AppCallout :title="t('accounts.emailsSpotlightTitle')" variant="info">
-      {{ t('accounts.emailsSpotlightBody') }}
+    <AppCallout :title="t('accounts.identityVsEmailTitle')" variant="info">
+      <p>{{ t('accounts.identityVsEmailBody') }}</p>
+      <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+        <li>{{ t('accounts.identityVsEmailIdentity') }}</li>
+        <li>{{ t('accounts.identityVsEmailEmail') }}</li>
+        <li>{{ t('accounts.identityVsEmailTogether') }}</li>
+      </ul>
     </AppCallout>
+
+    <section class="card space-y-4 p-5">
+      <div class="space-y-1">
+        <h2 class="text-sm font-semibold text-ink">{{ t('accounts.quickAddTitle') }}</h2>
+        <p class="text-sm text-muted">{{ t('accounts.quickAddHint') }}</p>
+      </div>
+      <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end" @submit.prevent="quickAddIdentity">
+        <label class="block text-sm lg:col-span-2">
+          <span class="label">{{ t('accounts.identityLabel') }}</span>
+          <input v-model="quickIdLabel" required class="field mt-1.5" />
+        </label>
+        <label class="block text-sm">
+          <span class="label">{{ t('assets.loginEmail') }}</span>
+          <input v-model="quickIdLoginEmail" type="email" required class="field mt-1.5" autocomplete="email" />
+        </label>
+        <label class="block text-sm">
+          <span class="label">{{ t('assets.provider') }}</span>
+          <select v-model="quickIdProvider" class="field mt-1.5">
+            <option value="">{{ t('accounts.noProvider') }}</option>
+            <option v-for="p in providers?.providers" :key="p.id" :value="p.id">{{ p.name }}</option>
+          </select>
+        </label>
+        <button type="submit" class="btn-primary lg:col-span-4 lg:w-fit">{{ t('accounts.quickAddSubmit') }}</button>
+      </form>
+      <p v-if="quickFormMessage" class="text-sm text-emerald-800 dark:text-emerald-300">{{ quickFormMessage }}</p>
+    </section>
 
     <AppDetailTabs :tabs="accountTabs" default-tab="emails">
       <template #identities>
     <section class="card space-y-4 p-5">
       <h2 class="sr-only">{{ t('accounts.identities') }}</h2>
-      <form class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end" @submit.prevent="addIdentity">
-        <label class="block min-w-[10rem] flex-1 text-sm">
+      <p class="text-sm text-muted">{{ t('accounts.identitiesHint') }}</p>
+      <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end" @submit.prevent="addIdentity">
+        <label class="block text-sm lg:col-span-2">
           <span class="label">{{ t('accounts.identityLabel') }}</span>
           <input v-model="idLabel" required class="field mt-1.5" />
         </label>
-        <label class="block min-w-[10rem] text-sm">
+        <label class="block text-sm">
           <span class="label">{{ t('assets.provider') }}</span>
           <select v-model="idProvider" class="field mt-1.5">
             <option value="">{{ t('accounts.noProvider') }}</option>
             <option v-for="p in providers?.providers" :key="p.id" :value="p.id">{{ p.name }}</option>
           </select>
         </label>
-        <button type="submit" class="btn-primary">{{ t('common.add') }}</button>
+        <label class="block text-sm">
+          <span class="label">{{ t('accounts.identityLoginEmailOptional') }}</span>
+          <input v-model="idLoginEmail" type="email" class="field mt-1.5" autocomplete="email" />
+        </label>
+        <button type="submit" class="btn-primary lg:col-span-4 lg:w-fit">{{ t('common.add') }}</button>
       </form>
+      <p v-if="identityFormMessage" class="text-sm text-emerald-800 dark:text-emerald-300">{{ identityFormMessage }}</p>
       <ul v-if="identities?.identities?.length" class="divide-y divide-rule border-t border-rule-light">
         <li v-for="item in identities.identities" :key="item.id">
           <NuxtLink
@@ -137,7 +207,8 @@ const accountTabs = computed(() => [
       <template #emails>
     <section class="card space-y-4 p-5">
       <h2 class="text-sm font-semibold text-ink">{{ t('accounts.emails') }}</h2>
-      <p class="text-sm text-muted">{{ t('accounts.emailsHint') }}</p>
+      <p class="text-sm text-muted">{{ t('accounts.emailsTabHint') }}</p>
+      <p class="text-sm text-subtle">{{ t('accounts.vaultPerAssetHint') }}</p>
       <form class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end" @submit.prevent="addEmail">
         <label class="block min-w-[14rem] flex-1 text-sm">
           <span class="label">{{ t('accounts.emailAddress') }}</span>
@@ -165,11 +236,6 @@ const accountTabs = computed(() => [
           <p v-if="item.identityLinkCount || item.assetLinkCount" class="text-xs text-subtle">
             {{ t('accounts.emailLinkCounts', { identities: item.identityLinkCount ?? 0, assets: item.assetLinkCount ?? 0 }) }}
           </p>
-          <PasswordManagerLinkField
-            v-model="emailPmUrls[item.id]"
-            hint-key="assets.emailPasswordManagerLink"
-            @save="saveEmailPmLink(item.id)"
-          />
         </li>
       </ul>
       <p v-else class="text-sm text-subtle">{{ t('accounts.emptyEmails') }}</p>

@@ -24,6 +24,7 @@ services:
       NUXT_PUBLIC_APP_URL: ${NUXT_PUBLIC_APP_URL:-https://localhost}
       NUXT_SMTP_HOST: ${NUXT_SMTP_HOST:-}
       NUXT_SMTP_PORT: ${NUXT_SMTP_PORT:-587}
+      HILKO_ALLOW_PUBLIC_REGISTER: ${HILKO_ALLOW_PUBLIC_REGISTER:-true}
     depends_on:
       db:
         condition: service_healthy

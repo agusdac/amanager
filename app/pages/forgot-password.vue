@@ -20,7 +20,10 @@ async function submit() {
 
 <template>
   <div class="mx-auto max-w-md space-y-6">
-    <h1 class="page-title">{{ t('auth.forgotTitle') }}</h1>
+    <header class="space-y-1">
+      <h1 class="page-title">{{ t('auth.forgotTitle') }}</h1>
+      <p class="lede">{{ t('auth.forgotLede') }}</p>
+    </header>
     <form v-if="!sent" class="card space-y-4 p-6 shadow-sm" @submit.prevent="submit">
       <label class="block">
         <span class="label">{{ t('auth.email') }}</span>

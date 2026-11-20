@@ -24,3 +24,14 @@ export function rowHasSuspiciousSecret(values: Record<string, string>): boolean 
   }
   return false
 }
+
+export function scanTextFields(fields: Record<string, string | null | undefined>): string | null {
+  for (const [key, raw] of Object.entries(fields)) {
+    const val = raw?.trim()
+    if (!val) continue
+    if (FORBIDDEN_COLUMNS.some((re) => re.test(key.trim()))) return key
+    if (SUSPICIOUS_VALUE.test(val)) return key
+    if (rowHasSuspiciousSecret({ [key]: val })) return key
+  }
+  return null
+}

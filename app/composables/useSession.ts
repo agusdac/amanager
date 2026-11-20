@@ -10,6 +10,8 @@ export function useSessionFetch() {
       theme: string
       workspaceId: string
       workspaceRole: string
+      workspaceType: string
+      workspaceName: string
     } | null
   }>('/api/auth/session', {
     key: 'session',

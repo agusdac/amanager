@@ -9,6 +9,7 @@ import {
   Route,
   Sparkles,
   Upload,
+  Users,
 } from 'lucide-vue-next'
 import { UI_ICON_STROKE } from '~/components/icons/uiIconDefaults'
 import type { AppNavItem } from '~/constants/appNav'
@@ -28,6 +29,7 @@ const glyph = computed(() => {
     checklist: ClipboardList,
     guide: BookOpen,
     guides: BookMarked,
+    team: Users,
   } as const
   return map[props.icon]
 })

@@ -3,7 +3,7 @@ import { passwordResetTokens, users } from '../../../db/schema'
 import { forgotPasswordSchema } from '../../../shared/schemas/auth'
 import { hashToken, randomToken } from '../../utils/crypto'
 import { useDb } from '../../utils/db'
-import { sendMail } from '../../utils/mail'
+import { sendPasswordResetMail } from '../../utils/password-reset-mail'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -27,10 +27,10 @@ export default defineEventHandler(async (event) => {
 
     const baseUrl = process.env.NUXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const link = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`
-    await sendMail({
+    await sendPasswordResetMail({
       to: user.email,
-      subject: 'Reset your Hilko password',
-      text: `Use this link within one hour:\n\n${link}\n`,
+      locale: user.locale,
+      resetUrl: link,
     })
   }
 

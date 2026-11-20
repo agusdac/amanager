@@ -5,9 +5,12 @@ import { recordAudit } from '../../../../utils/audit'
 import { useDb } from '../../../../utils/db'
 import { getRunbookOrThrow } from '../../../../utils/runbooks/access'
 import { requireSession } from '../../../../utils/session'
+import { assertWorkspaceMember } from '../../../../utils/workspace-membership'
+import { requireEditor } from '../../../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const runbookId = getRouterParam(event, 'id')
   const stepId = getRouterParam(event, 'stepId')
   if (!runbookId || !stepId) throw createError({ statusCode: 400, statusMessage: 'Missing id' })
@@ -15,6 +18,11 @@ export default defineEventHandler(async (event) => {
   const body = patchRunbookStepSchema.parse(await readBody(event))
   const db = useDb()
   await getRunbookOrThrow(db, session.workspaceId, runbookId)
+
+  if (body.defaultAssigneeUserId) {
+    const member = await assertWorkspaceMember(db, body.defaultAssigneeUserId, session.workspaceId)
+    if (!member) throw createError({ statusCode: 400, statusMessage: 'Assignee not in workspace' })
+  }
 
   const [existing] = await db
     .select()
@@ -40,6 +48,9 @@ export default defineEventHandler(async (event) => {
       ...(body.position !== undefined ? { position: body.position } : {}),
       ...(body.hidden === true ? { hiddenAt: new Date() } : {}),
       ...(body.hidden === false ? { hiddenAt: null } : {}),
+      ...(body.defaultAssigneeUserId !== undefined
+        ? { defaultAssigneeUserId: body.defaultAssigneeUserId }
+        : {}),
       updatedAt: new Date(),
     })
     .where(eq(runbookSteps.id, stepId))

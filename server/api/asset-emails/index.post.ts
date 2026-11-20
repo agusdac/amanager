@@ -1,9 +1,10 @@
 import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { assets } from '../../../db/schema'
+import { assets, emailAddresses } from '../../../db/schema'
 import { useDb } from '../../utils/db'
 import { findOrCreateEmail, linkAssetLoginEmail } from '../../utils/inventory-links'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 
 const linkSchema = z.object({
   assetId: z.string().uuid(),
@@ -14,6 +15,7 @@ const linkSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const body = await readBody(event)
   const parsed = linkSchema.safeParse(body)
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Invalid input' })
@@ -26,8 +28,19 @@ export default defineEventHandler(async (event) => {
     .limit(1)
   if (!asset) throw createError({ statusCode: 404, statusMessage: 'Not Found' })
 
+  const normalized = parsed.data.address.trim().toLowerCase()
+  const [existingEmail] = await db
+    .select({ id: emailAddresses.id })
+    .from(emailAddresses)
+    .where(and(eq(emailAddresses.workspaceId, session.workspaceId), eq(emailAddresses.address, normalized)))
+    .limit(1)
+
   const email = await findOrCreateEmail(db, session.workspaceId, parsed.data.address)
   await linkAssetLoginEmail(db, session.workspaceId, parsed.data.assetId, email.id, parsed.data.identityId)
 
-  return { email: { id: email.id, address: email.address }, purpose: parsed.data.purpose }
+  return {
+    email: { id: email.id, address: email.address },
+    purpose: parsed.data.purpose,
+    workspaceEmailCreated: !existingEmail,
+  }
 })

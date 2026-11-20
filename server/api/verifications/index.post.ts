@@ -3,9 +3,11 @@ import { createVerificationSchema } from '../../../shared/schemas/inventory'
 import { assets, verifications } from '../../../db/schema'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const body = await readBody(event)
   const parsed = createVerificationSchema.safeParse(body)
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Invalid input' })
@@ -18,6 +20,11 @@ export default defineEventHandler(async (event) => {
     .limit(1)
   if (!asset) throw createError({ statusCode: 404, statusMessage: 'Not Found' })
 
+  if (parsed.data.assigneeUserId) {
+    const member = await assertWorkspaceMember(db, parsed.data.assigneeUserId, session.workspaceId)
+    if (!member) throw createError({ statusCode: 400, statusMessage: 'Assignee not in workspace' })
+  }
+
   const confirmedStatus = parsed.data.status ?? 'confirmed_by_human'
   const checkedAt = new Date()
 
@@ -29,6 +36,7 @@ export default defineEventHandler(async (event) => {
       sourceId: parsed.data.sourceId,
       status: parsed.data.method,
       evidenceNote: parsed.data.evidenceNote ?? null,
+      assigneeUserId: parsed.data.assigneeUserId ?? null,
       checkedAt,
     })
     .returning()

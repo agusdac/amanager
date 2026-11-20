@@ -9,9 +9,11 @@ import { useDb } from '../../../../utils/db'
 import { getRunbookOrThrow } from '../../../../utils/runbooks/access'
 import { listVisibleRunbookSteps } from '../../../../utils/runbooks/queries'
 import { requireSession } from '../../../../utils/session'
+import { requireEditor } from '../../../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const runbookId = getRouterParam(event, 'id')
   if (!runbookId) throw createError({ statusCode: 400, statusMessage: 'Missing id' })
 
@@ -47,6 +49,7 @@ export default defineEventHandler(async (event) => {
           risk: s.risk,
           dependsOnJson: s.dependsOnJson,
           originStepId: s.id,
+          assigneeUserId: s.defaultAssigneeUserId,
         })),
       )
       .returning()

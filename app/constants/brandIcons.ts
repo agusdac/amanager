@@ -42,6 +42,9 @@ import {
 /** Maps `providers.slug` (see db/seed/providers.ts) → Simple Icons entry. */
 export const PROVIDER_BRAND_ICONS: Record<string, SimpleIcon> = {
   google: siGoogle,
+  'google-oauth': siGoogle,
+  'google-search-console': siGooglesearchconsole,
+  'google-ads': siGoogleads,
   github: siGithub,
   cloudflare: siCloudflare,
   namecheap: siNamecheap,

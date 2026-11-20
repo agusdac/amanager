@@ -3,10 +3,12 @@ import { configEntries, projects, vaultReferences } from '../../../db/schema'
 import { recordAudit } from '../../utils/audit'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 import { assertSameWorkspace } from '../../utils/workspace'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const id = getRouterParam(event, 'id')
   if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing id' })
 
@@ -14,6 +16,10 @@ export default defineEventHandler(async (event) => {
   const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1)
   if (!project) throw createError({ statusCode: 404, statusMessage: 'Not Found' })
   assertSameWorkspace(session.workspaceId, project.workspaceId)
+
+  if (session.workspaceRole === 'editor' && project.createdByUserId !== session.id) {
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+  }
 
   await db
     .update(configEntries)

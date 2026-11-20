@@ -5,9 +5,11 @@ import { recordAudit } from '../../../../utils/audit'
 import { useDb } from '../../../../utils/db'
 import { getRunbookOrThrow } from '../../../../utils/runbooks/access'
 import { requireSession } from '../../../../utils/session'
+import { requireEditor } from '../../../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const runbookId = getRouterParam(event, 'id')
   if (!runbookId) throw createError({ statusCode: 400, statusMessage: 'Missing id' })
 

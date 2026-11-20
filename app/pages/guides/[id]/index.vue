@@ -36,12 +36,15 @@ async function saveOverview() {
   }
 }
 
-async function saveStep(stepId: string, title: string, bodyMarkdown: string) {
+async function saveStep(
+  stepId: string,
+  payload: { title: string; bodyMarkdown: string; defaultAssigneeUserId?: string | null },
+) {
   stepSaving.value = stepId
   try {
     await $fetch(`/api/runbooks/${id.value}/steps/${stepId}`, {
       method: 'PATCH',
-      body: { title, bodyMarkdown },
+      body: payload,
     })
     await refresh()
   } finally {
@@ -146,7 +149,7 @@ async function startExecution() {
         :key="step.id"
         :step="step"
         :saving="stepSaving === step.id"
-        @save="(p) => saveStep(step.id, p.title, p.bodyMarkdown)"
+        @save="(p) => saveStep(step.id, p)"
       />
     </section>
 

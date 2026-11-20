@@ -4,9 +4,11 @@ import { assetRoles, assets, identities } from '../../../db/schema'
 import { recordAudit } from '../../utils/audit'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
+import { requireAdmin } from '../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireAdmin(session)
   const body = await readBody(event)
   const parsed = createAssetRoleSchema.safeParse(body)
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Invalid input' })

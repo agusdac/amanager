@@ -4,9 +4,11 @@ import { recordAudit } from '../../utils/audit'
 import { useDb } from '../../utils/db'
 import { assertWorkspaceTemplate } from '../../utils/runbooks/template-access'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const slug = getRouterParam(event, 'slug')
   if (!slug) throw createError({ statusCode: 400, statusMessage: 'Missing slug' })
 

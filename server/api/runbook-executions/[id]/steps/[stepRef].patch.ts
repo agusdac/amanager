@@ -1,12 +1,15 @@
 import { and, eq } from 'drizzle-orm'
-import { runbookStepResults } from '../../../../../db/schema'
+import { runbookExecutionSteps, runbookStepResults } from '../../../../../db/schema'
 import { patchStepResultSchema } from '../../../../../shared/schemas/runbooks'
 import { useDb } from '../../../../utils/db'
 import { getExecutionOrThrow } from '../../../../utils/runbooks/access'
 import { requireSession } from '../../../../utils/session'
+import { requireEditor } from '../../../../utils/workspace-role'
+import { assertWorkspaceMember } from '../../../../utils/workspace-membership'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const executionId = getRouterParam(event, 'id')
   const stepRef = getRouterParam(event, 'stepRef')
   if (!executionId || !stepRef) throw createError({ statusCode: 400, statusMessage: 'Missing id' })
@@ -36,6 +39,21 @@ export default defineEventHandler(async (event) => {
     .limit(1)
 
   if (!existing) throw createError({ statusCode: 404, statusMessage: 'Step result not found' })
+
+  if (body.assigneeUserId) {
+    const member = await assertWorkspaceMember(db, body.assigneeUserId, session.workspaceId)
+    if (!member) throw createError({ statusCode: 400, statusMessage: 'Assignee not in workspace' })
+    if (execution.contentBinding === 'snapshot' && existing.executionStepId) {
+      await db
+        .update(runbookExecutionSteps)
+        .set({ assigneeUserId: body.assigneeUserId })
+        .where(eq(runbookExecutionSteps.id, existing.executionStepId))
+    }
+  }
+
+  if (!body.status) {
+    return { result: existing }
+  }
 
   const doneStatuses = ['done', 'skipped', 'failed']
   const [result] = await db

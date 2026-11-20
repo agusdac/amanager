@@ -5,9 +5,11 @@ import { useDb } from '../../utils/db'
 import { buildWorkspaceTemplateSchemaJson, publicTemplateFromRow } from '../../utils/runbooks/templates'
 import { uniqueWorkspaceTemplateSlug } from '../../utils/runbooks/workspace-template-slug'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const body = upsertWorkspaceRunbookTemplateSchema.parse(await readBody(event))
   const db = useDb()
 

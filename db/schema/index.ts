@@ -27,6 +27,9 @@ export const sessions = pgTable('sessions', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   tokenHash: text('token_hash').notNull().unique(),
+  activeWorkspaceId: uuid('active_workspace_id').references(() => workspaces.id, {
+    onDelete: 'set null',
+  }),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
@@ -67,6 +70,27 @@ export const workspaceMembers = pgTable(
   (table) => [primaryKey({ columns: [table.workspaceId, table.userId] })],
 )
 
+export const workspaceInvites = pgTable(
+  'workspace_invites',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspaces.id, { onDelete: 'cascade' }),
+    email: text('email').notNull(),
+    role: text('role').notNull(),
+    tokenHash: text('token_hash').notNull().unique(),
+    invitedByUserId: uuid('invited_by_user_id')
+      .notNull()
+      .references(() => users.id),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    acceptedAt: timestamp('accepted_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex('workspace_invites_workspace_email_idx').on(table.workspaceId, table.email)],
+)
+
 /** Global catalog (system seed). */
 export const providers = pgTable('providers', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -99,6 +123,7 @@ export const projects = pgTable(
     name: text('name').notNull(),
     description: text('description'),
     websiteUrl: text('website_url'),
+    createdByUserId: uuid('created_by_user_id').references(() => users.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
@@ -254,6 +279,7 @@ export const assetEmails = pgTable('asset_emails', {
     .notNull()
     .references(() => emailAddresses.id, { onDelete: 'cascade' }),
   purpose: text('purpose').notNull(),
+  passwordManagerItemUrl: text('password_manager_item_url'),
 })
 
 export const assetDependencies = pgTable(
@@ -315,6 +341,7 @@ export const verifications = pgTable('verifications', {
   sourceId: uuid('source_id').notNull(),
   status: text('status').notNull(),
   evidenceNote: text('evidence_note'),
+  assigneeUserId: uuid('assignee_user_id').references(() => users.id, { onDelete: 'set null' }),
   checkedAt: timestamp('checked_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
@@ -398,6 +425,9 @@ export const runbookSteps = pgTable(
     isRequired: boolean('is_required').notNull().default(true),
     source: text('source').notNull().default('generated'),
     hiddenAt: timestamp('hidden_at', { withTimezone: true }),
+    defaultAssigneeUserId: uuid('default_assignee_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
@@ -432,7 +462,8 @@ export const runbookExecutionSteps = pgTable('runbook_execution_steps', {
   bodyMarkdown: text('body_markdown').notNull().default(''),
   risk: text('risk').notNull().default('low'),
   dependsOnJson: jsonb('depends_on_json').notNull().default([]),
-  originStepId: uuid('origin_step_id').references(() => runbookSteps.id),
+    originStepId: uuid('origin_step_id').references(() => runbookSteps.id),
+    assigneeUserId: uuid('assignee_user_id').references(() => users.id, { onDelete: 'set null' }),
 })
 
 export const runbookStepResults = pgTable('runbook_step_results', {

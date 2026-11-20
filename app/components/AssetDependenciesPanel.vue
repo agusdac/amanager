@@ -134,5 +134,9 @@ function confirmRemove() {
         <p v-else class="mt-2 text-sm text-subtle">{{ t('assets.depsInboundEmpty') }}</p>
       </div>
     </div>
+
+    <div v-if="$slots.add" class="border-t border-rule-light pt-8">
+      <slot name="add" />
+    </div>
   </section>
 </template>

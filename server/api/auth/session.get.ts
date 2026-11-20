@@ -14,6 +14,8 @@ export default defineEventHandler(async (event) => {
       theme: user.theme,
       workspaceId: user.workspaceId,
       workspaceRole: user.workspaceRole,
+      workspaceType: user.workspaceType,
+      workspaceName: user.workspaceName,
     },
   }
 })

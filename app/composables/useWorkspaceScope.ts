@@ -1,18 +1,57 @@
-const STORAGE_PROJECT = 'hilko-scope-project'
-const STORAGE_ENV = 'hilko-scope-environment'
+const LEGACY_PROJECT = 'hilko-scope-project'
+const LEGACY_ENV = 'hilko-scope-environment'
+
+function projectStorageKey(workspaceId: string) {
+  return `hilko-scope-project:${workspaceId}`
+}
+
+function envStorageKey(workspaceId: string) {
+  return `hilko-scope-environment:${workspaceId}`
+}
 
 export function useWorkspaceScope() {
   const route = useRoute()
   const router = useRouter()
+  const { data: session } = useSessionFetch()
 
   const projectId = useState<string>('workspace-scope-project', () => '')
   const environmentId = useState<string>('workspace-scope-environment', () => '')
   const hydrated = useState('workspace-scope-hydrated', () => false)
+  const activeWorkspaceId = useState<string>('workspace-scope-workspace-id', () => '')
+
+  function persistScopeForWorkspace(workspaceId: string) {
+    if (!import.meta.client || !workspaceId) return
+    localStorage.setItem(projectStorageKey(workspaceId), projectId.value)
+    localStorage.setItem(envStorageKey(workspaceId), environmentId.value)
+  }
+
+  function hydrateScopeForWorkspace(workspaceId: string) {
+    if (!import.meta.client || !workspaceId) return
+    activeWorkspaceId.value = workspaceId
+    let storedProject = localStorage.getItem(projectStorageKey(workspaceId)) ?? ''
+    let storedEnv = localStorage.getItem(envStorageKey(workspaceId)) ?? ''
+
+    if (!storedProject && !localStorage.getItem(projectStorageKey(workspaceId))) {
+      const legacy = localStorage.getItem(LEGACY_PROJECT) ?? ''
+      if (legacy) {
+        storedProject = legacy
+        storedEnv = localStorage.getItem(LEGACY_ENV) ?? ''
+        localStorage.setItem(projectStorageKey(workspaceId), storedProject)
+        if (storedEnv) localStorage.setItem(envStorageKey(workspaceId), storedEnv)
+        localStorage.removeItem(LEGACY_PROJECT)
+        localStorage.removeItem(LEGACY_ENV)
+      }
+    }
+
+    projectId.value = storedProject
+    environmentId.value = storedProject ? storedEnv : ''
+    hydrated.value = true
+    syncRouteQuery()
+  }
 
   function persist() {
-    if (!import.meta.client) return
-    localStorage.setItem(STORAGE_PROJECT, projectId.value)
-    localStorage.setItem(STORAGE_ENV, environmentId.value)
+    if (!import.meta.client || !activeWorkspaceId.value) return
+    persistScopeForWorkspace(activeWorkspaceId.value)
   }
 
   function syncRouteQuery() {
@@ -29,20 +68,28 @@ export function useWorkspaceScope() {
     if (!same) router.replace({ query: next })
   }
 
-  function hydrate() {
-    if (!import.meta.client || hydrated.value) return
+  function applyRouteScopeOverride() {
     const fromRouteProject = typeof route.query.projectId === 'string' ? route.query.projectId : ''
     const fromRouteEnv = typeof route.query.environmentId === 'string' ? route.query.environmentId : ''
-    const fromStorageProject = localStorage.getItem(STORAGE_PROJECT) ?? ''
-    const fromStorageEnv = localStorage.getItem(STORAGE_ENV) ?? ''
-
-    projectId.value = fromRouteProject || fromStorageProject
-    environmentId.value = fromRouteEnv || (projectId.value ? fromStorageEnv : '')
-    hydrated.value = true
+    if (fromRouteProject) projectId.value = fromRouteProject
+    if (fromRouteEnv && fromRouteProject) environmentId.value = fromRouteEnv
+    if (fromRouteProject || fromRouteEnv) persist()
   }
 
   onMounted(() => {
-    hydrate()
+    const wsId = session.value?.user?.workspaceId
+    if (wsId) {
+      hydrateScopeForWorkspace(wsId)
+      applyRouteScopeOverride()
+    } else if (!hydrated.value) {
+      const legacyProject = localStorage.getItem(LEGACY_PROJECT) ?? ''
+      const fromRouteProject = typeof route.query.projectId === 'string' ? route.query.projectId : ''
+      projectId.value = fromRouteProject || legacyProject
+      const fromRouteEnv = typeof route.query.environmentId === 'string' ? route.query.environmentId : ''
+      environmentId.value =
+        fromRouteEnv || (projectId.value ? (localStorage.getItem(LEGACY_ENV) ?? '') : '')
+      hydrated.value = true
+    }
     syncRouteQuery()
   })
 
@@ -71,6 +118,13 @@ export function useWorkspaceScope() {
     syncRouteQuery()
   }
 
+  /** Drop project filter when it does not exist in the active workspace. */
+  function validateProjectInList(validIds: Set<string>) {
+    if (projectId.value && !validIds.has(projectId.value)) {
+      setProject('')
+    }
+  }
+
   const scopedProjectId = computed(() => projectId.value)
   const scopedEnvironmentId = computed(() => (projectId.value ? environmentId.value : ''))
 
@@ -80,5 +134,8 @@ export function useWorkspaceScope() {
     setProject,
     setEnvironment,
     hydrated,
+    persistScopeForWorkspace,
+    hydrateScopeForWorkspace,
+    validateProjectInList,
   }
 }

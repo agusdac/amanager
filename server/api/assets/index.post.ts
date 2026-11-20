@@ -13,9 +13,11 @@ import {
 import { useDb } from '../../utils/db'
 import { findOrCreateEmail, linkAssetLoginEmail } from '../../utils/inventory-links'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const body = await readBody(event)
   const parsed = createAssetFullSchema.safeParse(body)
   if (!parsed.success) {

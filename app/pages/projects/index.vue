@@ -1,7 +1,16 @@
 <script setup lang="ts">
 const { t } = useI18n()
 useAppPageTitle('pageTitles.projects')
-const { data, refresh, pending } = await useFetch('/api/projects')
+const { data: session } = useSessionFetch()
+const { data, pending } = await useFetch('/api/projects')
+const { data: personalProjects } = await useFetch('/api/me/personal-projects')
+
+const showImportFromPersonal = computed(
+  () =>
+    session.value?.user?.workspaceType === 'team' &&
+    session.value.user.workspaceRole !== 'viewer' &&
+    Boolean(personalProjects.value?.workspaceId),
+)
 </script>
 
 <template>
@@ -11,12 +20,18 @@ const { data, refresh, pending } = await useFetch('/api/projects')
         <h1 class="page-title">{{ t('projects.title') }}</h1>
         <p class="lede">{{ t('app.tagline') }}</p>
       </div>
-      <NuxtLink
-        to="/projects/new"
-        class="btn-primary"
-      >
-        {{ t('projects.new') }}
-      </NuxtLink>
+      <div class="flex flex-wrap gap-2">
+        <NuxtLink
+          v-if="showImportFromPersonal"
+          to="/projects/import-personal"
+          class="btn-secondary"
+        >
+          {{ t('projectCopy.importFromPersonal') }}
+        </NuxtLink>
+        <NuxtLink to="/projects/new" class="btn-primary">
+          {{ t('projects.new') }}
+        </NuxtLink>
+      </div>
     </div>
 
     <p v-if="pending" class="lede">{{ t('common.loading') }}</p>

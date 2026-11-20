@@ -7,9 +7,11 @@ import { getTemplateBySlugForWorkspace } from '../../utils/runbooks/template-acc
 import { loadRunbookContext } from '../../utils/runbooks/context'
 import { generateStepsFromTemplate, type TemplateStepDef } from '../../utils/runbooks/generator'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const body = createRunbookFromTemplateSchema.parse(await readBody(event))
   const db = useDb()
 

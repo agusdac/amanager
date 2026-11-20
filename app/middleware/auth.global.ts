@@ -4,6 +4,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     '/register',
     '/forgot-password',
     '/reset-password',
+    '/invites/accept',
   ])
   if (publicPaths.has(to.path)) return
 

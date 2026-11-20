@@ -2,9 +2,11 @@ import { and, eq } from 'drizzle-orm'
 import { assetDependencies } from '../../../db/schema'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const id = getRouterParam(event, 'id')
   if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing id' })
 

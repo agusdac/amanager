@@ -12,6 +12,7 @@ export type AppNavItem = {
     | 'checklist'
     | 'guide'
     | 'guides'
+    | 'team'
   match?: 'exact' | 'prefix'
 }
 
@@ -27,5 +28,6 @@ export const NAV_SECONDARY: AppNavItem[] = [
   { to: '/import', labelKey: 'nav.import', icon: 'import' },
   { to: '/onboarding', labelKey: 'nav.onboarding', icon: 'onboarding' },
   { to: '/checklist', labelKey: 'nav.checklist', icon: 'checklist' },
+  { to: '/team', labelKey: 'nav.team', icon: 'team' },
   { to: '/guide/verification', labelKey: 'nav.verificationGuide', icon: 'guide' },
 ]

@@ -7,9 +7,11 @@ import { assertWorkspaceTemplate } from '../../utils/runbooks/template-access'
 import { buildWorkspaceTemplateSchemaJson, publicTemplateFromRow } from '../../utils/runbooks/templates'
 import { uniqueWorkspaceTemplateSlug } from '../../utils/runbooks/workspace-template-slug'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const slug = getRouterParam(event, 'slug')
   if (!slug) throw createError({ statusCode: 400, statusMessage: 'Missing slug' })
 

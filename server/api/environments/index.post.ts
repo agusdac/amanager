@@ -3,9 +3,11 @@ import { createEnvironmentSchema } from '../../../shared/schemas/inventory'
 import { projectEnvironments, projects } from '../../../db/schema'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const body = await readBody(event)
   const parsed = createEnvironmentSchema.safeParse(body)
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Invalid input' })

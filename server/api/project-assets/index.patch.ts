@@ -3,10 +3,12 @@ import { projectAssets, projectEnvironments, projects } from '../../../db/schema
 import { updateProjectAssetEnvironmentSchema } from '../../../shared/schemas/inventory'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 import { assertSameWorkspace } from '../../utils/workspace'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const body = await readBody(event)
   const parsed = updateProjectAssetEnvironmentSchema.safeParse(body)
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Invalid input' })

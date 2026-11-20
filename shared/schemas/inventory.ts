@@ -59,6 +59,8 @@ export const createIdentitySchema = z.object({
   principalType: z.string().max(80).optional(),
   authMethod: z.string().max(80).optional(),
   notes: z.string().max(2000).optional(),
+  /** Creates or reuses workspace email and links identity_emails (login). */
+  loginEmail: z.string().email().max(320).optional().nullable(),
 })
 
 export const createEmailSchema = z.object({
@@ -123,6 +125,10 @@ export const patchEmailSchema = z.object({
   label: z.string().max(200).optional(),
 })
 
+export const patchAssetEmailSchema = z.object({
+  passwordManagerItemUrl: optionalUrlField.optional(),
+})
+
 export const createDependencySchema = z.object({
   fromAssetId: z.string().uuid(),
   toAssetId: z.string().uuid(),
@@ -163,7 +169,7 @@ export const createConfigEntrySchema = z
     message: 'Sensitive keys must not store a public value',
   })
 
-export const ONBOARDING_MAX_STEP = 7
+export const ONBOARDING_MAX_STEP = 6
 
 export const onboardingDraftSchema = z.object({
   step: z.number().int().min(1).max(ONBOARDING_MAX_STEP),
@@ -180,4 +186,5 @@ export const createVerificationSchema = z.object({
   method: z.enum(VERIFICATION_METHOD_KEYS),
   evidenceNote: z.string().max(2000).optional(),
   status: z.enum(['declared', 'confirmed_by_human', 'unverified']).optional(),
+  assigneeUserId: z.string().uuid().optional().nullable(),
 })

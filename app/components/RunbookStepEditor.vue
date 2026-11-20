@@ -7,17 +7,19 @@ const props = defineProps<{
     risk: string
     kind: string
     source: string
+    defaultAssigneeUserId?: string | null
   }
   saving?: boolean
 }>()
 
 const emit = defineEmits<{
-  save: [payload: { title: string; bodyMarkdown: string }]
+  save: [payload: { title: string; bodyMarkdown: string; defaultAssigneeUserId?: string | null }]
 }>()
 
 const { t } = useI18n()
 const title = ref(props.step.title)
 const body = ref(props.step.bodyMarkdown)
+const assigneeUserId = ref<string | null>(props.step.defaultAssigneeUserId ?? null)
 const showPreview = ref(false)
 
 watch(
@@ -25,6 +27,7 @@ watch(
   (s) => {
     title.value = s.title
     body.value = s.bodyMarkdown
+    assigneeUserId.value = s.defaultAssigneeUserId ?? null
   },
   { deep: true },
 )
@@ -58,11 +61,21 @@ watch(
     <div v-else class="card border-rule bg-stone-50/50 p-3">
       <AppMarkdownPreview :markdown="body" />
     </div>
+    <label class="block text-sm">
+      <span class="label">{{ t('assignee.defaultOnStep') }}</span>
+      <WorkspaceMemberSelect v-model="assigneeUserId" />
+    </label>
     <button
       type="button"
       class="btn-secondary text-sm"
       :disabled="saving"
-      @click="emit('save', { title: title, bodyMarkdown: body })"
+      @click="
+        emit('save', {
+          title: title,
+          bodyMarkdown: body,
+          defaultAssigneeUserId: assigneeUserId,
+        })
+      "
     >
       {{ saving ? t('common.saving') : t('common.save') }}
     </button>

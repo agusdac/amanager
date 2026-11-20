@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import {
   assetDependencies,
   assetEmails,
@@ -6,6 +6,7 @@ import {
   assets,
   emailAddresses,
   identities,
+  identityEmails,
   projectAssets,
   projectEnvironments,
   projects,
@@ -14,6 +15,7 @@ import {
   configEntries,
   vaultReferences,
   verifications,
+  users,
 } from '../../../db/schema'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
@@ -69,13 +71,46 @@ export default defineEventHandler(async (event) => {
     .leftJoin(identities, eq(identities.id, assetRoles.identityId))
     .where(and(eq(assetRoles.assetId, id), eq(assetRoles.workspaceId, session.workspaceId)))
 
+  const roleIdentityIds = [
+    ...new Set(roles.map((r) => r.identityId).filter((identityId): identityId is string => !!identityId)),
+  ]
+  const identityEmailRows =
+    roleIdentityIds.length > 0
+      ? await db
+          .select({
+            identityId: identityEmails.identityId,
+            address: emailAddresses.address,
+            purpose: identityEmails.purpose,
+          })
+          .from(identityEmails)
+          .innerJoin(emailAddresses, eq(emailAddresses.id, identityEmails.emailId))
+          .where(
+            and(
+              eq(identityEmails.workspaceId, session.workspaceId),
+              inArray(identityEmails.identityId, roleIdentityIds),
+            ),
+          )
+      : []
+
+  const identityEmailsByIdentityId = new Map<string, { address: string; purpose: string }[]>()
+  for (const row of identityEmailRows) {
+    const list = identityEmailsByIdentityId.get(row.identityId) ?? []
+    list.push({ address: row.address, purpose: row.purpose })
+    identityEmailsByIdentityId.set(row.identityId, list)
+  }
+
+  const rolesWithIdentityEmails = roles.map((role) => ({
+    ...role,
+    identityEmails: role.identityId ? (identityEmailsByIdentityId.get(role.identityId) ?? []) : [],
+  }))
+
   const emails = await db
     .select({
       id: assetEmails.id,
       purpose: assetEmails.purpose,
       address: emailAddresses.address,
       emailId: emailAddresses.id,
-      passwordManagerItemUrl: emailAddresses.passwordManagerItemUrl,
+      passwordManagerItemUrl: assetEmails.passwordManagerItemUrl,
     })
     .from(assetEmails)
     .innerJoin(emailAddresses, eq(emailAddresses.id, assetEmails.emailId))
@@ -132,8 +167,16 @@ export default defineEventHandler(async (event) => {
     .where(and(eq(configEntries.workspaceId, session.workspaceId), eq(configEntries.assetId, id)))
 
   const verificationRows = await db
-    .select()
+    .select({
+      id: verifications.id,
+      status: verifications.status,
+      evidenceNote: verifications.evidenceNote,
+      checkedAt: verifications.checkedAt,
+      assigneeUserId: verifications.assigneeUserId,
+      assigneeName: users.name,
+    })
     .from(verifications)
+    .leftJoin(users, eq(users.id, verifications.assigneeUserId))
     .where(
       and(
         eq(verifications.workspaceId, session.workspaceId),
@@ -147,7 +190,7 @@ export default defineEventHandler(async (event) => {
     provider,
     providerAccount: account,
     projects: projectLinks,
-    roles,
+    roles: rolesWithIdentityEmails,
     emails,
     dependencies: {
       outbound: outboundDeps,

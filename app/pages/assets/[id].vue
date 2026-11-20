@@ -3,6 +3,8 @@ import type { AssetAttributes } from '#shared/schemas/assetAttributes'
 import {
   ASSET_TYPES_WITH_VAULT_HINT,
   ASSET_TYPE_KEYS,
+  assetTypeShowsAdminUrl,
+  assetTypeShowsPublicUrl,
   CONFIG_ENTRY_KEY_PRESETS,
   NEEDS_CONFIRMATION_VERIFICATION_STATUSES,
   VERIFICATION_METHOD_KEYS,
@@ -38,14 +40,17 @@ const saving = ref(false)
 const passwordManagerItemUrl = ref('')
 const emailPmUrls = ref<Record<string, string>>({})
 
-const newLoginEmail = ref('')
 const newRoleIdentityId = ref('')
+const pickerIdentityEmails = ref<{ address: string; purpose: string }[]>([])
 const newRoleType = ref<(typeof ACCESS_ROLES)[number]>('admin')
 const accessError = ref('')
+const accessWarning = ref('')
+const accessSuccess = ref('')
 const verifyMethod = ref<(typeof verificationMethods)[number]>('dns_txt')
 const verifyNote = ref('')
 const verifyError = ref('')
 const verifyLoading = ref(false)
+const verifyAssigneeUserId = ref<string | null>(null)
 
 const configPreset = ref<(typeof CONFIG_ENTRY_KEY_PRESETS)[number]>('oauth_client_id')
 const configCustomKey = ref('')
@@ -55,6 +60,11 @@ const configValueType = ref<'string' | 'url' | 'boolean'>('string')
 const configSensitive = ref(false)
 const configError = ref('')
 const configLoading = ref(false)
+const vaultRefLabel = ref('')
+const vaultRefLocation = ref('')
+const vaultRefItemUrl = ref('')
+const vaultRefError = ref('')
+const vaultRefLoading = ref(false)
 const depRemovingId = ref<string | null>(null)
 
 const impactAssets = computed(() =>
@@ -89,7 +99,7 @@ watch(
     passwordManagerItemUrl.value = d.asset.passwordManagerItemUrl ?? ''
     const pm: Record<string, string> = {}
     for (const em of d.emails ?? []) {
-      pm[em.emailId] = em.passwordManagerItemUrl ?? ''
+      pm[em.id] = em.passwordManagerItemUrl ?? ''
     }
     emailPmUrls.value = pm
   },
@@ -99,6 +109,54 @@ watch(
 const showVaultLinkField = computed(() =>
   (ASSET_TYPES_WITH_VAULT_HINT as readonly string[]).includes(type.value),
 )
+const showAdminUrl = computed(() => assetTypeShowsAdminUrl(type.value))
+const showPublicUrl = computed(() => assetTypeShowsPublicUrl(type.value))
+
+const filteredProviderAccounts = computed(() => {
+  const list = accounts.value?.accounts ?? []
+  if (!providerId.value) return list
+  return list.filter((a) => !a.providerId || a.providerId === providerId.value)
+})
+
+const assetLinkedEmailAddresses = computed(
+  () => new Set((data.value?.emails ?? []).map((e) => e.address.trim().toLowerCase())),
+)
+
+function emailAlreadyOnAsset(address: string) {
+  return assetLinkedEmailAddresses.value.has(address.trim().toLowerCase())
+}
+
+watch(
+  [newRoleIdentityId, () => data.value?.roles],
+  async ([identityId]) => {
+    pickerIdentityEmails.value = []
+    if (!identityId) return
+    const fromRole = data.value?.roles?.find((r) => r.identityId === identityId)?.identityEmails
+    if (fromRole?.length) {
+      pickerIdentityEmails.value = fromRole
+      return
+    }
+    try {
+      const detail = await $fetch<{ emails: { address: string; purpose: string }[] }>(
+        `/api/identities/${identityId}`,
+      )
+      pickerIdentityEmails.value = detail.emails ?? []
+    } catch {
+      pickerIdentityEmails.value = []
+    }
+  },
+)
+
+watch(type, () => {
+  if (!showAdminUrl.value) adminUrl.value = ''
+  if (!showPublicUrl.value) publicUrl.value = ''
+})
+
+watch(providerId, (next) => {
+  if (!next) return
+  const ok = filteredProviderAccounts.value.some((a) => a.id === providerAccountId.value)
+  if (providerAccountId.value && !ok) providerAccountId.value = ''
+})
 
 const needsConfirmation = computed(() =>
   (NEEDS_CONFIRMATION_VERIFICATION_STATUSES as readonly string[]).includes(
@@ -223,29 +281,22 @@ async function saveMetadata() {
   }
 }
 
-async function linkEmail() {
-  accessError.value = ''
-  if (!newLoginEmail.value.trim()) return
-  try {
-    await $fetch('/api/asset-emails', {
-      method: 'POST',
-      body: {
-        assetId: assetId.value,
-        address: newLoginEmail.value.trim(),
-        purpose: 'login',
-        identityId: newRoleIdentityId.value || null,
-      },
-    })
-    newLoginEmail.value = ''
-    await refresh()
-  } catch (e: unknown) {
-    accessError.value = formatApiError(e)
-  }
+async function onLoginEmailLinked() {
+  await refresh()
 }
 
 async function addRole() {
   accessError.value = ''
-  if (!newRoleIdentityId.value) return
+  accessWarning.value = ''
+  accessSuccess.value = ''
+  if (!identities.value?.identities?.length) {
+    accessWarning.value = t('assets.accessNoIdentities')
+    return
+  }
+  if (!newRoleIdentityId.value) {
+    accessWarning.value = t('assets.accessIdentityRequired')
+    return
+  }
   try {
     await $fetch('/api/asset-roles', {
       method: 'POST',
@@ -255,6 +306,7 @@ async function addRole() {
         roleType: newRoleType.value,
       },
     })
+    accessSuccess.value = t('assets.accessRoleAdded')
     await refresh()
   } catch (e: unknown) {
     accessError.value = formatApiError(e)
@@ -280,6 +332,7 @@ async function addVerification(
         method: verifyMethod.value,
         evidenceNote: verifyNote.value.trim() || undefined,
         status: outcome,
+        assigneeUserId: verifyAssigneeUserId.value,
       },
     })
     verifyNote.value = ''
@@ -352,21 +405,57 @@ async function saveAssetVaultLink() {
   await refresh()
 }
 
-async function saveEmailVaultLink(emailId: string) {
-  await $fetch(`/api/email-addresses/${emailId}`, {
+async function saveEmailVaultLink(assetEmailId: string) {
+  await $fetch(`/api/asset-emails/${assetEmailId}`, {
     method: 'PATCH',
-    body: { passwordManagerItemUrl: emailPmUrls.value[emailId]?.trim() || '' },
+    body: { passwordManagerItemUrl: emailPmUrls.value[assetEmailId]?.trim() || '' },
   })
   await refresh()
 }
+
 
 async function removeDependency(dependencyId: string) {
   depRemovingId.value = dependencyId
   try {
     await $fetch(`/api/dependencies/${dependencyId}`, { method: 'DELETE' })
-    await refresh()
+    await Promise.all([refresh(), refreshProjectGraph()])
   } finally {
     depRemovingId.value = null
+  }
+}
+
+async function onDependencyLinked() {
+  await Promise.all([refresh(), refreshProjectGraph()])
+}
+
+async function addVaultReference() {
+  vaultRefError.value = ''
+  const label = vaultRefLabel.value.trim()
+  const locationHint = vaultRefLocation.value.trim()
+  if (!label || !locationHint) {
+    vaultRefError.value = t('assets.vaultRefFieldsRequired')
+    return
+  }
+  vaultRefLoading.value = true
+  try {
+    await $fetch('/api/vault-references', {
+      method: 'POST',
+      body: {
+        assetId: assetId.value,
+        projectId: primaryProjectId.value ?? undefined,
+        label,
+        locationHint,
+        itemUrl: vaultRefItemUrl.value.trim() || undefined,
+      },
+    })
+    vaultRefLabel.value = ''
+    vaultRefLocation.value = ''
+    vaultRefItemUrl.value = ''
+    await refresh()
+  } catch (e: unknown) {
+    vaultRefError.value = formatApiError(e)
+  } finally {
+    vaultRefLoading.value = false
   }
 }
 
@@ -462,23 +551,29 @@ async function removeConfigEntry(id: string) {
               <option v-for="p in providers?.providers" :key="p.id" :value="p.id">{{ p.name }}</option>
             </select>
           </label>
-          <label class="form-field">
+          <label class="form-field sm:col-span-2">
             <span class="label">{{ t('assets.providerAccount') }}</span>
-            <select v-model="providerAccountId" class="field">
+            <p class="mt-0.5 text-xs text-subtle">{{ t('assets.providerAccountHint') }}</p>
+            <select v-model="providerAccountId" class="field mt-1">
               <option value="">{{ t('assets.providerAccountAny') }}</option>
-              <option v-for="a in accounts?.accounts" :key="a.id" :value="a.id">{{ a.label }}</option>
+              <option v-for="a in filteredProviderAccounts" :key="a.id" :value="a.id">
+                {{ a.label }}{{ a.providerName ? ` (${a.providerName})` : '' }}
+              </option>
             </select>
+            <NuxtLink to="/accounts?tab=providerAccounts" class="mt-1.5 inline-block text-xs text-subtle underline">
+              {{ t('assets.providerAccountManage') }}
+            </NuxtLink>
           </label>
           <label class="form-field sm:col-span-2">
             <span class="label">{{ t('assets.description') }}</span>
             <textarea v-model="description" rows="3" class="field" />
           </label>
-          <label class="form-field">
+          <label v-if="showAdminUrl" class="form-field">
             <span class="label">{{ t('assets.adminUrl') }}</span>
             <input v-model="adminUrl" type="url" class="field" inputmode="url" />
           </label>
-          <label class="form-field">
-            <span class="label">{{ t('assets.publicUrl', 'Public URL') }}</span>
+          <label v-if="showPublicUrl" class="form-field">
+            <span class="label">{{ t('assets.publicUrl') }}</span>
             <input v-model="publicUrl" type="url" class="field" inputmode="url" />
           </label>
 
@@ -519,9 +614,20 @@ async function removeConfigEntry(id: string) {
           </button>
         </form>
 
-        <form v-if="showVaultLinkField" class="mt-6 border-t border-rule-light pt-6" @submit.prevent="saveAssetVaultLink">
-          <PasswordManagerLinkField v-model="passwordManagerItemUrl" @save="saveAssetVaultLink" />
-        </form>
+        <div
+          v-if="showVaultLinkField"
+          class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-rule-light pt-6"
+        >
+          <div>
+            <p class="text-sm font-medium text-ink">{{ t('assets.passwordManagerItemUrl') }}</p>
+            <p class="text-xs text-subtle">{{ t('assets.passwordManagerItemUrlHint') }}</p>
+          </div>
+          <AssetVaultLinkControl
+            v-model="passwordManagerItemUrl"
+            hint-key="assets.passwordManagerItemUrlHint"
+            @save="saveAssetVaultLink"
+          />
+        </div>
       </section>
 
       <AssetTypeFieldsPanel
@@ -529,13 +635,6 @@ async function removeConfigEntry(id: string) {
         :attributes="assetAttributes"
         :project-website-url="primaryProjectWebsite"
         @save="saveTypeAttributes"
-      />
-
-      <InfrastructureQuickLink
-        :asset-id="assetId"
-        :asset-type="type"
-        :project-asset-options="projectAssetOptions"
-        @linked="refresh"
       />
 
       <section
@@ -574,73 +673,163 @@ async function removeConfigEntry(id: string) {
       </template>
 
       <template #access>
-      <section class="card p-6">
+      <section class="card space-y-8 p-6">
         <h2 class="sr-only">{{ t('assets.sectionAccess') }}</h2>
 
-        <ul v-if="data.roles?.length" class="list-card mt-3 text-sm">
-          <li v-for="role in data.roles" :key="role.id" class="flex justify-between gap-2 px-3 py-2">
-            <span>
-              {{ role.identityLabel ?? t('assets.unknown') }}
-              <span class="text-subtle">({{ t(`assets.roles.${role.roleType}`) }})</span>
-            </span>
-            <VerificationChip :status="role.verificationStatus" />
-          </li>
-        </ul>
-        <p v-else class="mt-2 text-sm text-subtle">{{ t('assets.noRoles') }}</p>
-
-        <ul v-if="data.emails?.length" class="list-card mt-4 text-sm">
-          <li v-for="em in data.emails" :key="em.id" class="space-y-2 px-3 py-3">
-            <div>
-              {{ em.address }}
-              <span class="text-subtle">({{ t(`assets.purposes.${em.purpose}`) }})</span>
-            </div>
-            <PasswordManagerLinkField
-              v-model="emailPmUrls[em.emailId]"
-              hint-key="assets.emailPasswordManagerLink"
-              @save="saveEmailVaultLink(em.emailId)"
-            />
-          </li>
-        </ul>
-        <p v-else class="mt-2 text-sm text-subtle">{{ t('assets.noEmails') }}</p>
-
-        <div class="mt-6 grid gap-4 sm:grid-cols-2">
-          <label class="block text-sm sm:col-span-2">
-            <span class="label">{{ t('assets.accessIdentity') }}</span>
-            <select v-model="newRoleIdentityId" class="field mt-1.5">
-              <option value="">{{ t('assets.accessIdentityAny') }}</option>
-              <option v-for="ident in identities?.identities" :key="ident.id" :value="ident.id">
-                {{ ident.label }}
-              </option>
-            </select>
-          </label>
-          <label class="block text-sm">
-            <span class="label">{{ t('assets.accessRole') }}</span>
-            <select v-model="newRoleType" class="field mt-1.5">
-              <option v-for="role in ACCESS_ROLES" :key="role" :value="role">{{ t(`assets.roles.${role}`) }}</option>
-            </select>
-          </label>
-          <div class="flex items-end">
-            <button
-              type="button"
-              class="btn-secondary"
-              @click="addRole"
-            >
-              {{ t('assets.addRole') }}
-            </button>
+        <div class="space-y-3">
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 class="text-sm font-semibold text-ink">{{ t('assets.sectionIdentityRoles') }}</h3>
+            <p class="text-xs text-subtle">{{ t('assets.sectionIdentityRolesHint') }}</p>
           </div>
-          <label class="block text-sm sm:col-span-2">
-            <span class="label">{{ t('assets.loginEmail') }}</span>
-            <input v-model="newLoginEmail" type="email" class="field mt-1.5" />
-          </label>
-          <button
-            type="button"
-            class="btn-primary sm:col-span-2 sm:w-fit"
-            @click="linkEmail"
-          >
-            {{ t('assets.linkLoginEmail') }}
-          </button>
+          <ul v-if="data.roles?.length" class="list-card text-sm">
+            <li v-for="role in data.roles" :key="role.id" class="space-y-1.5 px-3 py-3">
+              <div class="flex justify-between gap-2">
+                <span class="min-w-0">
+                  <NuxtLink
+                    v-if="role.identityId"
+                    :to="`/identities/${role.identityId}`"
+                    class="font-medium text-ink underline decoration-stone-300 underline-offset-2 hover:decoration-stone-600 dark:decoration-stone-600"
+                  >
+                    {{ role.identityLabel ?? t('assets.unknown') }}
+                  </NuxtLink>
+                  <span v-else class="font-medium text-ink">{{ role.identityLabel ?? t('assets.unknown') }}</span>
+                  <span class="text-subtle"> · {{ t(`assets.roles.${role.roleType}`) }}</span>
+                </span>
+                <VerificationChip :status="role.verificationStatus" />
+              </div>
+              <ul
+                v-if="role.identityEmails?.length"
+                class="space-y-0.5 border-l-2 border-rule-light pl-3 text-xs text-muted"
+              >
+                <li v-for="(em, idx) in role.identityEmails" :key="`${em.address}-${idx}`">
+                  <span class="font-mono text-stone-800 dark:text-stone-200">{{ em.address }}</span>
+                  <span class="text-subtle"> · {{ t(`assets.purposes.${em.purpose}`, em.purpose) }}</span>
+                  <span
+                    v-if="emailAlreadyOnAsset(em.address)"
+                    class="ml-1 font-medium text-emerald-800 dark:text-emerald-300"
+                  >
+                    · {{ t('assets.identityEmailAlreadyOnAsset') }}
+                  </span>
+                </li>
+              </ul>
+              <p v-else-if="role.identityId" class="border-l-2 border-rule-light pl-3 text-xs text-subtle">
+                {{ t('assets.identityNoEmailsYet') }}
+              </p>
+            </li>
+          </ul>
+          <p v-else class="text-sm text-subtle">{{ t('assets.noRoles') }}</p>
+
+          <div class="border-t border-rule-light pt-4">
+            <p class="text-sm font-medium text-ink">{{ t('assets.addRole') }}</p>
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+              <div
+                v-if="!identities?.identities?.length"
+                class="callout callout-warning text-sm sm:col-span-2"
+              >
+                <p class="callout-body">
+                  {{ t('assets.accessNoIdentities') }}
+                  <NuxtLink to="/accounts?tab=identities" class="font-medium text-ink underline">
+                    {{ t('assets.accessCreateIdentity') }}
+                  </NuxtLink>
+                </p>
+              </div>
+              <label class="block text-sm sm:col-span-2">
+                <span class="label">{{ t('assets.accessIdentity') }}</span>
+                <select
+                  v-model="newRoleIdentityId"
+                  class="field mt-1.5"
+                  :disabled="!identities?.identities?.length"
+                >
+                  <option value="">{{ t('assets.accessIdentityPick') }}</option>
+                  <option v-for="ident in identities?.identities" :key="ident.id" :value="ident.id">
+                    {{ ident.label }}
+                  </option>
+                </select>
+              </label>
+              <label class="block text-sm">
+                <span class="label">{{ t('assets.accessRole') }}</span>
+                <select v-model="newRoleType" class="field mt-1.5">
+                  <option v-for="role in ACCESS_ROLES" :key="role" :value="role">{{ t(`assets.roles.${role}`) }}</option>
+                </select>
+              </label>
+              <div class="flex items-end">
+                <button
+                  type="button"
+                  class="btn-secondary"
+                  :disabled="!identities?.identities?.length"
+                  @click="addRole"
+                >
+                  {{ t('assets.addRole') }}
+                </button>
+              </div>
+            </div>
+            <p v-if="accessWarning" class="mt-3 text-sm text-amber-800 dark:text-amber-300">{{ accessWarning }}</p>
+            <p v-if="accessSuccess" class="mt-3 text-sm text-emerald-800 dark:text-emerald-300">{{ accessSuccess }}</p>
+            <p v-if="accessError" class="error-text mt-2">{{ accessError }}</p>
+          </div>
         </div>
-        <p v-if="accessError" class="error-text mt-2">{{ accessError }}</p>
+
+        <div class="space-y-3 border-t border-rule-light pt-8">
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 class="text-sm font-semibold text-ink">{{ t('assets.sectionLoginEmails') }}</h3>
+            <p class="text-xs text-subtle">{{ t('assets.sectionLoginEmailsHint') }}</p>
+          </div>
+          <ul v-if="data.emails?.length" class="list-card text-sm">
+            <li v-for="em in data.emails" :key="em.id" class="flex items-center justify-between gap-3 px-3 py-2.5">
+              <div class="min-w-0">
+                <span class="font-medium text-ink">{{ em.address }}</span>
+                <span class="text-subtle"> · {{ t(`assets.purposes.${em.purpose}`) }}</span>
+              </div>
+              <AssetVaultLinkControl
+                v-model="emailPmUrls[em.id]"
+                hint-key="assets.vaultLinkPerAccessHint"
+                @save="saveEmailVaultLink(em.id)"
+              />
+            </li>
+          </ul>
+          <p v-else class="text-sm text-subtle">{{ t('assets.noEmails') }}</p>
+
+          <div class="border-t border-rule-light pt-4 space-y-3">
+            <p class="text-sm font-medium text-ink">{{ t('assets.linkLoginEmail') }}</p>
+            <p class="text-xs leading-relaxed text-muted">
+              {{ t('assets.linkLoginEmailIdentitySuggest') }}
+              <NuxtLink to="/accounts?tab=identities" class="font-medium text-ink underline">
+                {{ t('assets.accessCreateIdentity') }}
+              </NuxtLink>
+            </p>
+            <p v-if="newRoleIdentityId" class="text-xs text-subtle">
+              {{ t('assets.linkLoginEmailTieIdentityHint') }}
+            </p>
+            <div
+              v-if="newRoleIdentityId && pickerIdentityEmails.length"
+              class="callout callout-neutral text-sm"
+            >
+              <p class="callout-body">
+                <span class="font-medium text-ink">{{ t('assets.pickerIdentityEmailsTitle') }}</span>
+              </p>
+              <ul class="mt-2 space-y-1 text-xs">
+                <li v-for="(em, idx) in pickerIdentityEmails" :key="`pick-${em.address}-${idx}`">
+                  <span class="font-mono">{{ em.address }}</span>
+                  <span
+                    v-if="emailAlreadyOnAsset(em.address)"
+                    class="ml-1 font-medium text-emerald-800 dark:text-emerald-300"
+                  >
+                    {{ t('assets.identityEmailAlreadyOnAsset') }}
+                  </span>
+                  <span v-else class="ml-1 text-subtle">{{ t('assets.identityEmailNotOnAssetYet') }}</span>
+                </li>
+              </ul>
+            </div>
+            <LoginEmailLinkPanel
+              class="mt-2"
+              mode="asset"
+              :asset-id="assetId"
+              :tie-identity-id="newRoleIdentityId || null"
+              :linked-on-asset-addresses="[...assetLinkedEmailAddresses]"
+              @linked="onLoginEmailLinked"
+            />
+          </div>
+        </div>
       </section>
       </template>
 
@@ -653,35 +842,83 @@ async function removeConfigEntry(id: string) {
         :inbound="data.dependencies.inbound"
         :removing-id="depRemovingId"
         @remove="removeDependency"
-      />
+      >
+        <template #add>
+          <InfrastructureQuickLink
+            embedded
+            :asset-id="assetId"
+            :asset-type="type"
+            :project-asset-options="projectAssetOptions"
+            @linked="onDependencyLinked"
+          />
+        </template>
+      </AssetDependenciesPanel>
       </template>
 
       <template #config>
-      <section v-if="data.vaultReferences?.length" class="card bg-stone-50/80 dark:bg-stone-900/80 dark:bg-stone-900/80 p-6">
-        <h2 class="section-title">{{ t('assets.sectionVaultRefs') }}</h2>
-        <p class="lede">{{ t('assets.vaultRefsHint') }}</p>
-        <ul class="list-card mt-3 text-sm">
-          <li v-for="vr in data.vaultReferences" :key="vr.id" class="px-3 py-2">
-            <span class="font-medium">{{ vr.label }}</span>
-            <span class="mt-1 block text-muted">{{ vr.locationHint }}</span>
-            <a
-              v-if="vr.itemUrl"
-              :href="vr.itemUrl"
-              class="mt-1 block text-xs text-muted underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {{ vr.itemUrl }}
-            </a>
-            <span v-if="vr.notes" class="text-subtle">{{ vr.notes }}</span>
-          </li>
-        </ul>
-      </section>
+      <div class="space-y-6">
+        <p class="text-sm text-muted">
+          {{ t('assets.configPageLead') }}
+          <NuxtLink
+            :to="{ path: route.path, query: { tab: 'access' } }"
+            class="font-medium text-ink underline decoration-stone-300 underline-offset-2 hover:decoration-stone-600"
+          >
+            {{ t('assets.configVaultIntroAccessLink') }}
+          </NuxtLink>
+        </p>
 
-      <section class="card p-6" :class="data.vaultReferences?.length ? 'mt-6' : ''">
-        <h2 class="section-title">{{ t('assets.sectionConfig') }}</h2>
-        <p class="lede">{{ t('assets.configHint') }}</p>
-        <ul v-if="data.configEntries?.length" class="list-card mt-4 text-sm">
+        <section class="card space-y-8 p-6">
+          <div class="space-y-4">
+            <header class="space-y-1">
+              <h2 class="section-title">{{ t('assets.sectionVaultRefs') }}</h2>
+              <p class="lede">{{ t('assets.vaultRefsHint') }}</p>
+            </header>
+            <ul v-if="data.vaultReferences?.length" class="list-card text-sm">
+              <li v-for="vr in data.vaultReferences" :key="vr.id" class="space-y-1 px-3 py-3">
+                <span class="font-medium text-ink">{{ vr.label }}</span>
+                <span class="block text-sm text-muted">{{ vr.locationHint }}</span>
+                <a
+                  v-if="vr.itemUrl"
+                  :href="vr.itemUrl"
+                  class="block break-all font-mono text-xs text-subtle underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ vr.itemUrl }}
+                </a>
+                <p v-if="vr.notes" class="text-xs text-subtle">{{ vr.notes }}</p>
+              </li>
+            </ul>
+            <p v-else class="text-sm text-subtle">{{ t('assets.vaultRefsEmpty') }}</p>
+            <form class="grid max-w-2xl gap-4 border-t border-rule-light pt-6 sm:grid-cols-2" @submit.prevent="addVaultReference">
+              <label class="block text-sm sm:col-span-2">
+                <span class="label">{{ t('assets.vaultRefLabel') }}</span>
+                <input v-model="vaultRefLabel" class="field mt-1.5" :placeholder="t('assets.vaultRefLabelPlaceholder')" />
+              </label>
+              <label class="block text-sm sm:col-span-2">
+                <span class="label">{{ t('assets.vaultRefLocation') }}</span>
+                <input v-model="vaultRefLocation" class="field mt-1.5" :placeholder="t('assets.vaultRefLocationPlaceholder')" />
+              </label>
+              <label class="block text-sm sm:col-span-2">
+                <span class="label">{{ t('assets.vaultRefItemUrl') }}</span>
+                <span class="mt-0.5 block text-xs text-subtle">{{ t('assets.vaultRefItemUrlHint') }}</span>
+                <input v-model="vaultRefItemUrl" type="url" class="field mt-1.5 font-mono text-sm" inputmode="url" />
+              </label>
+              <div class="sm:col-span-2">
+                <p v-if="vaultRefError" class="error-text">{{ vaultRefError }}</p>
+                <button type="submit" class="btn-secondary mt-2" :disabled="vaultRefLoading">
+                  {{ t('assets.addVaultReference') }}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="space-y-4 border-t border-rule-light pt-8">
+            <header class="space-y-1">
+              <h2 class="section-title">{{ t('assets.sectionConfig') }}</h2>
+              <p class="lede">{{ t('assets.configHint') }}</p>
+            </header>
+        <ul v-if="data.configEntries?.length" class="list-card text-sm">
           <li
             v-for="entry in data.configEntries"
             :key="entry.id"
@@ -701,8 +938,8 @@ async function removeConfigEntry(id: string) {
             </button>
           </li>
         </ul>
-        <p v-else class="mt-3 text-sm text-subtle">{{ t('assets.noConfigEntries') }}</p>
-        <form class="mt-6 max-w-xl space-y-3" @submit.prevent="addConfigEntry">
+        <p v-else class="text-sm text-subtle">{{ t('assets.noConfigEntries') }}</p>
+        <form class="max-w-2xl space-y-4 border-t border-rule-light pt-6" @submit.prevent="addConfigEntry">
           <label class="block text-sm">
             <span class="label">{{ t('assets.configKey') }}</span>
             <select v-model="configPreset" class="field mt-1.5">
@@ -732,7 +969,9 @@ async function removeConfigEntry(id: string) {
             {{ t('assets.addConfigEntry') }}
           </button>
         </form>
-      </section>
+          </div>
+        </section>
+      </div>
       </template>
 
       <template #verifications>
@@ -763,6 +1002,9 @@ async function removeConfigEntry(id: string) {
         <ul v-if="data.verifications?.length" class="list-card mt-4 text-sm">
           <li v-for="v in data.verifications" :key="v.id" class="space-y-1 px-3 py-2">
             <span class="font-medium text-ink">{{ verificationMethodLabel(v.status) }}</span>
+            <p v-if="v.assigneeName" class="text-xs text-muted">
+              {{ t('assignee.label') }}: {{ v.assigneeName }}
+            </p>
             <p v-if="v.evidenceNote" class="text-muted">{{ v.evidenceNote }}</p>
             <p v-if="v.checkedAt" class="text-xs text-subtle">
               {{ t('assets.verificationChecked', { date: new Date(v.checkedAt).toLocaleDateString() }) }}
@@ -782,6 +1024,10 @@ async function removeConfigEntry(id: string) {
           <label class="block text-sm">
             <span class="label">{{ t('assets.verificationEvidence') }}</span>
             <textarea v-model="verifyNote" rows="2" class="field mt-1.5" :placeholder="t('assets.verificationEvidencePlaceholder')" />
+          </label>
+          <label class="block text-sm">
+            <span class="label">{{ t('assignee.label') }}</span>
+            <WorkspaceMemberSelect v-model="verifyAssigneeUserId" />
           </label>
           <p v-if="verifyError" class="error-text">{{ verifyError }}</p>
           <button type="submit" class="btn-secondary" :disabled="verifyLoading">

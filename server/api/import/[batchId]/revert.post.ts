@@ -3,9 +3,11 @@ import { assets, importBatches, projectAssets } from '../../../../db/schema'
 import { recordAudit } from '../../../utils/audit'
 import { useDb } from '../../../utils/db'
 import { requireSession } from '../../../utils/session'
+import { requireEditor } from '../../../utils/workspace-role'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const batchId = getRouterParam(event, 'batchId')
   if (!batchId) throw createError({ statusCode: 400, statusMessage: 'Missing batchId' })
 

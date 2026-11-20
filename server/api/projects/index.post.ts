@@ -2,10 +2,12 @@ import { createProjectSchema } from '../../../shared/schemas/project'
 import { projects } from '../../../db/schema'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
+import { requireEditor } from '../../utils/workspace-role'
 import { slugify } from '../../utils/slug'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
+  requireEditor(session)
   const body = await readBody(event)
   const parsed = createProjectSchema.safeParse(body)
   if (!parsed.success) {
@@ -23,6 +25,7 @@ export default defineEventHandler(async (event) => {
         .insert(projects)
         .values({
           workspaceId: session.workspaceId,
+          createdByUserId: session.id,
           slug,
           name: parsed.data.name,
           description: parsed.data.description ?? null,

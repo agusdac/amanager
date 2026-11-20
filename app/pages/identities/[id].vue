@@ -32,6 +32,13 @@ useAppPageTitle(
   ),
 )
 
+const loginEmails = computed(() =>
+  (data.value?.emails ?? []).filter((em: { purpose: string }) => em.purpose === 'login'),
+)
+const otherEmails = computed(() =>
+  (data.value?.emails ?? []).filter((em: { purpose: string }) => em.purpose !== 'login'),
+)
+
 const identityTabs = computed(() => [
   { id: 'access', label: t('tabs.identity.access') },
   { id: 'emails', label: t('tabs.identity.emails') },
@@ -61,8 +68,10 @@ const identityTabs = computed(() => [
 
     <AppDetailTabs v-else-if="data" :tabs="identityTabs" default-tab="access">
       <template #access>
-        <section class="card space-y-3 p-5">
+        <section class="card space-y-6 p-5">
           <h2 class="sr-only">{{ t('identityDetail.assetsAccess') }}</h2>
+          <div class="space-y-3">
+          <p class="text-sm font-semibold text-ink">{{ t('identityDetail.assetsAccess') }}</p>
           <p class="lede">{{ t('identityDetail.assetsAccessHint') }}</p>
           <ul v-if="data.assetAccess?.length" class="divide-y divide-rule border-t border-rule-light">
             <li
@@ -83,8 +92,12 @@ const identityTabs = computed(() => [
             </li>
           </ul>
           <p v-else class="mt-4 text-sm text-subtle">{{ t('identityDetail.noAssets') }}</p>
-          <IdentityAccessForm :identity-id="id" @linked="refresh()" />
-          <div v-if="assetOptions.length" class="mt-6 border-t border-rule-light pt-4">
+          <div class="border-t border-rule-light pt-4">
+            <p class="text-sm font-medium text-ink">{{ t('identityDetail.linkAsset') }}</p>
+            <IdentityAccessForm class="mt-4" :identity-id="id" @linked="refresh()" />
+          </div>
+          </div>
+          <div v-if="assetOptions.length" class="border-t border-rule-light pt-6">
             <p class="text-sm font-medium text-stone-800 dark:text-stone-200">{{ t('identityDetail.openAssetAccess') }}</p>
             <p class="mt-1 text-xs text-subtle">{{ t('identityDetail.openAssetAccessHint') }}</p>
             <ul class="mt-2 flex flex-wrap gap-2 text-sm">
@@ -99,15 +112,35 @@ const identityTabs = computed(() => [
       </template>
 
       <template #emails>
-        <section class="card space-y-3 p-5">
+        <section class="card space-y-8 p-5">
           <h2 class="sr-only">{{ t('accounts.emails') }}</h2>
-          <ul v-if="data.emails?.length" class="divide-y divide-rule border-t border-rule-light">
-            <li v-for="(em, i) in data.emails" :key="i" class="px-4 py-2 text-sm">
-              <span class="font-medium">{{ em.address }}</span>
-              <span class="ml-2 text-subtle">({{ t(`assets.purposes.${em.purpose}`) }})</span>
-            </li>
-          </ul>
-          <p v-else class="mt-3 text-sm text-subtle">{{ t('identityDetail.noEmails') }}</p>
+
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 class="text-sm font-semibold text-ink">{{ t('identityDetail.loginEmailsSection') }}</h3>
+              <p class="text-xs text-subtle">{{ t('identityDetail.loginEmailsSectionHint') }}</p>
+            </div>
+            <ul v-if="loginEmails.length" class="list-card text-sm">
+              <li v-for="em in loginEmails" :key="em.address" class="px-3 py-2">
+                <span class="font-medium text-ink">{{ em.address }}</span>
+              </li>
+            </ul>
+            <p v-else class="text-sm text-subtle">{{ t('identityDetail.noLoginEmails') }}</p>
+            <div class="border-t border-rule-light pt-4">
+              <p class="text-sm font-medium text-ink">{{ t('assets.linkLoginEmail') }}</p>
+              <LoginEmailLinkPanel class="mt-4" mode="identity" :identity-id="id" @linked="refresh()" />
+            </div>
+          </div>
+
+          <div v-if="otherEmails.length" class="space-y-3 border-t border-rule-light pt-8">
+            <h3 class="text-sm font-semibold text-ink">{{ t('identityDetail.otherEmailsSection') }}</h3>
+            <ul class="list-card text-sm">
+              <li v-for="em in otherEmails" :key="`${em.address}-${em.purpose}`" class="px-3 py-2">
+                <span class="font-medium text-ink">{{ em.address }}</span>
+                <span class="text-subtle"> · {{ t(`assets.purposes.${em.purpose}`) }}</span>
+              </li>
+            </ul>
+          </div>
         </section>
       </template>
 
