@@ -30,7 +30,7 @@ function methodExample(key: string) {
         <li
           v-for="key in statusKeys"
           :key="key"
-          class="rounded-lg border border-rule bg-stone-50/80 dark:bg-stone-900/80 px-4 py-3"
+          class="rounded-lg border border-rule bg-stone-50/80 dark:bg-stone-900/80 dark:bg-stone-900/80 px-4 py-3"
         >
           <div class="flex flex-wrap items-center gap-2">
             <VerificationChip :status="key" />

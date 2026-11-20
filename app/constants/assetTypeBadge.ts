@@ -8,8 +8,7 @@ export const ASSET_TYPE_BADGE_CLASS: Record<string, string> = {
   hosting: 'bg-amber-100 text-amber-950 dark:bg-amber-950/55 dark:text-amber-300',
   hosting_account: 'bg-amber-100 text-amber-950 dark:bg-amber-950/55 dark:text-amber-300',
   server: 'bg-orange-100 text-orange-900 dark:bg-orange-950/55 dark:text-orange-300',
-  repository:
-    'bg-stone-100 text-stone-800 dark:bg-stone-800 dark:text-stone-200',
+  repository: 'bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-stone-100',
   dns: 'bg-cyan-100 text-cyan-900 dark:bg-cyan-950/55 dark:text-cyan-300',
   email: 'bg-pink-100 text-pink-900 dark:bg-pink-950/55 dark:text-pink-300',
   oauth_client: 'bg-indigo-100 text-indigo-900 dark:bg-indigo-950/55 dark:text-indigo-300',

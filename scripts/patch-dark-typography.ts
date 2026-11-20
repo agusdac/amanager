@@ -23,7 +23,10 @@ function walk(dir: string) {
 walk(join(root, 'app'))
 targets.push(join(root, 'shared', 'markdown', 'preview.ts'))
 
-const skipFiles = new Set(['app/constants/assetTypeBadge.ts'])
+const skipFiles = new Set([
+  'app/constants/assetTypeBadge.ts',
+  'app/components/DependencyGraph.vue',
+])
 
 type Rule = { from: RegExp; to: string }
 

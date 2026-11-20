@@ -536,7 +536,7 @@ async function finalize() {
               class="flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors"
               :class="
                 selectedProviders.includes(p.slug)
-                  ? 'border-stone-900 bg-stone-900 text-white dark:border-stone-300 dark:bg-stone-100 dark:text-stone-900'
+                  ? 'border-stone-900 bg-stone-900 text-white dark:border-stone-300 dark:bg-stone-100 dark:text-ink'
                   : 'border-rule bg-surface-muted text-ink hover:border-stone-300 dark:border-stone-600 hover:bg-surface'
               "
               @click="toggleProvider(p.slug)"
@@ -558,7 +558,7 @@ async function finalize() {
           <div
             v-for="(id, idx) in identityDrafts"
             :key="idx"
-            class="rounded-lg border border-rule bg-stone-50/80 dark:bg-stone-900/80 p-3 sm:p-4"
+            class="rounded-lg border border-rule bg-stone-50/80 dark:bg-stone-900/80 dark:bg-stone-900/80 p-3 sm:p-4"
           >
             <p v-if="id.providerSlug && !id.unsure" class="mb-2 text-xs text-subtle">
               {{ t(roleHintKey(id.providerSlug)) }}
@@ -747,7 +747,7 @@ async function finalize() {
           </div>
         </dl>
 
-        <div class="rounded-lg border border-rule bg-stone-50/80 dark:bg-stone-900/80 p-4 text-sm text-ink-secondary">
+        <div class="rounded-lg border border-rule bg-stone-50/80 dark:bg-stone-900/80 dark:bg-stone-900/80 p-4 text-sm text-ink-secondary">
           <p class="font-medium text-ink">{{ t('onboarding.reviewNextSteps') }}</p>
           <p class="mt-1 text-muted">{{ t('onboarding.reviewNextStepsHint') }}</p>
         </div>
@@ -756,7 +756,7 @@ async function finalize() {
       </div>
 
       <footer
-        class="flex flex-col-reverse gap-3 border-t border-rule-light bg-stone-50/80 dark:bg-stone-900/80 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8"
+        class="flex flex-col-reverse gap-3 border-t border-rule-light bg-stone-50/80 dark:bg-stone-900/80 dark:bg-stone-900/80 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8"
       >
         <div class="flex flex-wrap gap-2">
           <button

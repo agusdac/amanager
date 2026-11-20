@@ -112,7 +112,7 @@ const identityTabs = computed(() => [
       </template>
 
       <template #accounts>
-        <section class="card space-y-2 bg-stone-50/80 dark:bg-stone-900/80 p-5">
+        <section class="card space-y-2 bg-stone-50/80 dark:bg-stone-900/80 dark:bg-stone-900/80 p-5">
           <h2 class="sr-only">{{ t('accounts.providerAccounts') }}</h2>
           <ul class="mt-2 space-y-1 text-sm">
             <li v-for="acc in data.linkedAccounts" :key="acc.accountId">

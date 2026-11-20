@@ -56,7 +56,7 @@ const graphPalette = computed(() => {
     edgeLabelStroke: dark ? '#57534e' : '#e7e5e4',
     edgeLabelText: dark ? '#e7e5e4' : '#44403c',
     arrowFill: dark ? '#a8a29e' : '#78716c',
-    nodeLabelClass: dark ? 'truncate text-xs font-medium text-stone-100' : 'truncate text-xs font-medium text-stone-800',
+    nodeLabelClass: dark ? 'truncate text-xs font-medium text-stone-100' : 'truncate text-xs font-medium text-stone-800 dark:text-stone-200',
   }
 })
 
@@ -840,8 +840,9 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
 </template>
 
 <style scoped>
+/* Use only Tailwind core utilities here — semantic tokens break PostCSS @apply in SFC. */
 .graph-canvas-shell--expanded {
-  @apply fixed inset-3 z-[80] m-0 rounded-xl border-stone-300 bg-stone-50 shadow-2xl;
+  @apply fixed inset-3 z-[80] m-0 rounded-xl border border-stone-300 bg-stone-50 shadow-2xl;
   @apply dark:border-stone-600 dark:bg-stone-950;
   max-height: calc(100vh - 1.5rem);
 }

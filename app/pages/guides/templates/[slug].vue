@@ -111,7 +111,7 @@ async function deleteTemplate() {
       </ol>
     </section>
 
-    <section class="card space-y-2 border-rule bg-stone-50/80 dark:bg-stone-900/80 p-5 text-sm text-ink-secondary">
+    <section class="card space-y-2 border-rule bg-stone-50/80 dark:bg-stone-900/80 dark:bg-stone-900/80 p-5 text-sm text-ink-secondary">
       <h2 class="font-medium text-ink">{{ t('guides.templates.afterCreateTitle') }}</h2>
       <p>{{ t('guides.templates.afterCreateBody') }}</p>
     </section>
