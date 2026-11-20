@@ -69,11 +69,11 @@ function choose(row: { id: string; label: string }) {
       aria-modal="true"
     >
       <div class="absolute inset-0 bg-stone-900/45 backdrop-blur-[2px]" @click="open = false" />
-      <div class="relative z-10 w-full max-w-md rounded-xl border border-stone-200 bg-white p-5 shadow-xl">
-        <h2 class="text-lg font-medium text-stone-900">
+      <div class="relative z-10 w-full max-w-md rounded-xl border border-rule bg-surface p-5 shadow-xl">
+        <h2 class="text-lg font-medium text-ink">
           {{ t(`guides.templates.pickerTitle.${targetType}`) }}
         </h2>
-        <p class="mt-1 text-sm text-stone-600">{{ t('guides.templates.pickerHint') }}</p>
+        <p class="mt-1 text-sm text-muted">{{ t('guides.templates.pickerHint') }}</p>
         <input
           v-model="q"
           type="search"
@@ -81,16 +81,16 @@ function choose(row: { id: string; label: string }) {
           :placeholder="t('guides.templates.pickerSearchPh')"
           autofocus
         />
-        <p v-if="pending" class="mt-3 text-sm text-stone-500">{{ t('common.loading') }}</p>
+        <p v-if="pending" class="mt-3 text-sm text-subtle">{{ t('common.loading') }}</p>
         <ul v-else-if="results.length" class="mt-3 max-h-64 space-y-1 overflow-y-auto">
           <li v-for="row in results" :key="row.id">
-            <button type="button" class="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-stone-100" @click="choose(row)">
-              <span class="font-medium text-stone-900">{{ row.label }}</span>
-              <span v-if="row.sublabel" class="mt-0.5 block text-xs text-stone-500">{{ row.sublabel }}</span>
+            <button type="button" class="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-surface-soft" @click="choose(row)">
+              <span class="font-medium text-ink">{{ row.label }}</span>
+              <span v-if="row.sublabel" class="mt-0.5 block text-xs text-subtle">{{ row.sublabel }}</span>
             </button>
           </li>
         </ul>
-        <p v-else-if="q.trim().length >= 1" class="mt-3 text-sm text-stone-500">{{ t('guides.templates.pickerEmpty') }}</p>
+        <p v-else-if="q.trim().length >= 1" class="mt-3 text-sm text-subtle">{{ t('guides.templates.pickerEmpty') }}</p>
         <button type="button" class="btn-secondary mt-4 w-full text-sm" @click="open = false">
           {{ t('common.cancel') }}
         </button>

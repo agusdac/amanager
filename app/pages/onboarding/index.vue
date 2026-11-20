@@ -414,37 +414,37 @@ async function finalize() {
     <header class="space-y-2">
       <h1 class="page-title tracking-tight">{{ t('onboarding.title') }}</h1>
       <p class="lede">{{ t('onboarding.subtitle') }}</p>
-      <div class="flex flex-wrap items-center gap-3 text-xs text-stone-500">
+      <div class="flex flex-wrap items-center gap-3 text-xs text-subtle">
         <span>{{ t('onboarding.step', { current: step, total: TOTAL_STEPS }) }}</span>
-        <span v-if="saving" class="text-stone-400">{{ t('common.loading') }}</span>
+        <span v-if="saving" class="text-faint">{{ t('common.loading') }}</span>
         <span v-else-if="lastSaved" class="text-emerald-700">{{ t('onboarding.saved') }}</span>
       </div>
     </header>
 
     <OnboardingStepper :current="step" :total="TOTAL_STEPS" :labels="stepNavLabels" />
 
-    <section class="rounded-xl border border-stone-200 bg-white shadow-sm">
+    <section class="onboarding-panel">
       <!-- Step 1 -->
       <div v-if="step === 1" class="space-y-6 p-6 sm:p-8">
         <div class="space-y-2">
-          <h2 class="text-lg font-semibold text-stone-900">{{ t('onboarding.welcomeTitle') }}</h2>
-          <p class="text-sm leading-relaxed text-stone-600">{{ t('onboarding.welcomeBody') }}</p>
+          <h2 class="text-lg font-semibold text-ink">{{ t('onboarding.welcomeTitle') }}</h2>
+          <p class="text-sm leading-relaxed text-muted">{{ t('onboarding.welcomeBody') }}</p>
         </div>
-        <ul class="space-y-3 text-sm text-stone-700">
+        <ul class="space-y-3 text-sm text-ink-secondary">
           <li class="flex gap-3">
-            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-600">
+            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-soft text-muted">
               <IconCheck class="h-3.5 w-3.5" />
             </span>
             {{ t('onboarding.welcomeList1') }}
           </li>
           <li class="flex gap-3">
-            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-600">
+            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-soft text-muted">
               <IconCheck class="h-3.5 w-3.5" />
             </span>
             {{ t('onboarding.welcomeList2') }}
           </li>
           <li class="flex gap-3">
-            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-600">
+            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-soft text-muted">
               <IconCheck class="h-3.5 w-3.5" />
             </span>
             {{ t('onboarding.welcomeList3') }}
@@ -455,12 +455,12 @@ async function finalize() {
       <!-- Step 2 -->
       <div v-else-if="step === 2" class="space-y-5 p-6 sm:p-8">
         <div class="space-y-1">
-          <h2 class="text-lg font-semibold text-stone-900">{{ t('onboarding.projectTitle') }}</h2>
-          <p class="text-sm text-stone-600">{{ t('onboarding.projectHint') }}</p>
+          <h2 class="text-lg font-semibold text-ink">{{ t('onboarding.projectTitle') }}</h2>
+          <p class="text-sm text-muted">{{ t('onboarding.projectHint') }}</p>
         </div>
         <div class="space-y-4">
           <label class="block text-sm">
-            <span class="font-medium text-stone-700">{{ t('projects.name') }}</span>
+            <span class="font-medium text-ink-secondary">{{ t('projects.name') }}</span>
             <input
               v-model="projectName"
               type="text"
@@ -470,10 +470,10 @@ async function finalize() {
             />
           </label>
           <div class="block text-sm">
-            <span class="font-medium text-stone-700">{{ t('projects.website') }}</span>
-            <span class="ml-1 font-normal text-stone-400">· {{ t('common.optional') }}</span>
-            <div v-if="!websiteDomainUnverified" class="mt-1.5 flex rounded-lg border border-stone-300 bg-white focus-within:border-stone-500 focus-within:ring-2 focus-within:ring-stone-200">
-              <span class="flex items-center rounded-l-lg border-r border-stone-200 bg-stone-50 px-3 text-sm text-stone-500">https://</span>
+            <span class="font-medium text-ink-secondary">{{ t('projects.website') }}</span>
+            <span class="ml-1 font-normal text-faint">· {{ t('common.optional') }}</span>
+            <div v-if="!websiteDomainUnverified" class="mt-1.5 flex rounded-lg border border-stone-300 dark:border-stone-600 bg-surface focus-within:border-stone-500 focus-within:ring-2 focus-within:ring-stone-200">
+              <span class="flex items-center rounded-l-lg border-r border-rule bg-surface-muted px-3 text-sm text-subtle">https://</span>
               <input
                 v-model="websiteHost"
                 type="text"
@@ -489,14 +489,14 @@ async function finalize() {
               :placeholder="t('onboarding.websiteUnverifiedPlaceholder')"
               class="field-wizard mt-1.5"
             />
-            <label class="mt-2 flex cursor-pointer items-center gap-2 text-sm text-stone-600">
-              <input v-model="websiteDomainUnverified" type="checkbox" class="rounded border-stone-300" />
+            <label class="mt-2 flex cursor-pointer items-center gap-2 text-sm text-muted">
+              <input v-model="websiteDomainUnverified" type="checkbox" class="checkbox" />
               {{ t('onboarding.websiteUnverified') }}
             </label>
-            <p class="mt-1 text-xs text-stone-500">{{ t('onboarding.websiteHint') }}</p>
+            <p class="mt-1 text-xs text-subtle">{{ t('onboarding.websiteHint') }}</p>
           </div>
           <label class="block text-sm">
-            <span class="font-medium text-stone-700">{{ t('projects.description') }}</span>
+            <span class="font-medium text-ink-secondary">{{ t('projects.description') }}</span>
             <textarea
               v-model="description"
               rows="3"
@@ -510,8 +510,8 @@ async function finalize() {
       <!-- Step 3 -->
       <div v-else-if="step === 3" class="space-y-5 p-6 sm:p-8">
         <div class="space-y-1">
-          <h2 class="text-lg font-semibold text-stone-900">{{ t('onboarding.toolsTitle') }}</h2>
-          <p class="text-sm text-stone-600">{{ t('onboarding.toolsHint') }}</p>
+          <h2 class="text-lg font-semibold text-ink">{{ t('onboarding.toolsTitle') }}</h2>
+          <p class="text-sm text-muted">{{ t('onboarding.toolsHint') }}</p>
         </div>
         <input
           v-model="providerSearch"
@@ -519,15 +519,15 @@ async function finalize() {
           :placeholder="t('onboarding.toolsSearch')"
           class="field-wizard"
         />
-        <p class="text-xs text-stone-500">{{ t('onboarding.toolsSelected', { count: selectedProviders.length }) }}</p>
+        <p class="text-xs text-subtle">{{ t('onboarding.toolsSelected', { count: selectedProviders.length }) }}</p>
         <div
           v-if="!groupedProviders.length"
-          class="rounded-lg border border-dashed border-stone-200 px-4 py-8 text-center text-sm text-stone-500"
+          class="rounded-lg border border-dashed border-rule px-4 py-8 text-center text-sm text-subtle"
         >
           {{ t('onboarding.toolsEmpty') }}
         </div>
         <div v-for="[category, items] in groupedProviders" :key="category" class="space-y-2">
-          <h3 class="text-xs font-semibold uppercase tracking-wide text-stone-500">{{ categoryLabel(category) }}</h3>
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-subtle">{{ categoryLabel(category) }}</h3>
           <div class="grid gap-2 sm:grid-cols-2">
             <button
               v-for="p in items"
@@ -536,8 +536,8 @@ async function finalize() {
               class="flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors"
               :class="
                 selectedProviders.includes(p.slug)
-                  ? 'border-stone-900 bg-stone-900 text-white'
-                  : 'border-stone-200 bg-stone-50 hover:border-stone-300 hover:bg-white'
+                  ? 'border-stone-900 bg-stone-900 text-white dark:border-stone-300 dark:bg-stone-100 dark:text-stone-900'
+                  : 'border-rule bg-surface-muted text-ink hover:border-stone-300 dark:border-stone-600 hover:bg-surface'
               "
               @click="toggleProvider(p.slug)"
             >
@@ -551,21 +551,21 @@ async function finalize() {
       <!-- Step 4 -->
       <div v-else-if="step === 4" class="space-y-5 p-6 sm:p-8">
         <div class="space-y-1">
-          <h2 class="text-lg font-semibold text-stone-900">{{ t('onboarding.accountsTitle') }}</h2>
-          <p class="text-sm text-stone-600">{{ t('onboarding.accountsHint') }}</p>
+          <h2 class="text-lg font-semibold text-ink">{{ t('onboarding.accountsTitle') }}</h2>
+          <p class="text-sm text-muted">{{ t('onboarding.accountsHint') }}</p>
         </div>
         <div class="space-y-3">
           <div
             v-for="(id, idx) in identityDrafts"
             :key="idx"
-            class="rounded-lg border border-stone-200 bg-stone-50/80 p-3 sm:p-4"
+            class="rounded-lg border border-rule bg-stone-50/80 dark:bg-stone-900/80 p-3 sm:p-4"
           >
-            <p v-if="id.providerSlug && !id.unsure" class="mb-2 text-xs text-stone-500">
+            <p v-if="id.providerSlug && !id.unsure" class="mb-2 text-xs text-subtle">
               {{ t(roleHintKey(id.providerSlug)) }}
             </p>
             <div class="grid gap-3 sm:grid-cols-[1fr,minmax(8rem,10rem),auto] sm:items-end">
               <label class="block text-sm">
-                <span class="font-medium text-stone-700">{{ t('onboarding.identityLabel') }}</span>
+                <span class="font-medium text-ink-secondary">{{ t('onboarding.identityLabel') }}</span>
                 <input
                   v-model="id.label"
                   type="text"
@@ -575,7 +575,7 @@ async function finalize() {
                 />
               </label>
               <label class="block text-sm">
-                <span class="font-medium text-stone-700">{{ t('onboarding.identityProvider') }}</span>
+                <span class="font-medium text-ink-secondary">{{ t('onboarding.identityProvider') }}</span>
                 <select
                   v-model="id.providerSlug"
                   :disabled="id.unsure"
@@ -586,14 +586,14 @@ async function finalize() {
                 </select>
               </label>
               <div class="flex items-center justify-between gap-2 sm:flex-col sm:items-stretch">
-                <label class="flex cursor-pointer items-center gap-2 text-sm text-stone-600">
-                  <input v-model="id.unsure" type="checkbox" class="rounded border-stone-300" />
+                <label class="flex cursor-pointer items-center gap-2 text-sm text-muted">
+                  <input v-model="id.unsure" type="checkbox" class="checkbox" />
                   {{ t('onboarding.notSure') }}
                 </label>
                 <button
                   v-if="identityDrafts.length > 1"
                   type="button"
-                  class="inline-flex items-center justify-center gap-1 rounded border border-stone-200 bg-white px-2 py-1.5 text-xs text-stone-600 hover:bg-stone-50"
+                  class="inline-flex items-center justify-center gap-1 rounded border border-rule bg-surface px-2 py-1.5 text-xs text-muted hover:bg-surface-muted"
                   @click="removeIdentityRow(idx)"
                 >
                   <IconX class="h-3.5 w-3.5" />
@@ -602,8 +602,8 @@ async function finalize() {
               </div>
             </div>
             <label v-if="!id.unsure" class="mt-3 block text-sm">
-              <span class="font-medium text-stone-700">{{ t('onboarding.identityLoginEmail') }}</span>
-              <span class="ml-1 font-normal text-stone-400">· {{ t('common.optional') }}</span>
+              <span class="font-medium text-ink-secondary">{{ t('onboarding.identityLoginEmail') }}</span>
+              <span class="ml-1 font-normal text-faint">· {{ t('common.optional') }}</span>
               <input
                 v-model="id.loginEmail"
                 type="email"
@@ -615,7 +615,7 @@ async function finalize() {
         </div>
         <button
           type="button"
-          class="inline-flex items-center gap-2 text-sm font-medium text-stone-700 hover:text-stone-900"
+          class="inline-flex items-center gap-2 text-sm font-medium text-ink-secondary hover:text-ink"
           @click="addIdentityRow"
         >
           <IconPlus class="h-4 w-4" />
@@ -626,30 +626,30 @@ async function finalize() {
       <!-- Step 5 — assets -->
       <div v-else-if="step === 5" class="space-y-5 p-6 sm:p-8">
         <div class="space-y-1">
-          <h2 class="text-lg font-semibold text-stone-900">{{ t('onboarding.assetsTitle') }}</h2>
-          <p class="text-sm text-stone-600">{{ t('onboarding.assetsHint') }}</p>
+          <h2 class="text-lg font-semibold text-ink">{{ t('onboarding.assetsTitle') }}</h2>
+          <p class="text-sm text-muted">{{ t('onboarding.assetsHint') }}</p>
         </div>
-        <div v-if="!selectedProviders.length" class="text-sm text-stone-500">{{ t('onboarding.noProvidersSelected') }}</div>
+        <div v-if="!selectedProviders.length" class="text-sm text-subtle">{{ t('onboarding.noProvidersSelected') }}</div>
         <div v-else class="space-y-3">
           <div
             v-for="asset in assetDrafts"
             :key="asset.providerSlug"
-            class="rounded-lg border border-stone-200 p-4"
+            class="rounded-lg border border-rule p-4"
           >
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <label class="flex items-center gap-2 text-sm font-medium text-stone-800">
-                <input v-model="asset.enabled" type="checkbox" class="rounded border-stone-300" />
+              <label class="flex items-center gap-2 text-sm font-medium text-ink">
+                <input v-model="asset.enabled" type="checkbox" class="checkbox" />
                 {{ providerBySlug.get(asset.providerSlug)?.name ?? asset.providerSlug }}
               </label>
-              <span class="text-xs text-stone-500">{{ t('onboarding.assetTypeLabel') }}</span>
+              <span class="text-xs text-subtle">{{ t('onboarding.assetTypeLabel') }}</span>
             </div>
             <div class="mt-3 grid gap-3 sm:grid-cols-2">
               <label class="block text-sm sm:col-span-2">
-                <span class="font-medium text-stone-700">{{ t('onboarding.assetResourceName') }}</span>
+                <span class="font-medium text-ink-secondary">{{ t('onboarding.assetResourceName') }}</span>
                 <input v-model="asset.name" type="text" :disabled="!asset.enabled" class="field-wizard mt-1" />
               </label>
               <label class="block text-sm sm:col-span-2">
-                <span class="font-medium text-stone-700">{{ t('assets.type') }}</span>
+                <span class="font-medium text-ink-secondary">{{ t('assets.type') }}</span>
                 <select v-model="asset.type" :disabled="!asset.enabled" class="field-wizard mt-1">
                   <option v-for="ty in ASSET_TYPES" :key="ty" :value="ty">{{ t(`assets.types.${ty}`) }}</option>
                 </select>
@@ -662,33 +662,33 @@ async function finalize() {
       <!-- Step 6 — connections -->
       <div v-else-if="step === 6" class="space-y-6 p-6 sm:p-8">
         <div class="space-y-1">
-          <h2 class="text-lg font-semibold text-stone-900">{{ t('onboarding.connectionsTitle') }}</h2>
-          <p class="text-sm text-stone-600">{{ t('onboarding.connectionsHint') }}</p>
+          <h2 class="text-lg font-semibold text-ink">{{ t('onboarding.connectionsTitle') }}</h2>
+          <p class="text-sm text-muted">{{ t('onboarding.connectionsHint') }}</p>
         </div>
         <div v-if="accessLinks.length" class="space-y-2">
-          <h3 class="text-sm font-semibold text-stone-800">{{ t('onboarding.connectionsAccess') }}</h3>
-          <p class="text-xs text-stone-500">{{ t('onboarding.connectionsAccessHint') }}</p>
+          <h3 class="text-sm font-semibold text-ink">{{ t('onboarding.connectionsAccess') }}</h3>
+          <p class="text-xs text-subtle">{{ t('onboarding.connectionsAccessHint') }}</p>
           <ul class="list-card text-sm">
             <li v-for="(link, idx) in accessLinks" :key="idx" class="flex flex-wrap items-center gap-3 px-3 py-2">
               <label class="flex flex-1 cursor-pointer items-center gap-2">
-                <input v-model="link.enabled" type="checkbox" class="rounded border-stone-300" />
-                <span class="text-stone-800">
+                <input v-model="link.enabled" type="checkbox" class="checkbox" />
+                <span class="text-ink">
                   <span class="font-medium">{{ link.identityLabel }}</span>
-                  <span class="text-stone-500"> → {{ providerBySlug.get(link.providerSlug)?.name ?? link.providerSlug }}</span>
+                  <span class="text-subtle"> → {{ providerBySlug.get(link.providerSlug)?.name ?? link.providerSlug }}</span>
                 </span>
               </label>
             </li>
           </ul>
         </div>
-        <p v-else class="text-sm text-stone-500">{{ t('onboarding.connectionsAccessEmpty') }}</p>
+        <p v-else class="text-sm text-subtle">{{ t('onboarding.connectionsAccessEmpty') }}</p>
         <div v-if="dependencyDrafts.length" class="space-y-2">
-          <h3 class="text-sm font-semibold text-stone-800">{{ t('onboarding.connectionsDeps') }}</h3>
-          <p class="text-xs text-stone-500">{{ t('onboarding.connectionsDepsHint') }}</p>
+          <h3 class="text-sm font-semibold text-ink">{{ t('onboarding.connectionsDeps') }}</h3>
+          <p class="text-xs text-subtle">{{ t('onboarding.connectionsDepsHint') }}</p>
           <ul class="list-card text-sm">
             <li v-for="(dep, idx) in dependencyDrafts" :key="idx" class="px-3 py-2">
               <label class="flex cursor-pointer items-start gap-2">
-                <input v-model="dep.enabled" type="checkbox" class="mt-1 rounded border-stone-300" />
-                <span class="text-stone-800">
+                <input v-model="dep.enabled" type="checkbox" class="checkbox mt-1" />
+                <span class="text-ink">
                   {{ providerBySlug.get(dep.fromProviderSlug)?.name ?? dep.fromProviderSlug }}
                   → {{ t(`dependencies.relationTypes.${dep.relationType}`) }} →
                   {{ providerBySlug.get(dep.toProviderSlug)?.name ?? dep.toProviderSlug }}
@@ -697,34 +697,34 @@ async function finalize() {
             </li>
           </ul>
         </div>
-        <p v-else class="text-sm text-stone-500">{{ t('onboarding.connectionsDepsEmpty') }}</p>
+        <p v-else class="text-sm text-subtle">{{ t('onboarding.connectionsDepsEmpty') }}</p>
       </div>
 
       <!-- Step 7 — review -->
       <div v-else class="space-y-6 p-6 sm:p-8">
         <div class="space-y-1">
-          <h2 class="text-lg font-semibold text-stone-900">{{ t('onboarding.reviewTitle') }}</h2>
-          <p class="text-sm text-stone-600">{{ t('onboarding.reviewHint') }}</p>
+          <h2 class="text-lg font-semibold text-ink">{{ t('onboarding.reviewTitle') }}</h2>
+          <p class="text-sm text-muted">{{ t('onboarding.reviewHint') }}</p>
         </div>
 
-        <dl class="divide-y divide-stone-100 rounded-lg border border-stone-200 text-sm">
+        <dl class="divide-y divide-rule rounded-lg border border-rule text-sm">
           <div class="grid gap-1 p-4 sm:grid-cols-3">
-            <dt class="font-medium text-stone-500">{{ t('onboarding.reviewProject') }}</dt>
+            <dt class="font-medium text-subtle">{{ t('onboarding.reviewProject') }}</dt>
             <dd class="sm:col-span-2">
-              <p class="font-semibold text-stone-900">{{ projectName || '—' }}</p>
-              <p v-if="resolvedWebsiteUrl()" class="text-stone-600">{{ resolvedWebsiteUrl() }}</p>
-              <p v-if="description" class="mt-1 text-stone-600">{{ description }}</p>
+              <p class="font-semibold text-ink">{{ projectName || '—' }}</p>
+              <p v-if="resolvedWebsiteUrl()" class="text-muted">{{ resolvedWebsiteUrl() }}</p>
+              <p v-if="description" class="mt-1 text-muted">{{ description }}</p>
             </dd>
           </div>
           <div class="grid gap-1 p-4 sm:grid-cols-3">
-            <dt class="font-medium text-stone-500">{{ t('onboarding.reviewProviders') }}</dt>
+            <dt class="font-medium text-subtle">{{ t('onboarding.reviewProviders') }}</dt>
             <dd class="sm:col-span-2">
-              <p v-if="!selectedProviders.length" class="text-stone-500">{{ t('onboarding.reviewNone') }}</p>
+              <p v-if="!selectedProviders.length" class="text-subtle">{{ t('onboarding.reviewNone') }}</p>
               <ul v-else class="flex flex-wrap gap-2">
                 <li
                   v-for="slug in selectedProviders"
                   :key="slug"
-                  class="rounded-full bg-stone-100 px-2.5 py-0.5 text-stone-800"
+                  class="rounded-full bg-surface-soft px-2.5 py-0.5 text-ink"
                 >
                   {{ providerBySlug.get(slug)?.name ?? slug }}
                 </li>
@@ -732,13 +732,13 @@ async function finalize() {
             </dd>
           </div>
           <div class="grid gap-1 p-4 sm:grid-cols-3">
-            <dt class="font-medium text-stone-500">{{ t('onboarding.reviewIdentities') }}</dt>
+            <dt class="font-medium text-subtle">{{ t('onboarding.reviewIdentities') }}</dt>
             <dd class="sm:col-span-2">
               <ul class="space-y-1">
-                <li v-for="(id, idx) in identityDrafts" :key="idx" class="text-stone-800">
-                  <span v-if="id.unsure || !id.label.trim()" class="text-stone-400">{{ t('onboarding.reviewSkipped') }}</span>
+                <li v-for="(id, idx) in identityDrafts" :key="idx" class="text-ink">
+                  <span v-if="id.unsure || !id.label.trim()" class="text-faint">{{ t('onboarding.reviewSkipped') }}</span>
                   <span v-else>{{ id.label }}</span>
-                  <span v-if="id.providerSlug && !id.unsure" class="text-stone-500">
+                  <span v-if="id.providerSlug && !id.unsure" class="text-subtle">
                     — {{ providerBySlug.get(id.providerSlug)?.name ?? id.providerSlug }}
                   </span>
                 </li>
@@ -747,16 +747,16 @@ async function finalize() {
           </div>
         </dl>
 
-        <div class="rounded-lg border border-stone-200 bg-stone-50/80 p-4 text-sm text-stone-700">
-          <p class="font-medium text-stone-900">{{ t('onboarding.reviewNextSteps') }}</p>
-          <p class="mt-1 text-stone-600">{{ t('onboarding.reviewNextStepsHint') }}</p>
+        <div class="rounded-lg border border-rule bg-stone-50/80 dark:bg-stone-900/80 p-4 text-sm text-ink-secondary">
+          <p class="font-medium text-ink">{{ t('onboarding.reviewNextSteps') }}</p>
+          <p class="mt-1 text-muted">{{ t('onboarding.reviewNextStepsHint') }}</p>
         </div>
 
         <p v-if="finalizeError" class="text-sm text-red-600">{{ finalizeError }}</p>
       </div>
 
       <footer
-        class="flex flex-col-reverse gap-3 border-t border-stone-100 bg-stone-50/80 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8"
+        class="flex flex-col-reverse gap-3 border-t border-rule-light bg-stone-50/80 dark:bg-stone-900/80 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8"
       >
         <div class="flex flex-wrap gap-2">
           <button

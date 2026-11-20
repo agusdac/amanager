@@ -43,8 +43,8 @@ function save() {
 
 <template>
   <section v-if="fields.length" class="card mt-6 p-6">
-    <h2 class="text-sm font-medium text-stone-700">{{ t('assets.typeSpecificFields') }}</h2>
-    <p class="mt-1 text-xs text-stone-500">{{ t('assets.typeSpecificFieldsHint') }}</p>
+    <h2 class="text-sm font-medium text-ink-secondary">{{ t('assets.typeSpecificFields') }}</h2>
+    <p class="mt-1 text-xs text-subtle">{{ t('assets.typeSpecificFieldsHint') }}</p>
     <form class="form-grid mt-4" @submit.prevent="save">
       <label v-for="field in fields" :key="field.key" class="form-field">
         <span class="label">{{ t(field.labelKey) }}</span>
@@ -56,7 +56,7 @@ function save() {
         />
         <p
           v-if="field.inheritFromProjectDomain && projectWebsiteUrl"
-          class="mt-1 text-xs text-stone-500"
+          class="mt-1 text-xs text-subtle"
         >
           {{ t('assets.inheritProjectDomainHint', { domain: projectDomainFromWebsite(projectWebsiteUrl) }) }}
         </p>

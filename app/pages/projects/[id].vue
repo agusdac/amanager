@@ -275,7 +275,7 @@ async function deleteProject() {
 </script>
 
 <template>
-  <div v-if="pending" class="text-stone-600">{{ t('common.loading') }}</div>
+  <div v-if="pending" class="text-muted">{{ t('common.loading') }}</div>
   <div v-else-if="data?.project" class="space-y-8">
     <AppConfirmDialog
       v-model:open="depConfirmOpen"
@@ -286,7 +286,7 @@ async function deleteProject() {
     >
       <div
         v-if="pendingDepPreview"
-        class="rounded-lg border border-stone-200 bg-stone-50/90 px-3 py-2.5"
+        class="rounded-lg border border-rule bg-stone-50/90 dark:bg-stone-900/80 px-3 py-2.5"
       >
         <DependencyListRow v-bind="pendingDepPreview" compact />
       </div>
@@ -300,21 +300,21 @@ async function deleteProject() {
     >
       <p
         v-if="pendingEnvironment"
-        class="rounded-lg border border-stone-200 bg-stone-50/90 px-3 py-2.5 text-sm font-medium text-stone-900"
+        class="rounded-lg border border-rule bg-stone-50/90 dark:bg-stone-900/80 px-3 py-2.5 text-sm font-medium text-ink"
       >
         {{ pendingEnvironment.name }}
-        <span class="font-normal text-stone-500">
+        <span class="font-normal text-subtle">
           ({{ t(`projects.envKinds.${pendingEnvironment.kind}`) }})
         </span>
       </p>
     </AppConfirmDialog>
     <header class="space-y-1">
       <h1 class="page-title">{{ data.project.name }}</h1>
-      <p v-if="data.project.description" class="text-stone-600">{{ data.project.description }}</p>
+      <p v-if="data.project.description" class="text-muted">{{ data.project.description }}</p>
       <a
         v-if="data.project.websiteUrl"
         :href="data.project.websiteUrl"
-        class="text-sm text-stone-500 underline"
+        class="text-sm text-subtle underline"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -414,7 +414,7 @@ async function deleteProject() {
 
           <label class="block text-sm sm:col-span-2">
             <span class="label">{{ t('assets.loginEmail') }}</span>
-            <p class="mt-0.5 text-xs text-stone-500">{{ t('assets.loginEmailHint') }}</p>
+            <p class="mt-0.5 text-xs text-subtle">{{ t('assets.loginEmailHint') }}</p>
             <input
               v-model="assetLoginEmail"
               type="email"
@@ -443,17 +443,17 @@ async function deleteProject() {
       <ul v-if="data.assets?.length" class="list-card">
         <li v-for="asset in data.assets" :key="asset.id" class="px-4 py-4 space-y-2">
           <div class="flex flex-wrap items-baseline gap-2">
-            <NuxtLink :to="`/assets/${asset.id}`" class="font-medium text-stone-900 hover:underline">
+            <NuxtLink :to="`/assets/${asset.id}`" class="font-medium text-ink hover:underline">
               {{ asset.name }}
             </NuxtLink>
-            <span class="text-sm text-stone-500">
+            <span class="text-sm text-subtle">
               <AssetTypeLabel :type="asset.type" :provider-slug="asset.providerSlug" />
             </span>
             <VerificationChip :status="asset.verificationStatus" />
           </div>
-          <p v-if="asset.providerName" class="text-sm text-stone-600">{{ asset.providerName }}</p>
+          <p v-if="asset.providerName" class="text-sm text-muted">{{ asset.providerName }}</p>
           <label class="mt-2 block max-w-sm text-xs">
-            <span class="font-medium text-stone-500">{{ t('assets.environment') }}</span>
+            <span class="font-medium text-subtle">{{ t('assets.environment') }}</span>
             <select
               class="field mt-1 text-sm"
               :value="asset.environmentId ?? ''"
@@ -466,14 +466,14 @@ async function deleteProject() {
               </option>
             </select>
           </label>
-          <p v-if="asset.roles?.length" class="text-sm text-stone-600">
-            <span class="font-medium text-stone-500">{{ t('assets.linkedIdentities') }}:</span>
+          <p v-if="asset.roles?.length" class="text-sm text-muted">
+            <span class="font-medium text-subtle">{{ t('assets.linkedIdentities') }}:</span>
             <span v-for="(role, ri) in asset.roles" :key="ri" class="ml-1">
               {{ role.identityLabel ?? t('assets.unknown') }} ({{ t(`assets.roles.${role.roleType}`) }})<span v-if="ri < asset.roles.length - 1">;</span>
             </span>
           </p>
-          <p v-if="asset.emails?.length" class="text-sm text-stone-600">
-            <span class="font-medium text-stone-500">{{ t('assets.linkedEmails') }}:</span>
+          <p v-if="asset.emails?.length" class="text-sm text-muted">
+            <span class="font-medium text-subtle">{{ t('assets.linkedEmails') }}:</span>
             <span v-for="(em, ei) in asset.emails" :key="ei" class="ml-1">
               {{ em.address }} ({{ t(`assets.purposes.${em.purpose}`) }})<span v-if="ei < asset.emails.length - 1">;</span>
             </span>
@@ -481,7 +481,7 @@ async function deleteProject() {
           <a
             v-if="asset.adminUrl"
             :href="asset.adminUrl"
-            class="text-sm text-stone-600 underline"
+            class="text-sm text-muted underline"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -513,18 +513,18 @@ async function deleteProject() {
             </button>
           </form>
           <p v-if="envError" class="error-text">{{ envError }}</p>
-          <p class="text-sm text-stone-600">{{ t('projects.environmentsHint') }}</p>
+          <p class="text-sm text-muted">{{ t('projects.environmentsHint') }}</p>
           <ul v-if="data.environments?.length" class="space-y-4">
             <li
               v-for="env in data.environments"
               :key="env.id"
               class="list-card text-sm"
             >
-              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 px-4 py-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-rule-light px-4 py-3">
                 <span>
-                  <span class="font-medium text-stone-900">{{ env.name }}</span>
-                  <span class="ml-2 text-stone-500">({{ t(`projects.envKinds.${env.kind}`) }})</span>
-                  <span class="ml-2 text-xs text-stone-400">
+                  <span class="font-medium text-ink">{{ env.name }}</span>
+                  <span class="ml-2 text-subtle">({{ t(`projects.envKinds.${env.kind}`) }})</span>
+                  <span class="ml-2 text-xs text-faint">
                     {{ t('projects.envAssetCount', { count: assetsInEnvironment(env.id).length }) }}
                   </span>
                 </span>
@@ -537,25 +537,25 @@ async function deleteProject() {
                   {{ t('projects.deleteEnvironment') }}
                 </button>
               </div>
-              <ul v-if="assetsInEnvironment(env.id).length" class="divide-y divide-stone-100">
+              <ul v-if="assetsInEnvironment(env.id).length" class="divide-y divide-rule">
                 <li
                   v-for="asset in assetsInEnvironment(env.id)"
                   :key="asset.id"
                   class="flex flex-wrap items-center justify-between gap-2 px-4 py-2"
                 >
-                  <NuxtLink :to="`/assets/${asset.id}`" class="font-medium text-stone-900 hover:underline">
+                  <NuxtLink :to="`/assets/${asset.id}`" class="font-medium text-ink hover:underline">
                     {{ asset.name }}
                   </NuxtLink>
                   <AssetTypeLabel :type="asset.type" :provider-slug="asset.providerSlug" />
                 </li>
               </ul>
-              <p v-else class="px-4 py-3 text-xs text-stone-500">{{ t('projects.envNoAssets') }}</p>
+              <p v-else class="px-4 py-3 text-xs text-subtle">{{ t('projects.envNoAssets') }}</p>
             </li>
           </ul>
           <p v-else class="lede">{{ t('projects.noEnvironments') }}</p>
           <section v-if="unassignedAssets.length" class="callout callout-neutral">
-            <p class="text-sm font-medium text-stone-800">{{ t('projects.unassignedAssetsTitle') }}</p>
-            <p class="mt-1 text-xs text-stone-600">{{ t('projects.unassignedAssetsHint') }}</p>
+            <p class="text-sm font-medium text-stone-800 dark:text-stone-200">{{ t('projects.unassignedAssetsTitle') }}</p>
+            <p class="mt-1 text-xs text-muted">{{ t('projects.unassignedAssetsHint') }}</p>
             <ul class="mt-3 space-y-1 text-sm">
               <li v-for="asset in unassignedAssets" :key="asset.id" class="flex flex-wrap items-center gap-2">
                 <NuxtLink :to="`/assets/${asset.id}`" class="font-medium underline">{{ asset.name }}</NuxtLink>
@@ -620,7 +620,7 @@ async function deleteProject() {
 
       <template #runbooks>
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <p class="text-sm text-stone-600">{{ t('guides.projectTabHint') }}</p>
+          <p class="text-sm text-muted">{{ t('guides.projectTabHint') }}</p>
           <NuxtLink :to="`/guides/templates?projectId=${id}`" class="btn-secondary text-sm">{{ t('guides.templates.browseAll') }}</NuxtLink>
           <NuxtLink :to="`/guides/new?projectId=${id}`" class="btn-primary text-sm">{{ t('guides.newFromTemplate') }}</NuxtLink>
         </div>
@@ -629,7 +629,7 @@ async function deleteProject() {
             <NuxtLink :to="`/guides/${rb.id}`" class="font-medium underline">{{ rb.title }}</NuxtLink>
           </li>
         </ul>
-        <p v-else class="mt-4 text-sm text-stone-500">{{ t('guides.empty') }}</p>
+        <p v-else class="mt-4 text-sm text-subtle">{{ t('guides.empty') }}</p>
       </template>
 
       <template #danger>

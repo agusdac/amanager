@@ -4,6 +4,14 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'Hilko',
+      script: [
+        {
+          key: 'theme-init',
+          tagPosition: 'head',
+          innerHTML:
+            "(function(){try{var m=document.cookie.match(/(?:^|;\\s*)hilko_theme=(light|dark)/);if(m&&m[1]==='dark')document.documentElement.classList.add('dark')}catch(e){}})();",
+        },
+      ],
     },
   },
   devtools: { enabled: true },

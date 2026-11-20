@@ -43,7 +43,7 @@ const workspaceTemplates = computed(() =>
     </div>
 
     <section v-if="workspaceTemplates.length" class="space-y-3">
-      <h2 class="text-sm font-medium uppercase tracking-wide text-stone-500">
+      <h2 class="text-sm font-medium uppercase tracking-wide text-subtle">
         {{ t('guides.templates.workspaceSection') }}
       </h2>
       <div class="grid gap-4 md:grid-cols-3">
@@ -57,7 +57,7 @@ const workspaceTemplates = computed(() =>
     </section>
 
     <section v-if="systemTemplates.length" class="space-y-3">
-      <h2 class="text-sm font-medium uppercase tracking-wide text-stone-500">
+      <h2 class="text-sm font-medium uppercase tracking-wide text-subtle">
         {{ t('guides.templates.browseAll') }}
       </h2>
       <div class="grid gap-4 md:grid-cols-3">
@@ -70,11 +70,11 @@ const workspaceTemplates = computed(() =>
       </div>
     </section>
 
-    <h2 class="text-sm font-medium uppercase tracking-wide text-stone-500">{{ t('guides.yourRunbooks') }}</h2>
+    <h2 class="text-sm font-medium uppercase tracking-wide text-subtle">{{ t('guides.yourRunbooks') }}</h2>
 
-    <p v-if="pending" class="text-sm text-stone-500">{{ t('common.loading') }}</p>
+    <p v-if="pending" class="text-sm text-subtle">{{ t('common.loading') }}</p>
 
-    <div v-else-if="!data?.runbooks?.length" class="card p-6 text-sm text-stone-600">
+    <div v-else-if="!data?.runbooks?.length" class="card p-6 text-sm text-muted">
       {{ t('guides.empty') }}
     </div>
 
@@ -82,18 +82,18 @@ const workspaceTemplates = computed(() =>
       <li v-for="rb in data.runbooks" :key="rb.id" class="card p-4">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <NuxtLink :to="`/guides/${rb.id}`" class="text-lg font-medium text-stone-900 underline">
+            <NuxtLink :to="`/guides/${rb.id}`" class="text-lg font-medium text-ink underline">
               {{ rb.title }}
             </NuxtLink>
-            <p class="mt-1 text-sm text-stone-600">
+            <p class="mt-1 text-sm text-muted">
               {{ rb.projectName }}
-              <span v-if="rb.templateSlug" class="text-stone-400">· {{ rb.templateSlug }}</span>
+              <span v-if="rb.templateSlug" class="text-faint">· {{ rb.templateSlug }}</span>
             </p>
             <p v-if="rb.activeExecution" class="mt-2 text-xs text-amber-800">
               {{ t('guides.executionInProgress') }}
             </p>
           </div>
-          <span class="rounded-full bg-stone-100 px-2 py-0.5 text-xs uppercase tracking-wide text-stone-600">
+          <span class="rounded-full bg-surface-soft px-2 py-0.5 text-xs uppercase tracking-wide text-muted">
             {{ rb.status }}
           </span>
         </div>

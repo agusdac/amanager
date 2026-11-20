@@ -35,16 +35,16 @@ function relationLabel(type: string) {
     >
       <NuxtLink
         :to="`/assets/${fromId}`"
-        class="font-medium text-stone-900 underline decoration-stone-300 underline-offset-[0.2em] hover:decoration-stone-600"
+        class="font-medium text-ink underline decoration-stone-300 underline-offset-[0.2em] hover:decoration-stone-600"
       >
         {{ fromName }}
       </NuxtLink>
-      <span class="select-none text-stone-400" aria-hidden="true">→</span>
-      <span class="font-normal lowercase text-stone-600">{{ relationLabel(relationType) }}</span>
-      <span class="select-none text-stone-400" aria-hidden="true">→</span>
+      <span class="select-none text-faint" aria-hidden="true">→</span>
+      <span class="font-normal lowercase text-muted">{{ relationLabel(relationType) }}</span>
+      <span class="select-none text-faint" aria-hidden="true">→</span>
       <NuxtLink
         :to="`/assets/${toId}`"
-        class="font-medium text-stone-900 underline decoration-stone-300 underline-offset-[0.2em] hover:decoration-stone-600"
+        class="font-medium text-ink underline decoration-stone-300 underline-offset-[0.2em] hover:decoration-stone-600"
       >
         {{ toName }}
       </NuxtLink>
@@ -62,7 +62,7 @@ function relationLabel(type: string) {
       </button>
     </div>
   </div>
-  <p v-if="!compact && edgeDescription" class="mt-1.5 text-sm text-stone-600">
+  <p v-if="!compact && edgeDescription" class="mt-1.5 text-sm text-muted">
     {{ edgeDescription }}
   </p>
 </template>

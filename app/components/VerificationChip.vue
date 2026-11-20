@@ -16,11 +16,11 @@ const tone = computed(() => {
     case 'confirmed_by_human':
     case 'verified_by_integration':
     case 'confirmed':
-      return 'border-emerald-200 bg-emerald-50 text-emerald-900'
+      return 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
     case 'unverified':
-      return 'border-stone-300 bg-stone-100 text-stone-700'
+      return 'border-stone-300 dark:border-stone-600 bg-surface-soft text-stone-700 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300'
     default:
-      return 'border-stone-200 bg-stone-100 text-stone-700'
+      return 'border-rule bg-surface-soft text-stone-700 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300'
   }
 })
 </script>

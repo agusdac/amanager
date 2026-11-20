@@ -18,7 +18,7 @@ const { data, pending, error: fetchError } = await useFetch('/api/dashboard')
 
     <div v-if="data?.onboarding" class="notice">
       {{ t('home.resumeOnboarding', { step: data.onboarding.step }) }}
-      <NuxtLink to="/onboarding" class="ml-2 font-medium text-stone-900 underline">{{ t('home.continue') }}</NuxtLink>
+      <NuxtLink to="/onboarding" class="ml-2 font-medium text-ink underline">{{ t('home.continue') }}</NuxtLink>
     </div>
 
     <p v-if="fetchError" class="text-sm text-red-700" role="alert">
@@ -31,11 +31,11 @@ const { data, pending, error: fetchError } = await useFetch('/api/dashboard')
       variant="warning"
     >
       {{ t('home.attentionHint', { count: data.counts.unverifiedAssets }) }}
-      <ul v-if="data.attentionAssets?.length" class="mt-3 space-y-2 text-sm text-stone-700">
+      <ul v-if="data.attentionAssets?.length" class="mt-3 space-y-2 text-sm text-ink-secondary">
         <li v-for="a in data.attentionAssets" :key="a.id" class="flex flex-wrap items-center gap-2">
           <NuxtLink
             :to="`/assets/${a.id}?tab=verifications`"
-            class="font-medium text-stone-900 underline"
+            class="font-medium text-ink underline"
           >
             {{ a.name }}
           </NuxtLink>
@@ -45,7 +45,7 @@ const { data, pending, error: fetchError } = await useFetch('/api/dashboard')
       </ul>
       <p
         v-if="data.counts.unverifiedAssets > (data.attentionAssets?.length ?? 0)"
-        class="mt-2 text-xs text-stone-500"
+        class="mt-2 text-xs text-subtle"
       >
         {{ t('home.attentionMore', { count: data.counts.unverifiedAssets - (data.attentionAssets?.length ?? 0) }) }}
       </p>
@@ -61,10 +61,10 @@ const { data, pending, error: fetchError } = await useFetch('/api/dashboard')
 
     <section aria-labelledby="home-stats-heading">
       <div class="mb-3 flex items-baseline justify-between gap-3">
-        <h2 id="home-stats-heading" class="text-base font-semibold text-stone-900">
+        <h2 id="home-stats-heading" class="text-base font-semibold text-ink">
           {{ t('home.statsTitle') }}
         </h2>
-        <NuxtLink to="/import" class="text-sm text-stone-600 underline hover:text-stone-900">
+        <NuxtLink to="/import" class="text-sm text-muted underline hover:text-ink">
           {{ t('nav.import') }}
         </NuxtLink>
       </div>
@@ -82,28 +82,28 @@ const { data, pending, error: fetchError } = await useFetch('/api/dashboard')
       </div>
 
       <div v-else-if="data" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <NuxtLink to="/accounts?tab=emails" class="card p-4 hover:bg-stone-50/80">
-          <p class="text-xs uppercase tracking-wide text-stone-500">{{ t('home.emails') }}</p>
+        <NuxtLink to="/accounts?tab=emails" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
+          <p class="text-xs uppercase tracking-wide text-subtle">{{ t('home.emails') }}</p>
           <p class="stat-value">{{ data.counts.emails }}</p>
         </NuxtLink>
-        <NuxtLink to="/projects" class="card p-4 hover:bg-stone-50/80">
-          <p class="text-xs uppercase tracking-wide text-stone-500">{{ t('home.projects') }}</p>
+        <NuxtLink to="/projects" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
+          <p class="text-xs uppercase tracking-wide text-subtle">{{ t('home.projects') }}</p>
           <p class="stat-value">{{ data.counts.projects }}</p>
         </NuxtLink>
-        <NuxtLink to="/accounts?tab=identities" class="card p-4 hover:bg-stone-50/80">
-          <p class="text-xs uppercase tracking-wide text-stone-500">{{ t('home.identities') }}</p>
+        <NuxtLink to="/accounts?tab=identities" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
+          <p class="text-xs uppercase tracking-wide text-subtle">{{ t('home.identities') }}</p>
           <p class="stat-value">{{ data.counts.identities }}</p>
         </NuxtLink>
-        <NuxtLink to="/assets" class="card p-4 hover:bg-stone-50/80">
-          <p class="text-xs uppercase tracking-wide text-stone-500">{{ t('home.assets') }}</p>
+        <NuxtLink to="/assets" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
+          <p class="text-xs uppercase tracking-wide text-subtle">{{ t('home.assets') }}</p>
           <p class="stat-value">{{ data.counts.assets }}</p>
         </NuxtLink>
-        <NuxtLink to="/assets" class="card p-4 hover:bg-stone-50/80">
-          <p class="text-xs uppercase tracking-wide text-stone-500">{{ t('home.dependencies') }}</p>
+        <NuxtLink to="/assets" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
+          <p class="text-xs uppercase tracking-wide text-subtle">{{ t('home.dependencies') }}</p>
           <p class="stat-value">{{ data.counts.dependencies }}</p>
         </NuxtLink>
-        <NuxtLink to="/guides" class="card p-4 hover:bg-stone-50/80">
-          <p class="text-xs uppercase tracking-wide text-stone-500">{{ t('nav.guides') }}</p>
+        <NuxtLink to="/guides" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
+          <p class="text-xs uppercase tracking-wide text-subtle">{{ t('nav.guides') }}</p>
           <p class="stat-value">{{ data.counts.runbooks ?? 0 }}</p>
         </NuxtLink>
       </div>
@@ -126,7 +126,7 @@ const { data, pending, error: fetchError } = await useFetch('/api/dashboard')
           {{ t('guides.templates.createWorkspace') }}
         </NuxtLink>
       </template>
-      <p v-if="data?.counts?.activeExecutions" class="mt-2 text-sm text-stone-700">
+      <p v-if="data?.counts?.activeExecutions" class="mt-2 text-sm text-ink-secondary">
         {{ t('home.guidesInProgress', { count: data.counts.activeExecutions }) }}
       </p>
     </AppCallout>

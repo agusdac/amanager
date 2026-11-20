@@ -44,12 +44,12 @@ async function submit() {
         {{ t('auth.submitLogin') }}
       </button>
     </form>
-    <p class="text-sm text-stone-600">
+    <p class="text-sm text-muted">
       {{ t('auth.noAccount') }}
-      <NuxtLink to="/register" class="font-medium text-stone-900 underline">{{ t('nav.register') }}</NuxtLink>
+      <NuxtLink to="/register" class="font-medium text-ink underline">{{ t('nav.register') }}</NuxtLink>
     </p>
     <p class="text-sm">
-      <NuxtLink to="/forgot-password" class="text-stone-600 underline">{{ t('auth.forgotTitle') }}</NuxtLink>
+      <NuxtLink to="/forgot-password" class="text-muted underline">{{ t('auth.forgotTitle') }}</NuxtLink>
     </p>
   </div>
 </template>

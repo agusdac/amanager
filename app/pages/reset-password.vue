@@ -47,7 +47,7 @@ async function submit() {
     </form>
     <p v-else class="lede">
       {{ t('auth.resetDone') }}
-      <NuxtLink to="/login" class="font-medium text-stone-900 underline">{{ t('nav.login') }}</NuxtLink>
+      <NuxtLink to="/login" class="font-medium text-ink underline">{{ t('nav.login') }}</NuxtLink>
     </p>
   </div>
 </template>

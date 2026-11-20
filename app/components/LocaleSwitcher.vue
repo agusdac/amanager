@@ -14,13 +14,13 @@ async function pick(code: string) {
 </script>
 
 <template>
-  <div class="flex gap-1 rounded-md border border-stone-200 bg-white p-0.5 text-sm">
+  <div class="flex gap-1 rounded-md border border-rule bg-surface p-0.5 text-sm">
     <button
       v-for="opt in options"
       :key="opt.code"
       type="button"
       class="rounded px-2 py-1 transition"
-      :class="locale === opt.code ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-100'"
+      :class="locale === opt.code ? 'bg-stone-900 text-white' : 'text-muted hover:bg-surface-soft'"
       @click="pick(opt.code)"
     >
       {{ opt.code.toUpperCase() }}

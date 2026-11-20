@@ -115,29 +115,29 @@ const accountTabs = computed(() => [
         </label>
         <button type="submit" class="btn-primary">{{ t('common.add') }}</button>
       </form>
-      <ul v-if="identities?.identities?.length" class="divide-y divide-stone-100 border-t border-stone-100">
+      <ul v-if="identities?.identities?.length" class="divide-y divide-rule border-t border-rule-light">
         <li v-for="item in identities.identities" :key="item.id">
           <NuxtLink
             :to="`/identities/${item.id}`"
-            class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm transition-colors hover:bg-stone-50"
+            class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm transition-colors hover:bg-surface-muted"
           >
             <div class="flex items-center gap-2">
-              <span class="font-medium text-stone-900">{{ item.label }}</span>
-              <span v-if="item.providerName" class="text-stone-500">{{ item.providerName }}</span>
-              <IconChevronRight class="h-4 w-4 text-stone-400" />
+              <span class="font-medium text-ink">{{ item.label }}</span>
+              <span v-if="item.providerName" class="text-subtle">{{ item.providerName }}</span>
+              <IconChevronRight class="h-4 w-4 text-faint" />
             </div>
             <VerificationChip :status="item.verificationStatus" />
           </NuxtLink>
         </li>
       </ul>
-      <p v-else class="text-sm text-stone-500">{{ t('accounts.emptyIdentities') }}</p>
+      <p v-else class="text-sm text-subtle">{{ t('accounts.emptyIdentities') }}</p>
     </section>
       </template>
 
       <template #emails>
     <section class="card space-y-4 p-5">
-      <h2 class="text-sm font-semibold text-stone-900">{{ t('accounts.emails') }}</h2>
-      <p class="text-sm text-stone-600">{{ t('accounts.emailsHint') }}</p>
+      <h2 class="text-sm font-semibold text-ink">{{ t('accounts.emails') }}</h2>
+      <p class="text-sm text-muted">{{ t('accounts.emailsHint') }}</p>
       <form class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end" @submit.prevent="addEmail">
         <label class="block min-w-[14rem] flex-1 text-sm">
           <span class="label">{{ t('accounts.emailAddress') }}</span>
@@ -149,7 +149,7 @@ const accountTabs = computed(() => [
         </label>
         <button type="submit" class="btn-primary">{{ t('common.add') }}</button>
       </form>
-      <ul v-if="emails?.emails?.length" class="divide-y divide-stone-100 border-t border-stone-100">
+      <ul v-if="emails?.emails?.length" class="divide-y divide-rule border-t border-rule-light">
         <li
           v-for="item in emails.emails"
           :key="item.id"
@@ -157,12 +157,12 @@ const accountTabs = computed(() => [
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <span class="font-medium text-stone-900">{{ item.address }}</span>
-              <p v-if="item.label" class="text-xs text-stone-500">{{ item.label }}</p>
+              <span class="font-medium text-ink">{{ item.address }}</span>
+              <p v-if="item.label" class="text-xs text-subtle">{{ item.label }}</p>
             </div>
             <VerificationChip v-if="item.verificationStatus" :status="item.verificationStatus" />
           </div>
-          <p v-if="item.identityLinkCount || item.assetLinkCount" class="text-xs text-stone-500">
+          <p v-if="item.identityLinkCount || item.assetLinkCount" class="text-xs text-subtle">
             {{ t('accounts.emailLinkCounts', { identities: item.identityLinkCount ?? 0, assets: item.assetLinkCount ?? 0 }) }}
           </p>
           <PasswordManagerLinkField
@@ -172,7 +172,7 @@ const accountTabs = computed(() => [
           />
         </li>
       </ul>
-      <p v-else class="text-sm text-stone-500">{{ t('accounts.emptyEmails') }}</p>
+      <p v-else class="text-sm text-subtle">{{ t('accounts.emptyEmails') }}</p>
     </section>
       </template>
 
@@ -193,20 +193,20 @@ const accountTabs = computed(() => [
         </label>
         <button type="submit" class="btn-primary">{{ t('common.add') }}</button>
       </form>
-      <ul v-if="accounts?.accounts?.length" class="divide-y divide-stone-100 border-t border-stone-100">
+      <ul v-if="accounts?.accounts?.length" class="divide-y divide-rule border-t border-rule-light">
         <li
           v-for="item in accounts.accounts"
           :key="item.id"
           class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
         >
           <span>
-            <span class="font-medium text-stone-900">{{ item.label }}</span>
-            <span v-if="item.providerName" class="ml-2 text-stone-500">({{ item.providerName }})</span>
+            <span class="font-medium text-ink">{{ item.label }}</span>
+            <span v-if="item.providerName" class="ml-2 text-subtle">({{ item.providerName }})</span>
           </span>
           <VerificationChip :status="item.verificationStatus" />
         </li>
       </ul>
-      <p v-else class="text-sm text-stone-500">{{ t('accounts.emptyAccounts') }}</p>
+      <p v-else class="text-sm text-subtle">{{ t('accounts.emptyAccounts') }}</p>
     </section>
       </template>
 

@@ -22,9 +22,11 @@ function stepState(index: number) {
       :key="index"
       class="relative flex min-w-0 flex-col gap-1 rounded-lg border px-3 py-2 text-left transition-colors"
       :class="{
-        'border-stone-900 bg-stone-900 text-white': stepState(index) === 'current',
-        'border-stone-200 bg-white text-stone-500': stepState(index) === 'upcoming',
-        'border-emerald-200 bg-emerald-50 text-emerald-900': stepState(index) === 'done',
+        'border-stone-900 bg-stone-900 text-white dark:border-stone-200 dark:bg-stone-100 dark:text-ink':
+          stepState(index) === 'current',
+        'border-rule bg-surface text-subtle': stepState(index) === 'upcoming',
+        'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300':
+          stepState(index) === 'done',
       }"
     >
       <span class="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide opacity-80">

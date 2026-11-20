@@ -82,7 +82,7 @@ async function createRunbook() {
 <template>
   <div class="mx-auto max-w-xl space-y-6">
     <p class="text-sm">
-      <NuxtLink to="/guides/templates" class="text-stone-600 underline">{{ t('guides.templates.browseAll') }}</NuxtLink>
+      <NuxtLink to="/guides/templates" class="text-muted underline">{{ t('guides.templates.browseAll') }}</NuxtLink>
     </p>
     <h1 class="page-title">{{ t('guides.newTitle') }}</h1>
     <p class="lede">{{ t('guides.newSubtitle') }}</p>
@@ -100,7 +100,7 @@ async function createRunbook() {
 
     <form class="card space-y-4 p-5" @submit.prevent="createRunbook">
       <label class="block text-sm">
-        <span class="font-medium text-stone-700">{{ t('guides.fieldTemplate') }}</span>
+        <span class="font-medium text-ink-secondary">{{ t('guides.fieldTemplate') }}</span>
         <select v-model="templateSlug" class="field mt-1.5 w-full" required>
           <option value="" disabled>{{ t('guides.pickTemplate') }}</option>
           <optgroup v-if="workspaceTemplateOptions.length" :label="t('guides.templates.workspaceSection')">
@@ -117,7 +117,7 @@ async function createRunbook() {
       </label>
 
       <label class="block text-sm">
-        <span class="font-medium text-stone-700">{{ t('guides.fieldProject') }}</span>
+        <span class="font-medium text-ink-secondary">{{ t('guides.fieldProject') }}</span>
         <select v-model="projectId" class="field mt-1.5 w-full" required>
           <option value="" disabled>{{ t('guides.pickProject') }}</option>
           <option v-for="p in projects?.projects ?? []" :key="p.id" :value="p.id">{{ p.name }}</option>
@@ -125,7 +125,7 @@ async function createRunbook() {
       </label>
 
       <label v-if="needsEnvironment" class="block text-sm">
-        <span class="font-medium text-stone-700">{{ t('guides.fieldEnvironment') }}</span>
+        <span class="font-medium text-ink-secondary">{{ t('guides.fieldEnvironment') }}</span>
         <select v-model="environmentId" class="field mt-1.5 w-full" required>
           <option value="" disabled>{{ t('guides.pickEnvironment') }}</option>
           <option v-for="e in envs?.environments ?? []" :key="e.id" :value="e.id">{{ e.name }} ({{ e.kind }})</option>
@@ -133,7 +133,7 @@ async function createRunbook() {
       </label>
 
       <label class="block text-sm">
-        <span class="font-medium text-stone-700">{{ t('guides.fieldTitle') }}</span>
+        <span class="font-medium text-ink-secondary">{{ t('guides.fieldTitle') }}</span>
         <input v-model="title" type="text" class="field mt-1.5 w-full" />
       </label>
 
@@ -144,6 +144,6 @@ async function createRunbook() {
       </button>
     </form>
 
-    <p class="text-xs text-stone-500">{{ t('guides.liveBindingHint') }}</p>
+    <p class="text-xs text-subtle">{{ t('guides.liveBindingHint') }}</p>
   </div>
 </template>

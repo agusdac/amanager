@@ -3,6 +3,7 @@ import { NAV_PRIMARY, NAV_SECONDARY } from '~/constants/appNav'
 
 const { t } = useI18n()
 useSyncUserLocale()
+useSyncUserTheme()
 const { collapsed, toggle } = useSidebarCollapsed()
 const { data: session } = useSessionFetch()
 const { projectId, setProject } = useWorkspaceScope()
@@ -21,8 +22,8 @@ const userInitial = computed(() => {
   <div class="app-shell" :class="{ 'app-shell--collapsed': collapsed }">
     <aside class="app-shell__sidebar" aria-label="Main navigation">
       <NuxtLink to="/home" class="app-shell__brand" :title="t('app.name')">
-        <IconFolder class="h-5 w-5 shrink-0 text-stone-800" />
-        <span v-if="!collapsed" class="truncate font-semibold text-stone-900">{{ t('app.name') }}</span>
+        <IconFolder class="h-5 w-5 shrink-0 text-stone-800 dark:text-stone-200" />
+        <span v-if="!collapsed" class="truncate font-semibold text-stone-900 dark:text-stone-100">{{ t('app.name') }}</span>
       </NuxtLink>
 
       <nav class="app-shell__nav">
@@ -67,7 +68,10 @@ const userInitial = computed(() => {
         <NuxtLink
           to="/account"
           class="app-shell__user"
-          :class="{ 'ring-2 ring-stone-800 ring-offset-2': $route.path.startsWith('/account') }"
+          :class="{
+            'ring-2 ring-stone-800 ring-offset-2 dark:ring-stone-300 dark:ring-offset-stone-900':
+              $route.path.startsWith('/account'),
+          }"
           :title="t('nav.account')"
         >
           <span class="app-shell__user-avatar" aria-hidden="true">{{ userInitial }}</span>

@@ -12,6 +12,7 @@ export type SessionUser = {
   email: string
   name: string
   locale: string
+  theme: string
   workspaceId: string
   workspaceRole: string
 }
@@ -57,6 +58,7 @@ export async function getSessionUser(event: H3Event): Promise<SessionUser | null
       email: users.email,
       name: users.name,
       locale: users.locale,
+      theme: users.theme,
       workspaceId: workspaces.id,
       workspaceRole: workspaceMembers.role,
     })
@@ -81,6 +83,7 @@ export async function getSessionUser(event: H3Event): Promise<SessionUser | null
     email: row.email,
     name: row.name,
     locale: row.locale,
+    theme: row.theme,
     workspaceId: row.workspaceId,
     workspaceRole: row.workspaceRole,
   }

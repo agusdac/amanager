@@ -39,6 +39,26 @@ const props = withDefaults(
 )
 
 const { t, te } = useI18n()
+const { theme } = useAppTheme()
+
+const graphPalette = computed(() => {
+  const dark = theme.value === 'dark'
+  return {
+    canvasFrom: dark ? '#1c1917' : '#fafaf9',
+    canvasTo: dark ? '#0c0a09' : '#ffffff',
+    nodeFillDefault: dark ? '#292524' : '#ffffff',
+    nodeFillHighlight: dark ? '#44403c' : '#fafaf9',
+    nodeFillPopover: dark ? '#422006' : '#fffbeb',
+    nodeStrokeDefault: dark ? '#57534e' : '#e7e5e4',
+    nodeStrokeHighlight: dark ? '#e7e5e4' : '#292524',
+    nodeStrokePopover: '#b45309',
+    edgeLabelBg: dark ? 'rgba(28, 25, 23, 0.94)' : 'rgba(255, 255, 255, 0.92)',
+    edgeLabelStroke: dark ? '#57534e' : '#e7e5e4',
+    edgeLabelText: dark ? '#e7e5e4' : '#44403c',
+    arrowFill: dark ? '#a8a29e' : '#78716c',
+    nodeLabelClass: dark ? 'truncate text-xs font-medium text-stone-100' : 'truncate text-xs font-medium text-stone-800',
+  }
+})
 
 type SimNode = SimulationNodeDatum &
   DependencyGraphNode & {
@@ -398,15 +418,17 @@ function nodeOpacity(node: SimNode) {
 }
 
 function nodeStroke(node: SimNode) {
-  if (detailPopover.value?.kind === 'node' && detailPopover.value.nodeId === node.id) return '#b45309'
-  if (props.highlightId === node.id) return '#292524'
-  return '#e7e5e4'
+  const p = graphPalette.value
+  if (detailPopover.value?.kind === 'node' && detailPopover.value.nodeId === node.id) return p.nodeStrokePopover
+  if (props.highlightId === node.id) return p.nodeStrokeHighlight
+  return p.nodeStrokeDefault
 }
 
 function nodeFill(node: SimNode) {
-  if (detailPopover.value?.kind === 'node' && detailPopover.value.nodeId === node.id) return '#fffbeb'
-  if (props.highlightId === node.id) return '#fafaf9'
-  return '#ffffff'
+  const p = graphPalette.value
+  if (detailPopover.value?.kind === 'node' && detailPopover.value.nodeId === node.id) return p.nodeFillPopover
+  if (props.highlightId === node.id) return p.nodeFillHighlight
+  return p.nodeFillDefault
 }
 
 function linkOpacity(link: SimLink) {
@@ -580,12 +602,12 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
         :placeholder="t('graph.search')"
         :aria-label="t('graph.search')"
       />
-      <label v-if="highlightId" class="inline-flex items-center gap-1.5 text-stone-600">
-        <input v-model="neighborhoodOnly" type="checkbox" class="rounded border-stone-300" />
+      <label v-if="highlightId" class="inline-flex items-center gap-1.5 text-muted">
+        <input v-model="neighborhoodOnly" type="checkbox" class="checkbox" />
         {{ t('graph.focusNeighbors') }}
       </label>
-      <label class="inline-flex items-center gap-1.5 text-stone-600">
-        <input v-model="onlyUnverified" type="checkbox" class="rounded border-stone-300" />
+      <label class="inline-flex items-center gap-1.5 text-muted">
+        <input v-model="onlyUnverified" type="checkbox" class="checkbox" />
         {{ t('graph.onlyUnverified') }}
       </label>
       <button type="button" class="btn-secondary text-xs" @click="resetLayout">
@@ -604,8 +626,8 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
         class="rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors"
         :class="
           enabledRelations.has(rel)
-            ? 'border-stone-300 bg-white text-stone-800 shadow-sm'
-            : 'border-transparent bg-stone-100 text-stone-400 line-through'
+            ? 'border-stone-300 dark:border-stone-600 bg-surface text-ink shadow-sm'
+            : 'border-transparent bg-surface-soft text-faint line-through'
         "
         :style="enabledRelations.has(rel) ? { borderColor: relationEdgeColor(rel) } : undefined"
         @click="toggleRelation(rel)"
@@ -614,18 +636,18 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
       </button>
     </div>
 
-    <p class="text-xs text-stone-500">{{ t('graph.hint') }}</p>
+    <p class="text-xs text-subtle">{{ t('graph.hint') }}</p>
 
     <div
       v-if="expanded"
-      class="fixed inset-0 z-[70] bg-stone-900/40"
+      class="fixed inset-0 z-[70] bg-stone-900/40 dark:bg-stone-950/70"
       aria-hidden="true"
       @click="toggleExpanded"
     />
 
     <div
       ref="containerRef"
-      class="graph-canvas-shell relative overflow-hidden rounded-xl border border-stone-200 bg-gradient-to-b from-stone-50 to-white shadow-inner"
+      class="graph-canvas-shell relative overflow-hidden rounded-xl border border-rule bg-gradient-to-b from-stone-50 to-white shadow-inner dark:from-stone-900 dark:to-stone-950 dark:shadow-none"
       :class="{ 'graph-canvas-shell--expanded': expanded }"
       :style="{ minHeight: `${height}px` }"
     >
@@ -641,7 +663,7 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
       </button>
       <p
         v-if="isEmpty"
-        class="absolute inset-0 z-10 flex items-center justify-center px-6 text-center text-sm text-stone-500"
+        class="absolute inset-0 z-10 flex items-center justify-center px-6 text-center text-sm text-subtle"
       >
         {{ t('graph.empty') }}
       </p>
@@ -665,7 +687,7 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
             markerHeight="7"
             orient="auto"
           >
-            <path d="M0,-4 L8,0 L0,4" fill="#78716c" />
+            <path d="M0,-4 L8,0 L0,4" :fill="graphPalette.arrowFill" />
           </marker>
         </defs>
         <g :transform="`translate(${pan.x},${pan.y}) scale(${scale})`">
@@ -702,8 +724,8 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
                   width="104"
                   height="18"
                   rx="4"
-                  fill="rgba(255,255,255,0.92)"
-                  stroke="#e7e5e4"
+                  :fill="graphPalette.edgeLabelBg"
+                  :stroke="graphPalette.edgeLabelStroke"
                   class="pointer-events-none"
                 />
                 <text
@@ -711,7 +733,7 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
                   :y="midPoint(link).y - 10"
                   text-anchor="middle"
                   class="pointer-events-none text-[10px] font-medium"
-                  fill="#44403c"
+                  :fill="graphPalette.edgeLabelText"
                 >
                   {{ edgeLabel(link) }}
                 </text>
@@ -748,7 +770,7 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
                     :size="14"
                     :title="node.name"
                   />
-                  <span class="truncate text-xs font-medium text-stone-800">
+                  <span :class="graphPalette.nodeLabelClass">
                     {{ node.name }}
                   </span>
                 </div>
@@ -768,20 +790,20 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
         <button type="button" class="graph-popover-close" :aria-label="t('common.close')" @click="closeDetailPopover">
           ×
         </button>
-        <p class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ t('graph.popover.edgeTitle') }}</p>
-        <p class="mt-1 text-sm font-semibold text-stone-900">{{ relationLabel(popoverEdge.relationType) }}</p>
-        <p class="mt-2 text-xs leading-relaxed text-stone-600">{{ relationHelp(popoverEdge.relationType) }}</p>
-        <dl class="mt-3 space-y-1.5 text-xs text-stone-700">
+        <p class="text-xs font-medium uppercase tracking-wide text-subtle">{{ t('graph.popover.edgeTitle') }}</p>
+        <p class="mt-1 text-sm font-semibold text-ink">{{ relationLabel(popoverEdge.relationType) }}</p>
+        <p class="mt-2 text-xs leading-relaxed text-muted">{{ relationHelp(popoverEdge.relationType) }}</p>
+        <dl class="mt-3 space-y-1.5 text-xs text-ink-secondary">
           <div class="flex justify-between gap-2">
-            <dt class="text-stone-500">{{ t('graph.popover.from') }}</dt>
+            <dt class="text-subtle">{{ t('graph.popover.from') }}</dt>
             <dd class="text-right font-medium">{{ nodeById(popoverEdge.from)?.name ?? popoverEdge.from }}</dd>
           </div>
           <div class="flex justify-between gap-2">
-            <dt class="text-stone-500">{{ t('graph.popover.to') }}</dt>
+            <dt class="text-subtle">{{ t('graph.popover.to') }}</dt>
             <dd class="text-right font-medium">{{ nodeById(popoverEdge.to)?.name ?? popoverEdge.to }}</dd>
           </div>
           <div class="flex items-center justify-between gap-2">
-            <dt class="text-stone-500">{{ t('graph.popover.verification') }}</dt>
+            <dt class="text-subtle">{{ t('graph.popover.verification') }}</dt>
             <dd><VerificationChip :status="popoverEdge.verificationStatus ?? 'declared'" /></dd>
           </div>
         </dl>
@@ -797,16 +819,16 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
         <button type="button" class="graph-popover-close" :aria-label="t('common.close')" @click="closeDetailPopover">
           ×
         </button>
-        <p class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ t('graph.popover.nodeTitle') }}</p>
-        <p class="mt-1 text-sm font-semibold text-stone-900">{{ popoverNode.name }}</p>
-        <p class="mt-1 text-xs text-stone-600">
+        <p class="text-xs font-medium uppercase tracking-wide text-subtle">{{ t('graph.popover.nodeTitle') }}</p>
+        <p class="mt-1 text-sm font-semibold text-ink">{{ popoverNode.name }}</p>
+        <p class="mt-1 text-xs text-muted">
           <AssetTypeLabel :type="popoverNode.type" :provider-slug="popoverNode.providerSlug" :show-icon="true" />
         </p>
-        <p v-if="typeDescription(popoverNode.type)" class="mt-2 text-xs leading-relaxed text-stone-600">
+        <p v-if="typeDescription(popoverNode.type)" class="mt-2 text-xs leading-relaxed text-muted">
           {{ typeDescription(popoverNode.type) }}
         </p>
         <div class="mt-2 flex items-center gap-2 text-xs">
-          <span class="text-stone-500">{{ t('graph.popover.verification') }}</span>
+          <span class="text-subtle">{{ t('graph.popover.verification') }}</span>
           <VerificationChip :status="popoverNode.verificationStatus ?? 'declared'" />
         </div>
         <NuxtLink :to="`/assets/${popoverNode.id}`" class="btn-secondary mt-3 w-full text-center text-xs">
@@ -819,20 +841,25 @@ const isEmpty = computed(() => filteredEdges.value.length === 0 && neighborhoodO
 
 <style scoped>
 .graph-canvas-shell--expanded {
-  @apply fixed inset-3 z-[80] m-0 rounded-xl border-stone-300 shadow-2xl;
+  @apply fixed inset-3 z-[80] m-0 rounded-xl border-stone-300 bg-stone-50 shadow-2xl;
+  @apply dark:border-stone-600 dark:bg-stone-950;
   max-height: calc(100vh - 1.5rem);
 }
 
 .graph-expand-btn {
-  @apply absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 bg-white/95 text-stone-700 shadow-sm transition-colors hover:bg-white hover:text-stone-900;
+  @apply absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 bg-white/95 text-stone-700 shadow-sm transition-colors;
+  @apply hover:bg-stone-50 hover:text-stone-900;
+  @apply dark:border-stone-700 dark:bg-stone-900/95 dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-stone-100;
 }
 
 .graph-popover {
   @apply absolute z-20 max-w-[17.5rem] rounded-lg border border-stone-200 bg-white p-4 pr-8 text-stone-900 shadow-lg;
+  @apply dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100;
   pointer-events: auto;
 }
 
 .graph-popover-close {
   @apply absolute right-2 top-1.5 flex h-7 w-7 items-center justify-center rounded text-lg leading-none text-stone-500 hover:bg-stone-100 hover:text-stone-800;
+  @apply dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-200;
 }
 </style>

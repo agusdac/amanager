@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import {
+  assetTypeBadgeClass,
+  assetTypeGlyph,
+  assetTypeUsesVectorIcon,
+} from '~/constants/assetTypeBadge'
 import { resolveBrandIcon } from '~/constants/brandIcons'
 
 const props = withDefaults(
@@ -27,35 +32,9 @@ const description = computed(() => {
 
 const hasBrandIcon = computed(() => !!resolveBrandIcon(props.providerSlug, props.type))
 
-const iconClass = computed(() => {
-  const map: Record<string, string> = {
-    service: 'bg-violet-100 text-violet-800',
-    domain: 'bg-sky-100 text-sky-800',
-    hosting: 'bg-amber-100 text-amber-900',
-    repository: 'bg-stone-200 text-stone-800',
-    dns: 'bg-cyan-100 text-cyan-900',
-    email: 'bg-pink-100 text-pink-900',
-    other: 'bg-stone-100 text-stone-700',
-  }
-  return map[props.type] ?? 'bg-stone-100 text-stone-700'
-})
-
-const glyph = computed(() => {
-  const map: Record<string, string> = {
-    service: '◆',
-    domain: '◎',
-    hosting: '▣',
-    repository: '{ }',
-    dns: '↯',
-    email: '@',
-    vps: '⬡',
-    mail_hosting: '✉',
-    object_storage: '☁',
-    transactional_email: '➤',
-    other: '…',
-  }
-  return map[props.type] ?? '·'
-})
+const iconClass = computed(() => assetTypeBadgeClass(props.type))
+const glyph = computed(() => assetTypeGlyph(props.type))
+const useVectorIcon = computed(() => assetTypeUsesVectorIcon(props.type))
 </script>
 
 <template>
@@ -69,16 +48,17 @@ const glyph = computed(() => {
     />
     <span
       v-else-if="showIcon"
-      class="inline-flex h-5 min-w-5 items-center justify-center rounded px-1 text-[10px] font-semibold leading-none"
+      class="inline-flex h-5 w-5 items-center justify-center rounded"
       :class="iconClass"
       aria-hidden="true"
     >
-      {{ glyph }}
+      <IconFolderGit v-if="useVectorIcon && type === 'repository'" :size="13" />
+      <span v-else class="px-0.5 text-[10px] font-semibold leading-none">{{ glyph }}</span>
     </span>
     <span>{{ label }}</span>
     <span
       v-if="showDescription && description"
-      class="ml-1 text-stone-500"
+      class="ml-1 text-subtle"
       :title="description"
     >
       ⓘ

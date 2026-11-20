@@ -12,6 +12,7 @@ export default defineEventHandler(async (event) => {
       email: users.email,
       name: users.name,
       locale: users.locale,
+      theme: users.theme,
       createdAt: users.createdAt,
     })
     .from(users)

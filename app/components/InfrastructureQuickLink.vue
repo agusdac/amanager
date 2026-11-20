@@ -46,9 +46,9 @@ async function link() {
 </script>
 
 <template>
-  <section v-if="show" class="card mt-6 border-dashed border-stone-300 bg-stone-50/80 p-5">
-    <h2 class="text-sm font-medium text-stone-800">{{ t('assets.infraLinkTitle') }}</h2>
-    <p class="mt-1 text-xs text-stone-600">{{ t('assets.infraLinkHint') }}</p>
+  <section v-if="show" class="card mt-6 border-dashed border-stone-300 dark:border-stone-600 bg-stone-50/80 dark:bg-stone-900/80 p-5">
+    <h2 class="text-sm font-medium text-stone-800 dark:text-stone-200">{{ t('assets.infraLinkTitle') }}</h2>
+    <p class="mt-1 text-xs text-muted">{{ t('assets.infraLinkHint') }}</p>
     <form class="mt-4 flex flex-wrap items-end gap-3" @submit.prevent="link">
       <label class="block min-w-[12rem] flex-1 text-sm">
         <span class="label">{{ t('assets.infraLinkTarget') }}</span>

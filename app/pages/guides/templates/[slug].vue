@@ -53,17 +53,17 @@ async function deleteTemplate() {
 </script>
 
 <template>
-  <div v-if="pending" class="text-sm text-stone-500">{{ t('common.loading') }}</div>
-  <div v-else-if="!tpl" class="text-sm text-stone-600">{{ t('guides.templates.notFound') }}</div>
+  <div v-if="pending" class="text-sm text-subtle">{{ t('common.loading') }}</div>
+  <div v-else-if="!tpl" class="text-sm text-muted">{{ t('guides.templates.notFound') }}</div>
   <div v-else class="mx-auto max-w-2xl space-y-8">
     <p class="text-sm">
-      <NuxtLink to="/guides/templates" class="text-stone-600 underline">{{ t('guides.templates.backToCatalog') }}</NuxtLink>
+      <NuxtLink to="/guides/templates" class="text-muted underline">{{ t('guides.templates.backToCatalog') }}</NuxtLink>
     </p>
 
     <header>
       <h1 class="page-title">{{ title }}</h1>
       <p v-if="description" class="lede">{{ description }}</p>
-      <p class="mt-2 text-sm text-stone-500">
+      <p class="mt-2 text-sm text-subtle">
         {{ t('guides.templates.stepCount', { count: tpl.stepCount }) }}
         ·
         {{
@@ -75,25 +75,25 @@ async function deleteTemplate() {
     </header>
 
     <section v-if="howTo.length" class="card space-y-3 p-5">
-      <h2 class="text-sm font-medium uppercase tracking-wide text-stone-500">
+      <h2 class="text-sm font-medium uppercase tracking-wide text-subtle">
         {{ t('guides.templates.howToTitle') }}
       </h2>
-      <ol class="list-decimal space-y-2 pl-5 text-sm text-stone-700">
+      <ol class="list-decimal space-y-2 pl-5 text-sm text-ink-secondary">
         <li v-for="(line, i) in howTo" :key="i">{{ line }}</li>
       </ol>
     </section>
 
     <section class="card space-y-3 p-5">
-      <h2 class="text-sm font-medium uppercase tracking-wide text-stone-500">{{ t('guides.templates.stepsTitle') }}</h2>
-      <p class="text-sm text-stone-600">{{ t('guides.templates.stepsHint') }}</p>
+      <h2 class="text-sm font-medium uppercase tracking-wide text-subtle">{{ t('guides.templates.stepsTitle') }}</h2>
+      <p class="text-sm text-muted">{{ t('guides.templates.stepsHint') }}</p>
       <ol class="space-y-3">
         <li
           v-for="step in tpl.stepsOutline"
           :key="step.key"
-          class="border-l-2 border-stone-200 pl-3 text-sm"
+          class="border-l-2 border-rule pl-3 text-sm"
         >
-          <span class="font-medium text-stone-900">{{ step.position }}. {{ step.title }}</span>
-          <span class="ml-2 text-xs text-stone-500">
+          <span class="font-medium text-ink">{{ step.position }}. {{ step.title }}</span>
+          <span class="ml-2 text-xs text-subtle">
             {{ t(`guides.stepKinds.${step.kind}`) }} · {{ t(`guides.stepRisks.${step.risk}`) }}
           </span>
           <p v-if="step.inventoryTargetLabel" class="mt-1 text-xs text-sky-900">
@@ -104,15 +104,15 @@ async function deleteTemplate() {
             class="mt-1 text-xs text-sky-900"
           >
             {{ t(`guides.templates.inventoryGenerators.${step.generator}`) }}
-            <span v-if="step.assetType" class="text-stone-500">· {{ step.assetType }}</span>
+            <span v-if="step.assetType" class="text-subtle">· {{ step.assetType }}</span>
           </p>
-          <AppMarkdownPreview v-if="step.bodyMarkdown" class="mt-2 text-stone-700" :markdown="step.bodyMarkdown" />
+          <AppMarkdownPreview v-if="step.bodyMarkdown" class="mt-2 text-ink-secondary" :markdown="step.bodyMarkdown" />
         </li>
       </ol>
     </section>
 
-    <section class="card space-y-2 border-stone-200 bg-stone-50/80 p-5 text-sm text-stone-700">
-      <h2 class="font-medium text-stone-900">{{ t('guides.templates.afterCreateTitle') }}</h2>
+    <section class="card space-y-2 border-rule bg-stone-50/80 dark:bg-stone-900/80 p-5 text-sm text-ink-secondary">
+      <h2 class="font-medium text-ink">{{ t('guides.templates.afterCreateTitle') }}</h2>
       <p>{{ t('guides.templates.afterCreateBody') }}</p>
     </section>
 

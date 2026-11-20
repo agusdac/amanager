@@ -63,13 +63,13 @@ const progress = computed(() => {
 </script>
 
 <template>
-  <section class="card border-stone-200 bg-gradient-to-b from-white to-stone-50/80 p-6">
+  <section class="card border-rule bg-gradient-to-b from-white to-stone-50/80 p-6 dark:from-stone-900 dark:to-stone-950/90">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h2 class="section-title">{{ t('setupChecklist.title') }}</h2>
         <p class="lede mt-1">{{ t('setupChecklist.subtitle') }}</p>
       </div>
-      <p class="text-sm text-stone-600">
+      <p class="text-sm text-muted">
         {{ t('setupChecklist.progress', { done: progress.n, total: progress.total }) }}
       </p>
     </div>
@@ -77,7 +77,7 @@ const progress = computed(() => {
       <li
         v-for="(step, index) in steps"
         :key="step.id"
-        class="flex gap-3 rounded-lg border border-stone-200 bg-white px-4 py-3"
+        class="flex gap-3 rounded-lg border border-rule bg-surface px-4 py-3"
       >
         <button
           type="button"
@@ -85,7 +85,7 @@ const progress = computed(() => {
           :class="
             done[step.id]
               ? 'border-emerald-600 bg-emerald-600 text-white'
-              : 'border-stone-300 text-stone-600 hover:border-stone-500'
+              : 'border-stone-300 dark:border-stone-600 text-muted hover:border-stone-500'
           "
           :aria-pressed="done[step.id]"
           @click="toggle(step.id)"
@@ -95,12 +95,12 @@ const progress = computed(() => {
         </button>
         <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-2">
-            <span class="font-medium text-stone-900">{{ step.label }}</span>
-            <NuxtLink :to="step.to" class="text-sm font-medium text-stone-700 underline decoration-stone-300">
+            <span class="font-medium text-ink">{{ step.label }}</span>
+            <NuxtLink :to="step.to" class="text-sm font-medium text-ink-secondary underline decoration-stone-300">
               {{ t('setupChecklist.open') }}
             </NuxtLink>
           </div>
-          <p class="mt-0.5 text-sm text-stone-600">{{ step.hint }}</p>
+          <p class="mt-0.5 text-sm text-muted">{{ step.hint }}</p>
         </div>
       </li>
     </ol>

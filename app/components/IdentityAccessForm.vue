@@ -52,7 +52,7 @@ async function linkEmail() {
 </script>
 
 <template>
-  <div class="mt-4 grid gap-4 border-t border-stone-100 pt-4 sm:grid-cols-2">
+  <div class="mt-4 grid gap-4 border-t border-rule-light pt-4 sm:grid-cols-2">
     <label class="block text-sm sm:col-span-2">
       <span class="label">{{ t('identityDetail.linkAsset') }}</span>
       <select v-model="assetId" class="field mt-1.5">

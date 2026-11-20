@@ -74,7 +74,7 @@ function confirmRemove() {
     >
       <div
         v-if="pendingRow"
-        class="rounded-lg border border-stone-200 bg-stone-50/90 px-3 py-2.5"
+        class="rounded-lg border border-rule bg-stone-50/90 dark:bg-stone-900/80 px-3 py-2.5"
       >
         <DependencyListRow
           v-bind="pendingRow"
@@ -90,7 +90,7 @@ function confirmRemove() {
 
     <div class="grid gap-6 lg:grid-cols-2">
       <div>
-        <h3 class="text-sm font-medium text-stone-700">{{ t('assets.depsOutbound') }}</h3>
+        <h3 class="text-sm font-medium text-ink-secondary">{{ t('assets.depsOutbound') }}</h3>
         <ul v-if="outbound.length" class="list-card mt-2 text-sm">
           <li v-for="d in outbound" :key="d.id" class="px-3 py-3">
             <DependencyListRow
@@ -104,15 +104,15 @@ function confirmRemove() {
               :removing="props.removingId === d.id"
               @remove="askRemove(d.id)"
             />
-            <span class="mt-1 block text-xs text-stone-500">
+            <span class="mt-1 block text-xs text-subtle">
               <AssetTypeLabel :type="d.peerType" />
             </span>
           </li>
         </ul>
-        <p v-else class="mt-2 text-sm text-stone-500">{{ t('assets.depsOutboundEmpty') }}</p>
+        <p v-else class="mt-2 text-sm text-subtle">{{ t('assets.depsOutboundEmpty') }}</p>
       </div>
       <div>
-        <h3 class="text-sm font-medium text-stone-700">{{ t('assets.depsInbound') }}</h3>
+        <h3 class="text-sm font-medium text-ink-secondary">{{ t('assets.depsInbound') }}</h3>
         <ul v-if="inbound.length" class="list-card mt-2 text-sm">
           <li v-for="d in inbound" :key="d.id" class="px-3 py-3">
             <DependencyListRow
@@ -126,12 +126,12 @@ function confirmRemove() {
               :removing="props.removingId === d.id"
               @remove="askRemove(d.id)"
             />
-            <span class="mt-1 block text-xs text-stone-500">
+            <span class="mt-1 block text-xs text-subtle">
               <AssetTypeLabel :type="d.peerType" />
             </span>
           </li>
         </ul>
-        <p v-else class="mt-2 text-sm text-stone-500">{{ t('assets.depsInboundEmpty') }}</p>
+        <p v-else class="mt-2 text-sm text-subtle">{{ t('assets.depsInboundEmpty') }}</p>
       </div>
     </div>
   </section>

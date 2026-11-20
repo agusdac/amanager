@@ -2,7 +2,15 @@
 export function useSessionFetch() {
   const requestFetch = useRequestFetch()
   return useFetch<{
-    user: { id: string; email: string; name: string; locale: string; workspaceId: string; workspaceRole: string } | null
+    user: {
+      id: string
+      email: string
+      name: string
+      locale: string
+      theme: string
+      workspaceId: string
+      workspaceRole: string
+    } | null
   }>('/api/auth/session', {
     key: 'session',
     $fetch: requestFetch,

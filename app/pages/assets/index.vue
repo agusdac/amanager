@@ -84,12 +84,12 @@ const assetTabs = computed(() => [
     <header class="flex flex-wrap items-end justify-between gap-4">
       <div class="space-y-1">
         <h1 class="page-title">{{ t('assets.inventoryTitle') }}</h1>
-        <p v-if="verificationFilter === 'needs_confirmation'" class="text-sm text-stone-600">
+        <p v-if="verificationFilter === 'needs_confirmation'" class="text-sm text-muted">
           {{ t('assets.verificationQueueHint') }}
         </p>
-        <p v-else class="text-sm text-stone-600">{{ t('assets.inventorySubtitle') }}</p>
+        <p v-else class="text-sm text-muted">{{ t('assets.inventorySubtitle') }}</p>
         <label v-if="projectId" class="mt-3 flex flex-wrap items-center gap-2 text-sm">
-          <span class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ t('assets.filterEnvironment') }}</span>
+          <span class="text-xs font-medium uppercase tracking-wide text-subtle">{{ t('assets.filterEnvironment') }}</span>
           <select
             class="field w-auto min-w-[10rem] py-1.5"
             :value="environmentId"
@@ -124,12 +124,8 @@ const assetTabs = computed(() => [
             <button
               type="button"
               role="tab"
-              class="rounded-full border px-3 py-1 transition-colors"
-              :class="
-                verificationFilter === ''
-                  ? 'border-stone-800 bg-stone-900 text-white'
-                  : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'
-              "
+              class="filter-pill"
+              :class="verificationFilter === '' ? 'filter-pill--active' : ''"
               :aria-selected="verificationFilter === ''"
               @click="setVerificationFilter('')"
             >
@@ -138,12 +134,8 @@ const assetTabs = computed(() => [
             <button
               type="button"
               role="tab"
-              class="rounded-full border px-3 py-1 transition-colors"
-              :class="
-                verificationFilter === 'needs_confirmation'
-                  ? 'border-stone-800 bg-stone-900 text-white'
-                  : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'
-              "
+              class="filter-pill"
+              :class="verificationFilter === 'needs_confirmation' ? 'filter-pill--active' : ''"
               :aria-selected="verificationFilter === 'needs_confirmation'"
               @click="setVerificationFilter('needs_confirmation')"
             >
@@ -152,12 +144,8 @@ const assetTabs = computed(() => [
             <button
               type="button"
               role="tab"
-              class="rounded-full border px-3 py-1 transition-colors"
-              :class="
-                verificationFilter === 'confirmed_by_human'
-                  ? 'border-emerald-700 bg-emerald-50 text-emerald-900'
-                  : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'
-              "
+              class="filter-pill"
+              :class="verificationFilter === 'confirmed_by_human' ? 'filter-pill--success-active' : ''"
               :aria-selected="verificationFilter === 'confirmed_by_human'"
               @click="setVerificationFilter('confirmed_by_human')"
             >
@@ -167,7 +155,7 @@ const assetTabs = computed(() => [
 
           <div class="card overflow-x-auto">
             <table class="w-full min-w-[32rem] text-left text-sm">
-              <thead class="border-b bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
+              <thead class="table-head">
                 <tr>
                   <th class="px-4 py-3">{{ t('assets.name') }}</th>
                   <th class="px-4 py-3">{{ t('assets.type') }}</th>
@@ -176,14 +164,14 @@ const assetTabs = computed(() => [
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="a in data?.assets" :key="a.id" class="border-b border-stone-100">
+                <tr v-for="a in data?.assets" :key="a.id" class="border-b border-rule-light">
                   <td class="px-4 py-3 font-medium">
-                    <NuxtLink :to="`/assets/${a.id}`" class="text-stone-900 hover:underline">{{ a.name }}</NuxtLink>
+                    <NuxtLink :to="`/assets/${a.id}`" class="text-ink hover:underline">{{ a.name }}</NuxtLink>
                   </td>
-                  <td class="px-4 py-3 text-stone-700">
+                  <td class="px-4 py-3 text-ink-secondary">
                     <AssetTypeLabel :type="a.type" :provider-slug="a.providerSlug" show-description />
                   </td>
-                  <td class="px-4 py-3 text-stone-600">{{ a.providerName ?? '—' }}</td>
+                  <td class="px-4 py-3 text-muted">{{ a.providerName ?? '—' }}</td>
                   <td class="px-4 py-3">
                     <NuxtLink :to="`/assets/${a.id}?tab=verifications`" class="inline-block hover:opacity-90">
                       <VerificationChip :status="a.verificationStatus" />
@@ -192,7 +180,7 @@ const assetTabs = computed(() => [
                 </tr>
               </tbody>
             </table>
-            <p v-if="!data?.assets?.length" class="px-4 py-8 text-center text-sm text-stone-500">{{ t('assets.empty') }}</p>
+            <p v-if="!data?.assets?.length" class="px-4 py-8 text-center text-sm text-subtle">{{ t('assets.empty') }}</p>
           </div>
         </div>
       </template>

@@ -386,14 +386,14 @@ async function removeConfigEntry(id: string) {
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="space-y-2">
         <h1 class="page-title">{{ data?.asset?.name ?? '…' }}</h1>
-        <p v-if="data?.asset" class="text-sm text-stone-600">
+        <p v-if="data?.asset" class="text-sm text-muted">
           <AssetTypeLabel
             :type="data.asset.type"
             :provider-slug="data.provider?.slug"
             show-description
           />
         </p>
-        <p v-if="typeDescription" class="max-w-2xl text-sm text-stone-500">{{ typeDescription }}</p>
+        <p v-if="typeDescription" class="max-w-2xl text-sm text-subtle">{{ typeDescription }}</p>
       </div>
       <div class="flex flex-wrap gap-2 text-sm">
         <NuxtLink to="/assets" class="btn-secondary">
@@ -409,7 +409,7 @@ async function removeConfigEntry(id: string) {
       </div>
     </div>
 
-    <p v-if="pending" class="text-stone-600">{{ t('common.loading') }}</p>
+    <p v-if="pending" class="text-muted">{{ t('common.loading') }}</p>
 
     <AppCallout
       v-else-if="data?.asset && needsConfirmation"
@@ -447,7 +447,7 @@ async function removeConfigEntry(id: string) {
                 {{ t(`assets.types.${type}`, type) }}
               </option>
             </select>
-            <p v-if="typeDescription" class="mt-1 text-xs text-stone-500">{{ typeDescription }}</p>
+            <p v-if="typeDescription" class="mt-1 text-xs text-subtle">{{ typeDescription }}</p>
           </label>
           <label class="form-field">
             <span class="label">{{ t('assets.criticality') }}</span>
@@ -485,8 +485,8 @@ async function removeConfigEntry(id: string) {
           <div class="form-section sm:col-span-2">
             <div class="flex flex-wrap items-start justify-between gap-3">
               <div class="space-y-1">
-                <p class="text-sm font-medium text-stone-900">{{ t('assets.verificationStatusLabel') }}</p>
-                <p class="text-xs text-stone-600">{{ t('assets.verificationStatusHint') }}</p>
+                <p class="text-sm font-medium text-ink">{{ t('assets.verificationStatusLabel') }}</p>
+                <p class="text-xs text-muted">{{ t('assets.verificationStatusHint') }}</p>
               </div>
               <VerificationGuideLink inline />
             </div>
@@ -500,11 +500,11 @@ async function removeConfigEntry(id: string) {
             </label>
             <p
               v-if="verificationStatus === 'confirmed_by_human'"
-              class="mt-3 text-xs text-stone-600"
+              class="mt-3 text-xs text-muted"
             >
               {{ t('assets.verificationConfirmedHint') }}
             </p>
-            <p class="mt-3 flex flex-wrap items-center gap-2 text-xs text-stone-500">
+            <p class="mt-3 flex flex-wrap items-center gap-2 text-xs text-subtle">
               <span>{{ t('assets.status') }}: {{ t(`assets.statuses.${data.asset.status}`) }}</span>
               <VerificationChip :status="data.asset.verificationStatus" />
             </p>
@@ -519,7 +519,7 @@ async function removeConfigEntry(id: string) {
           </button>
         </form>
 
-        <form v-if="showVaultLinkField" class="mt-6 border-t border-stone-100 pt-6" @submit.prevent="saveAssetVaultLink">
+        <form v-if="showVaultLinkField" class="mt-6 border-t border-rule-light pt-6" @submit.prevent="saveAssetVaultLink">
           <PasswordManagerLinkField v-model="passwordManagerItemUrl" @save="saveAssetVaultLink" />
         </form>
       </section>
@@ -540,19 +540,19 @@ async function removeConfigEntry(id: string) {
 
       <section
         v-if="data.projects?.length"
-        class="card mt-6 bg-stone-50/80 p-6"
+        class="card mt-6 bg-stone-50/80 dark:bg-stone-900/80 p-6"
       >
-        <h2 class="text-sm font-medium text-stone-700">{{ t('assets.projectsLinked') }}</h2>
+        <h2 class="text-sm font-medium text-ink-secondary">{{ t('assets.projectsLinked') }}</h2>
         <ul class="mt-3 space-y-3 text-sm">
           <li v-for="p in data.projects" :key="p.projectId" class="space-y-1">
-            <NuxtLink :to="`/projects/${p.projectId}`" class="font-medium text-stone-900 underline">
+            <NuxtLink :to="`/projects/${p.projectId}`" class="font-medium text-ink underline">
               {{ p.projectName }}
             </NuxtLink>
             <label
               v-if="p.projectId === primaryProjectId && projectGraphPack?.environments?.length"
               class="block max-w-sm text-xs"
             >
-              <span class="font-medium text-stone-500">{{ t('assets.environment') }}</span>
+              <span class="font-medium text-subtle">{{ t('assets.environment') }}</span>
               <select
                 class="field mt-1"
                 :value="p.environmentId ?? ''"
@@ -565,7 +565,7 @@ async function removeConfigEntry(id: string) {
                 </option>
               </select>
             </label>
-            <p v-else-if="p.environmentName" class="text-stone-600">
+            <p v-else-if="p.environmentName" class="text-muted">
               {{ t('assets.environment') }}: {{ p.environmentName }}
             </p>
           </li>
@@ -581,18 +581,18 @@ async function removeConfigEntry(id: string) {
           <li v-for="role in data.roles" :key="role.id" class="flex justify-between gap-2 px-3 py-2">
             <span>
               {{ role.identityLabel ?? t('assets.unknown') }}
-              <span class="text-stone-500">({{ t(`assets.roles.${role.roleType}`) }})</span>
+              <span class="text-subtle">({{ t(`assets.roles.${role.roleType}`) }})</span>
             </span>
             <VerificationChip :status="role.verificationStatus" />
           </li>
         </ul>
-        <p v-else class="mt-2 text-sm text-stone-500">{{ t('assets.noRoles') }}</p>
+        <p v-else class="mt-2 text-sm text-subtle">{{ t('assets.noRoles') }}</p>
 
         <ul v-if="data.emails?.length" class="list-card mt-4 text-sm">
           <li v-for="em in data.emails" :key="em.id" class="space-y-2 px-3 py-3">
             <div>
               {{ em.address }}
-              <span class="text-stone-500">({{ t(`assets.purposes.${em.purpose}`) }})</span>
+              <span class="text-subtle">({{ t(`assets.purposes.${em.purpose}`) }})</span>
             </div>
             <PasswordManagerLinkField
               v-model="emailPmUrls[em.emailId]"
@@ -601,7 +601,7 @@ async function removeConfigEntry(id: string) {
             />
           </li>
         </ul>
-        <p v-else class="mt-2 text-sm text-stone-500">{{ t('assets.noEmails') }}</p>
+        <p v-else class="mt-2 text-sm text-subtle">{{ t('assets.noEmails') }}</p>
 
         <div class="mt-6 grid gap-4 sm:grid-cols-2">
           <label class="block text-sm sm:col-span-2">
@@ -657,23 +657,23 @@ async function removeConfigEntry(id: string) {
       </template>
 
       <template #config>
-      <section v-if="data.vaultReferences?.length" class="card bg-stone-50/80 p-6">
+      <section v-if="data.vaultReferences?.length" class="card bg-stone-50/80 dark:bg-stone-900/80 p-6">
         <h2 class="section-title">{{ t('assets.sectionVaultRefs') }}</h2>
         <p class="lede">{{ t('assets.vaultRefsHint') }}</p>
         <ul class="list-card mt-3 text-sm">
           <li v-for="vr in data.vaultReferences" :key="vr.id" class="px-3 py-2">
             <span class="font-medium">{{ vr.label }}</span>
-            <span class="mt-1 block text-stone-600">{{ vr.locationHint }}</span>
+            <span class="mt-1 block text-muted">{{ vr.locationHint }}</span>
             <a
               v-if="vr.itemUrl"
               :href="vr.itemUrl"
-              class="mt-1 block text-xs text-stone-600 underline"
+              class="mt-1 block text-xs text-muted underline"
               target="_blank"
               rel="noopener noreferrer"
             >
               {{ vr.itemUrl }}
             </a>
-            <span v-if="vr.notes" class="text-stone-500">{{ vr.notes }}</span>
+            <span v-if="vr.notes" class="text-subtle">{{ vr.notes }}</span>
           </li>
         </ul>
       </section>
@@ -688,20 +688,20 @@ async function removeConfigEntry(id: string) {
             class="flex flex-wrap items-start justify-between gap-2 px-3 py-2"
           >
             <div class="min-w-0 flex-1">
-              <span class="font-medium text-stone-900">{{ configKeyLabel(entry.key) }}</span>
-              <span v-if="entry.description" class="mt-0.5 block text-stone-500">{{ entry.description }}</span>
-              <p v-if="entry.isSensitiveReference" class="mt-1 text-stone-600">{{ t('assets.configSensitiveRef') }}</p>
-              <p v-else-if="entry.publicValue" class="mt-1 break-all font-mono text-xs text-stone-800">
+              <span class="font-medium text-ink">{{ configKeyLabel(entry.key) }}</span>
+              <span v-if="entry.description" class="mt-0.5 block text-subtle">{{ entry.description }}</span>
+              <p v-if="entry.isSensitiveReference" class="mt-1 text-muted">{{ t('assets.configSensitiveRef') }}</p>
+              <p v-else-if="entry.publicValue" class="mt-1 break-all font-mono text-xs text-stone-800 dark:text-stone-200">
                 {{ entry.publicValue }}
               </p>
-              <p v-else class="mt-1 text-stone-500">{{ t('assets.configNoPublicValue') }}</p>
+              <p v-else class="mt-1 text-subtle">{{ t('assets.configNoPublicValue') }}</p>
             </div>
             <button type="button" class="text-xs text-red-700 underline" @click="removeConfigEntry(entry.id)">
               {{ t('assets.removeConfigEntry') }}
             </button>
           </li>
         </ul>
-        <p v-else class="mt-3 text-sm text-stone-500">{{ t('assets.noConfigEntries') }}</p>
+        <p v-else class="mt-3 text-sm text-subtle">{{ t('assets.noConfigEntries') }}</p>
         <form class="mt-6 max-w-xl space-y-3" @submit.prevent="addConfigEntry">
           <label class="block text-sm">
             <span class="label">{{ t('assets.configKey') }}</span>
@@ -716,7 +716,7 @@ async function removeConfigEntry(id: string) {
             <input v-model="configCustomKey" class="field mt-1.5" required />
           </label>
           <label class="flex items-center gap-2 text-sm">
-            <input v-model="configSensitive" type="checkbox" class="rounded border-stone-300" />
+            <input v-model="configSensitive" type="checkbox" class="checkbox" />
             <span>{{ t('assets.configSensitiveToggle') }}</span>
           </label>
           <label v-if="!configSensitive" class="block text-sm">
@@ -747,10 +747,10 @@ async function removeConfigEntry(id: string) {
         </div>
         <div
           v-if="needsConfirmation"
-          class="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4"
+          class="mt-4 rounded-lg border border-rule bg-surface-muted p-4"
         >
-          <p class="text-sm font-medium text-stone-900">{{ t('assets.confirmControlTitle') }}</p>
-          <p class="mt-1 text-xs text-stone-600">{{ t('assets.confirmControlHint') }}</p>
+          <p class="text-sm font-medium text-ink">{{ t('assets.confirmControlTitle') }}</p>
+          <p class="mt-1 text-xs text-muted">{{ t('assets.confirmControlHint') }}</p>
           <button
             type="button"
             class="btn-primary mt-3"
@@ -762,14 +762,14 @@ async function removeConfigEntry(id: string) {
         </div>
         <ul v-if="data.verifications?.length" class="list-card mt-4 text-sm">
           <li v-for="v in data.verifications" :key="v.id" class="space-y-1 px-3 py-2">
-            <span class="font-medium text-stone-900">{{ verificationMethodLabel(v.status) }}</span>
-            <p v-if="v.evidenceNote" class="text-stone-600">{{ v.evidenceNote }}</p>
-            <p v-if="v.checkedAt" class="text-xs text-stone-500">
+            <span class="font-medium text-ink">{{ verificationMethodLabel(v.status) }}</span>
+            <p v-if="v.evidenceNote" class="text-muted">{{ v.evidenceNote }}</p>
+            <p v-if="v.checkedAt" class="text-xs text-subtle">
               {{ t('assets.verificationChecked', { date: new Date(v.checkedAt).toLocaleDateString() }) }}
             </p>
           </li>
         </ul>
-        <p v-else class="mt-3 text-sm text-stone-500">{{ t('assets.noVerifications') }}</p>
+        <p v-else class="mt-3 text-sm text-subtle">{{ t('assets.noVerifications') }}</p>
         <form class="mt-6 max-w-lg space-y-3" @submit.prevent="addVerification">
           <label class="block text-sm">
             <span class="label">{{ t('assets.verificationMethod') }}</span>
@@ -800,7 +800,7 @@ async function removeConfigEntry(id: string) {
           <h2 class="sr-only">{{ t('graph.title') }}</h2>
           <NuxtLink
             :to="`/projects/${primaryProjectId}?tab=graph`"
-            class="text-sm text-stone-600 underline hover:text-stone-900"
+            class="text-sm text-muted underline hover:text-ink"
           >
             {{ t('graph.openProjectMap') }}
           </NuxtLink>

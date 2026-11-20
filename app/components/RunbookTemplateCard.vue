@@ -36,15 +36,18 @@ const inputsLabel = computed(() => {
 <template>
   <article class="card flex flex-col gap-3 p-5">
     <div>
-      <h2 class="text-lg font-medium text-stone-900">
+      <h2 class="text-lg font-medium text-ink">
         <NuxtLink :to="`/guides/templates/${template.slug}`" class="underline">{{ title }}</NuxtLink>
       </h2>
-      <p v-if="description" class="mt-1 text-sm text-stone-600">{{ description }}</p>
+      <p v-if="description" class="mt-1 text-sm text-muted">{{ description }}</p>
     </div>
-    <ul class="flex flex-wrap gap-2 text-xs text-stone-500">
-      <li class="rounded-full bg-stone-100 px-2 py-0.5">{{ t('guides.templates.stepCount', { count: template.stepCount }) }}</li>
-      <li class="rounded-full bg-stone-100 px-2 py-0.5">{{ inputsLabel }}</li>
-      <li v-if="isWorkspace" class="rounded-full bg-sky-50 px-2 py-0.5 text-sky-900">
+    <ul class="flex flex-wrap gap-2 text-xs text-subtle">
+      <li class="rounded-full bg-surface-soft px-2 py-0.5">{{ t('guides.templates.stepCount', { count: template.stepCount }) }}</li>
+      <li class="rounded-full bg-surface-soft px-2 py-0.5">{{ inputsLabel }}</li>
+      <li
+        v-if="isWorkspace"
+        class="rounded-full bg-sky-50 px-2 py-0.5 text-sky-900 dark:bg-sky-950/50 dark:text-sky-300"
+      >
         {{ t('guides.templates.workspaceBadge') }}
       </li>
     </ul>

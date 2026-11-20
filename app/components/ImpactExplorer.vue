@@ -84,13 +84,13 @@ function relationLabel(type: string) {
       <h2 class="section-title">{{ t('impact.title') }}</h2>
       <p class="lede mt-1">{{ t('impact.hint') }}</p>
     </template>
-    <p v-else class="text-sm text-stone-600">{{ t('impact.hint') }}</p>
+    <p v-else class="text-sm text-muted">{{ t('impact.hint') }}</p>
 
     <div class="flex flex-wrap gap-2" :class="embedded ? 'mt-2' : 'mt-4'">
       <button
         type="button"
         class="rounded border px-3 py-1.5 text-sm transition-colors"
-        :class="mode === 'asset' ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'"
+        :class="mode === 'asset' ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-300 dark:border-stone-600 bg-surface text-ink-secondary hover:bg-surface-muted'"
         @click="mode = 'asset'"
       >
         {{ t('impact.byAsset') }}
@@ -98,7 +98,7 @@ function relationLabel(type: string) {
       <button
         type="button"
         class="rounded border px-3 py-1.5 text-sm transition-colors"
-        :class="mode === 'identity' ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'"
+        :class="mode === 'identity' ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-300 dark:border-stone-600 bg-surface text-ink-secondary hover:bg-surface-muted'"
         @click="mode = 'identity'"
       >
         {{ t('impact.byIdentity') }}
@@ -125,16 +125,16 @@ function relationLabel(type: string) {
 
     <p v-if="error" class="error-text mt-3">{{ error }}</p>
 
-    <div v-if="linkedAssets.length" class="mt-4 rounded-lg border border-stone-100 bg-stone-50 p-3 text-sm">
-      <p class="font-medium text-stone-700">{{ t('impact.linkedAssets') }}</p>
-      <ul class="mt-1 list-inside list-disc text-stone-600">
+    <div v-if="linkedAssets.length" class="mt-4 rounded-lg border border-rule-light bg-surface-muted p-3 text-sm">
+      <p class="font-medium text-ink-secondary">{{ t('impact.linkedAssets') }}</p>
+      <ul class="mt-1 list-inside list-disc text-muted">
         <li v-for="a in linkedAssets" :key="a.id">{{ a.name }}</li>
       </ul>
     </div>
 
     <div v-if="edges.length" class="mt-4 overflow-x-auto">
       <table class="w-full min-w-[28rem] text-left text-sm">
-        <thead class="border-b text-xs uppercase tracking-wide text-stone-500">
+        <thead class="border-b text-xs uppercase tracking-wide text-subtle">
           <tr>
             <th class="py-2 pr-3">{{ t('impact.colFrom') }}</th>
             <th class="py-2 pr-3">{{ t('impact.colTo') }}</th>
@@ -143,8 +143,8 @@ function relationLabel(type: string) {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(e, i) in edges" :key="i" class="border-b border-stone-100">
-            <td class="py-2 pr-3 font-medium text-stone-800">
+          <tr v-for="(e, i) in edges" :key="i" class="border-b border-rule-light">
+            <td class="py-2 pr-3 font-medium text-stone-800 dark:text-stone-200">
               <NuxtLink
                 v-if="e.fromAssetId"
                 :to="`/assets/${e.fromAssetId}`"
@@ -154,7 +154,7 @@ function relationLabel(type: string) {
               </NuxtLink>
               <span v-else>{{ e.fromName }}</span>
             </td>
-            <td class="py-2 pr-3 text-stone-800">
+            <td class="py-2 pr-3 text-stone-800 dark:text-stone-200">
               <NuxtLink
                 v-if="e.toAssetId"
                 :to="`/assets/${e.toAssetId}`"
@@ -164,7 +164,7 @@ function relationLabel(type: string) {
               </NuxtLink>
               <span v-else>{{ e.toName }}</span>
             </td>
-            <td class="py-2 pr-3 text-stone-600">{{ relationLabel(e.relationType) }}</td>
+            <td class="py-2 pr-3 text-muted">{{ relationLabel(e.relationType) }}</td>
             <td class="py-2">
               <VerificationChip :status="e.verificationStatus" />
             </td>
@@ -172,6 +172,6 @@ function relationLabel(type: string) {
         </tbody>
       </table>
     </div>
-    <p v-else-if="entityId && !loading && !error" class="mt-4 text-sm text-stone-500">{{ t('impact.empty') }}</p>
+    <p v-else-if="entityId && !loading && !error" class="mt-4 text-sm text-subtle">{{ t('impact.empty') }}</p>
   </section>
 </template>

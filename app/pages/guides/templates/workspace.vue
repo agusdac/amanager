@@ -316,12 +316,12 @@ async function save() {
 <template>
   <div class="mx-auto max-w-2xl space-y-6">
     <p class="text-sm">
-      <NuxtLink to="/guides" class="text-stone-600 underline">{{ t('guides.templates.backToGuides') }}</NuxtLink>
+      <NuxtLink to="/guides" class="text-muted underline">{{ t('guides.templates.backToGuides') }}</NuxtLink>
     </p>
 
-    <div v-if="isEdit && loadingExisting" class="text-sm text-stone-500">{{ t('common.loading') }}</div>
+    <div v-if="isEdit && loadingExisting" class="text-sm text-subtle">{{ t('common.loading') }}</div>
 
-    <p v-else-if="isEdit && !hydrated" class="text-sm text-stone-600">{{ t('guides.templates.notFound') }}</p>
+    <p v-else-if="isEdit && !hydrated" class="text-sm text-muted">{{ t('guides.templates.notFound') }}</p>
 
     <template v-else-if="!isEdit || hydrated">
       <h1 class="page-title">
@@ -335,32 +335,32 @@ async function save() {
 
       <form class="card space-y-5 p-5" @submit.prevent="save">
         <label class="block text-sm">
-          <span class="font-medium text-stone-700">{{ t('guides.fieldTitle') }}</span>
+          <span class="font-medium text-ink-secondary">{{ t('guides.fieldTitle') }}</span>
           <input v-model="title" type="text" class="field mt-1.5 w-full" required />
         </label>
 
         <label class="block text-sm">
-          <span class="font-medium text-stone-700">{{ t('guides.templates.workspaceOverview') }}</span>
+          <span class="font-medium text-ink-secondary">{{ t('guides.templates.workspaceOverview') }}</span>
           <textarea v-model="contentMarkdown" rows="3" class="field mt-1.5 w-full font-mono text-sm" />
         </label>
 
         <label class="flex items-center gap-2 text-sm">
-          <input v-model="requiresEnvironment" type="checkbox" class="rounded border-stone-300" />
+          <input v-model="requiresEnvironment" type="checkbox" class="checkbox" />
           {{ t('guides.templates.workspaceRequiresEnv') }}
         </label>
 
         <label class="block text-sm">
-          <span class="font-medium text-stone-700">{{ t('guides.templates.previewProject') }}</span>
+          <span class="font-medium text-ink-secondary">{{ t('guides.templates.previewProject') }}</span>
           <select v-model="previewProjectId" class="field mt-1.5 w-full">
             <option value="">{{ t('guides.templates.previewSampleProject') }}</option>
             <option v-for="p in projects?.projects ?? []" :key="p.id" :value="p.id">{{ p.name }}</option>
           </select>
-          <span class="mt-1 block text-xs text-stone-500">{{ t('guides.templates.previewProjectHint') }}</span>
+          <span class="mt-1 block text-xs text-subtle">{{ t('guides.templates.previewProjectHint') }}</span>
         </label>
 
-        <section class="rounded-xl border border-dashed border-stone-300 bg-white p-4">
-          <h2 class="text-sm font-medium text-stone-900">{{ t('guides.templates.workflowPatternsTitle') }}</h2>
-          <p class="mt-1 text-xs text-stone-600">{{ t('guides.templates.workflowPatternsHint') }}</p>
+        <section class="rounded-xl border border-dashed border-stone-300 dark:border-stone-600 bg-surface p-4">
+          <h2 class="text-sm font-medium text-ink">{{ t('guides.templates.workflowPatternsTitle') }}</h2>
+          <p class="mt-1 text-xs text-muted">{{ t('guides.templates.workflowPatternsHint') }}</p>
           <div class="mt-3 flex flex-wrap gap-2">
             <button
               v-for="pid in WORKSPACE_TEMPLATE_PATTERN_IDS"
@@ -378,10 +378,10 @@ async function save() {
           <div
             v-for="(step, index) in steps"
             :key="index"
-            class="rounded-xl border border-stone-200 bg-stone-50/60 p-4"
+            class="rounded-xl border border-rule bg-stone-50/60 dark:bg-stone-900/70 p-4"
           >
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <span class="text-xs font-medium uppercase tracking-wide text-stone-500">
+              <span class="text-xs font-medium uppercase tracking-wide text-subtle">
                 {{ t('guides.templates.workspaceStepLabel', { n: index + 1 }) }}
               </span>
               <div class="flex gap-1">
@@ -409,7 +409,7 @@ async function save() {
 
             <div class="mt-3 grid gap-3 sm:grid-cols-2">
               <label class="block text-xs">
-                <span class="font-medium text-stone-600">{{ t('guides.templates.stepKind') }}</span>
+                <span class="font-medium text-muted">{{ t('guides.templates.stepKind') }}</span>
                 <select v-model="step.kind" class="field mt-1 w-full text-sm">
                   <option v-for="k in RUNBOOK_STEP_KINDS" :key="k" :value="k">
                     {{ t(`guides.stepKinds.${k}`) }}
@@ -417,7 +417,7 @@ async function save() {
                 </select>
               </label>
               <label class="block text-xs">
-                <span class="font-medium text-stone-600">{{ t('guides.templates.stepRisk') }}</span>
+                <span class="font-medium text-muted">{{ t('guides.templates.stepRisk') }}</span>
                 <select v-model="step.risk" class="field mt-1 w-full text-sm">
                   <option v-for="r in STEP_RISKS" :key="r" :value="r">
                     {{ t(`guides.stepRisks.${r}`) }}
@@ -426,14 +426,14 @@ async function save() {
               </label>
             </div>
 
-            <label class="mt-3 block text-xs font-medium text-stone-600">{{ t('guides.templates.workspaceStepSource') }}</label>
+            <label class="mt-3 block text-xs font-medium text-muted">{{ t('guides.templates.workspaceStepSource') }}</label>
             <select v-model="step.stepSource" class="field mt-1 w-full text-sm">
               <option value="markdown">{{ t('guides.templates.workspaceSourceMarkdown') }}</option>
               <option value="inventory">{{ t('guides.templates.workspaceSourceInventory') }}</option>
             </select>
 
             <template v-if="step.stepSource === 'inventory'">
-              <label class="mt-3 block text-xs font-medium text-stone-600">{{ t('guides.templates.workspaceInventoryKind') }}</label>
+              <label class="mt-3 block text-xs font-medium text-muted">{{ t('guides.templates.workspaceInventoryKind') }}</label>
               <select
                 v-model="step.inventoryGenerator"
                 class="field mt-1 w-full text-sm"
@@ -449,12 +449,12 @@ async function save() {
               </select>
 
               <div v-if="generatorSupportsSpecificTarget(step.inventoryGenerator)" class="mt-3 space-y-2">
-                <span class="text-xs font-medium text-stone-600">{{ t('guides.templates.inventoryScope') }}</span>
+                <span class="text-xs font-medium text-muted">{{ t('guides.templates.inventoryScope') }}</span>
                 <div class="flex flex-wrap gap-2">
                   <button
                     type="button"
                     class="rounded-full border px-3 py-1 text-xs"
-                    :class="step.inventoryScope === 'all' ? 'border-stone-800 bg-stone-900 text-white' : 'border-stone-300 bg-white'"
+                    :class="step.inventoryScope === 'all' ? 'border-stone-800 bg-stone-900 text-white' : 'border-stone-300 dark:border-stone-600 bg-surface'"
                     @click="step.inventoryScope = 'all'"
                   >
                     {{ t('guides.templates.inventoryScopeAll') }}
@@ -462,22 +462,22 @@ async function save() {
                   <button
                     type="button"
                     class="rounded-full border px-3 py-1 text-xs"
-                    :class="step.inventoryScope === 'specific' ? 'border-stone-800 bg-stone-900 text-white' : 'border-stone-300 bg-white'"
+                    :class="step.inventoryScope === 'specific' ? 'border-stone-800 bg-stone-900 text-white' : 'border-stone-300 dark:border-stone-600 bg-surface'"
                     @click="step.inventoryScope = 'specific'"
                   >
                     {{ t('guides.templates.inventoryScopeSpecific') }}
                   </button>
                 </div>
                 <div v-if="step.inventoryScope === 'specific'" class="flex flex-wrap items-center gap-2">
-                  <span v-if="step.inventoryTargetLabel" class="text-sm text-stone-800">{{ step.inventoryTargetLabel }}</span>
-                  <span v-else class="text-sm text-stone-500">{{ t('guides.templates.noTargetSelected') }}</span>
+                  <span v-if="step.inventoryTargetLabel" class="text-sm text-stone-800 dark:text-stone-200">{{ step.inventoryTargetLabel }}</span>
+                  <span v-else class="text-sm text-subtle">{{ t('guides.templates.noTargetSelected') }}</span>
                   <button type="button" class="btn-secondary text-xs" @click="openReferencePicker(index)">
                     {{ t('guides.templates.pickReference') }}
                   </button>
                   <button
                     v-if="step.inventoryTargetId"
                     type="button"
-                    class="text-xs text-stone-500 underline"
+                    class="text-xs text-subtle underline"
                     @click="
                       () => {
                         step.inventoryTargetId = ''
@@ -492,18 +492,18 @@ async function save() {
 
               <div v-if="inventoryGeneratorNeedsAssetType(step.inventoryGenerator) && step.inventoryScope === 'all'" class="mt-3 grid gap-3 sm:grid-cols-2">
                 <label class="block text-xs">
-                  <span class="font-medium text-stone-600">{{ t('guides.templates.workspaceAssetType') }}</span>
+                  <span class="font-medium text-muted">{{ t('guides.templates.workspaceAssetType') }}</span>
                   <select v-model="step.assetType" class="field mt-1 w-full text-sm">
                     <option v-for="atype in ASSET_TYPE_KEYS" :key="atype" :value="atype">{{ atype }}</option>
                   </select>
                 </label>
                 <label class="block text-xs">
-                  <span class="font-medium text-stone-600">{{ t('guides.templates.workspaceProviderSlug') }}</span>
+                  <span class="font-medium text-muted">{{ t('guides.templates.workspaceProviderSlug') }}</span>
                   <input v-model="step.providerSlug" type="text" class="field mt-1 w-full text-sm" :placeholder="t('guides.templates.workspaceProviderOptional')" />
                 </label>
               </div>
 
-              <label class="mt-3 block text-xs font-medium text-stone-600">{{ t('guides.templates.workspaceInventoryIntro') }}</label>
+              <label class="mt-3 block text-xs font-medium text-muted">{{ t('guides.templates.workspaceInventoryIntro') }}</label>
               <textarea
                 v-model="step.bodyMarkdown"
                 rows="2"
@@ -520,30 +520,30 @@ async function save() {
                 :placeholder="t('guides.templates.workspaceStepBodyPh')"
               />
               <div class="mt-2 flex flex-wrap items-center gap-2">
-                <span class="text-xs text-stone-500">{{ t('guides.templates.insertLink') }}:</span>
+                <span class="text-xs text-subtle">{{ t('guides.templates.insertLink') }}:</span>
                 <button
                   v-for="snip in HILKO_MARKDOWN_SNIPPETS"
                   :key="snip.id"
                   type="button"
-                  class="rounded border border-stone-200 bg-white px-2 py-0.5 text-xs text-stone-700 hover:bg-stone-50"
+                  class="rounded border border-rule bg-surface px-2 py-0.5 text-xs text-ink-secondary hover:bg-surface-muted"
                   @click="appendSnippet(index, snip.id)"
                 >
                   {{ t(snip.labelKey) }}
                 </button>
               </div>
-              <div v-if="step.bodyMarkdown.trim()" class="mt-3 rounded-lg border border-stone-200 bg-white p-3">
-                <p class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ t('guides.templates.stepPreview') }}</p>
+              <div v-if="step.bodyMarkdown.trim()" class="mt-3 rounded-lg border border-rule bg-surface p-3">
+                <p class="text-xs font-medium uppercase tracking-wide text-subtle">{{ t('guides.templates.stepPreview') }}</p>
                 <AppMarkdownPreview class="mt-2 text-sm" :markdown="step.bodyMarkdown" />
               </div>
             </template>
 
             <div
               v-if="step.stepSource === 'inventory' && step.title.trim()"
-              class="mt-3 rounded-lg border border-stone-200 bg-white p-3"
+              class="mt-3 rounded-lg border border-rule bg-surface p-3"
             >
               <div class="flex flex-wrap items-center justify-between gap-2">
-                <p class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ t('guides.templates.stepPreview') }}</p>
-                <span v-if="stepPreviewLoading[index]" class="text-xs text-stone-500">{{ t('common.loading') }}</span>
+                <p class="text-xs font-medium uppercase tracking-wide text-subtle">{{ t('guides.templates.stepPreview') }}</p>
+                <span v-if="stepPreviewLoading[index]" class="text-xs text-subtle">{{ t('common.loading') }}</span>
                 <span
                   v-else-if="stepPreviews[index]?.sample"
                   class="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-900"
@@ -562,13 +562,13 @@ async function save() {
                 class="mt-2 text-sm"
                 :markdown="stepPreviews[index]!.bodyMarkdown"
               />
-              <p v-else-if="!stepPreviewLoading[index]" class="mt-2 text-xs text-stone-500">
+              <p v-else-if="!stepPreviewLoading[index]" class="mt-2 text-xs text-subtle">
                 {{ t('guides.templates.previewEmpty') }}
               </p>
             </div>
 
             <div v-if="index > 0" class="mt-3">
-              <span class="text-xs font-medium text-stone-600">{{ t('guides.templates.workspaceDependsOn') }}</span>
+              <span class="text-xs font-medium text-muted">{{ t('guides.templates.workspaceDependsOn') }}</span>
               <ul class="mt-1 flex flex-wrap gap-2">
                 <li v-for="prior in priorSteps(index)" :key="prior">
                   <button
@@ -577,7 +577,7 @@ async function save() {
                     :class="
                       step.dependsOnStepIndexes.includes(prior)
                         ? 'border-stone-800 bg-stone-800 text-white'
-                        : 'border-stone-300 bg-white text-stone-600'
+                        : 'border-stone-300 dark:border-stone-600 bg-surface text-muted'
                     "
                     @click="toggleDepends(index, prior)"
                   >
@@ -605,7 +605,7 @@ async function save() {
         <p class="mt-1 text-sm text-red-800/90">{{ t('guides.templates.deleteWorkspaceDescription') }}</p>
         <button
           type="button"
-          class="mt-3 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-50"
+          class="mt-3 rounded-lg border border-red-300 bg-surface px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-50"
           @click="deleteOpen = true"
         >
           {{ t('guides.templates.deleteWorkspace') }}

@@ -24,7 +24,7 @@ function onInput() {
 <template>
   <label class="block text-sm sm:col-span-2">
     <span class="label">{{ t('assets.passwordManagerItemUrl') }}</span>
-    <p class="mt-0.5 text-xs text-stone-500">
+    <p class="mt-0.5 text-xs text-subtle">
       {{ hintKey ? t(hintKey) : t('assets.passwordManagerItemUrlHint') }}
     </p>
     <input
@@ -34,7 +34,7 @@ function onInput() {
       placeholder="bitwarden://… or https://vault.example/…"
       @input="onInput"
     />
-    <button type="button" class="mt-2 text-xs text-stone-600 underline" @click="emit('save')">
+    <button type="button" class="mt-2 text-xs text-muted underline" @click="emit('save')">
       {{ t('assets.savePasswordManagerLink') }}
     </button>
   </label>

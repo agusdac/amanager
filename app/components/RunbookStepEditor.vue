@@ -34,13 +34,13 @@ watch(
   <article class="card space-y-3 p-4">
     <div class="flex flex-wrap items-center justify-between gap-2">
       <input v-model="title" type="text" class="field flex-1 font-medium" />
-      <span class="text-xs uppercase text-stone-500">{{ step.kind }} · {{ step.risk }}</span>
+      <span class="text-xs uppercase text-subtle">{{ step.kind }} · {{ step.risk }}</span>
     </div>
     <div class="flex gap-2 text-sm">
       <button
         type="button"
         class="rounded px-2 py-0.5"
-        :class="!showPreview ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-700'"
+        :class="!showPreview ? 'bg-stone-900 text-white' : 'bg-surface-soft text-ink-secondary'"
         @click="showPreview = false"
       >
         {{ t('guides.editMarkdown') }}
@@ -48,14 +48,14 @@ watch(
       <button
         type="button"
         class="rounded px-2 py-0.5"
-        :class="showPreview ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-700'"
+        :class="showPreview ? 'bg-stone-900 text-white' : 'bg-surface-soft text-ink-secondary'"
         @click="showPreview = true"
       >
         {{ t('guides.previewMarkdown') }}
       </button>
     </div>
     <textarea v-if="!showPreview" v-model="body" rows="8" class="field w-full font-mono text-sm" />
-    <div v-else class="card border-stone-200 bg-stone-50/50 p-3">
+    <div v-else class="card border-rule bg-stone-50/50 p-3">
       <AppMarkdownPreview :markdown="body" />
     </div>
     <button

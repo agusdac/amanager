@@ -57,39 +57,39 @@ const identityTabs = computed(() => [
       </NuxtLink>
     </div>
 
-    <p v-if="pending" class="text-stone-600">{{ t('common.loading') }}</p>
+    <p v-if="pending" class="text-muted">{{ t('common.loading') }}</p>
 
     <AppDetailTabs v-else-if="data" :tabs="identityTabs" default-tab="access">
       <template #access>
         <section class="card space-y-3 p-5">
           <h2 class="sr-only">{{ t('identityDetail.assetsAccess') }}</h2>
           <p class="lede">{{ t('identityDetail.assetsAccessHint') }}</p>
-          <ul v-if="data.assetAccess?.length" class="divide-y divide-stone-100 border-t border-stone-100">
+          <ul v-if="data.assetAccess?.length" class="divide-y divide-rule border-t border-rule-light">
             <li
               v-for="row in data.assetAccess"
               :key="row.roleId"
               class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
             >
               <div>
-                <NuxtLink :to="`/assets/${row.assetId}`" class="font-medium text-stone-900 hover:underline">
+                <NuxtLink :to="`/assets/${row.assetId}`" class="font-medium text-ink hover:underline">
                   {{ row.assetName }}
                 </NuxtLink>
-                <span class="ml-2 text-stone-500">
+                <span class="ml-2 text-subtle">
                   <AssetTypeLabel :type="row.assetType" :provider-slug="row.providerSlug" />
                 </span>
-                <span class="ml-2 text-stone-500">({{ t(`assets.roles.${row.roleType}`) }})</span>
+                <span class="ml-2 text-subtle">({{ t(`assets.roles.${row.roleType}`) }})</span>
               </div>
               <VerificationChip :status="row.verificationStatus" />
             </li>
           </ul>
-          <p v-else class="mt-4 text-sm text-stone-500">{{ t('identityDetail.noAssets') }}</p>
+          <p v-else class="mt-4 text-sm text-subtle">{{ t('identityDetail.noAssets') }}</p>
           <IdentityAccessForm :identity-id="id" @linked="refresh()" />
-          <div v-if="assetOptions.length" class="mt-6 border-t border-stone-100 pt-4">
-            <p class="text-sm font-medium text-stone-800">{{ t('identityDetail.openAssetAccess') }}</p>
-            <p class="mt-1 text-xs text-stone-500">{{ t('identityDetail.openAssetAccessHint') }}</p>
+          <div v-if="assetOptions.length" class="mt-6 border-t border-rule-light pt-4">
+            <p class="text-sm font-medium text-stone-800 dark:text-stone-200">{{ t('identityDetail.openAssetAccess') }}</p>
+            <p class="mt-1 text-xs text-subtle">{{ t('identityDetail.openAssetAccessHint') }}</p>
             <ul class="mt-2 flex flex-wrap gap-2 text-sm">
               <li v-for="a in assetOptions" :key="a.id">
-                <NuxtLink :to="`/assets/${a.id}?tab=access`" class="rounded-full bg-stone-100 px-3 py-1 text-stone-800 underline decoration-stone-300">
+                <NuxtLink :to="`/assets/${a.id}?tab=access`" class="rounded-full bg-surface-soft px-3 py-1 text-stone-800 dark:text-stone-200 underline decoration-stone-300">
                   {{ a.name }}
                 </NuxtLink>
               </li>
@@ -101,23 +101,23 @@ const identityTabs = computed(() => [
       <template #emails>
         <section class="card space-y-3 p-5">
           <h2 class="sr-only">{{ t('accounts.emails') }}</h2>
-          <ul v-if="data.emails?.length" class="divide-y divide-stone-100 border-t border-stone-100">
+          <ul v-if="data.emails?.length" class="divide-y divide-rule border-t border-rule-light">
             <li v-for="(em, i) in data.emails" :key="i" class="px-4 py-2 text-sm">
               <span class="font-medium">{{ em.address }}</span>
-              <span class="ml-2 text-stone-500">({{ t(`assets.purposes.${em.purpose}`) }})</span>
+              <span class="ml-2 text-subtle">({{ t(`assets.purposes.${em.purpose}`) }})</span>
             </li>
           </ul>
-          <p v-else class="mt-3 text-sm text-stone-500">{{ t('identityDetail.noEmails') }}</p>
+          <p v-else class="mt-3 text-sm text-subtle">{{ t('identityDetail.noEmails') }}</p>
         </section>
       </template>
 
       <template #accounts>
-        <section class="card space-y-2 bg-stone-50/80 p-5">
+        <section class="card space-y-2 bg-stone-50/80 dark:bg-stone-900/80 p-5">
           <h2 class="sr-only">{{ t('accounts.providerAccounts') }}</h2>
           <ul class="mt-2 space-y-1 text-sm">
             <li v-for="acc in data.linkedAccounts" :key="acc.accountId">
               {{ acc.label }}
-              <span v-if="acc.providerName" class="text-stone-500">({{ acc.providerName }})</span>
+              <span v-if="acc.providerName" class="text-subtle">({{ acc.providerName }})</span>
             </li>
           </ul>
         </section>

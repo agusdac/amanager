@@ -17,12 +17,12 @@ function safeHref(href: string): string | null {
 
 function inlineFormat(escaped: string): string {
   return escaped
-    .replace(/`([^`]+)`/g, '<code class="rounded bg-stone-100 px-1 text-xs">$1</code>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label: string, href: string) => {
       const safe = safeHref(href)
       if (!safe) return label
-      return `<a href="${safe}" class="font-medium text-stone-900 underline">${label}</a>`
+      return `<a href="${safe}">${label}</a>`
     })
 }
 
@@ -50,7 +50,7 @@ export function renderMarkdownPreview(md: string): string {
     if (trimmed.startsWith('> ')) {
       closeUl()
       const inner = inlineFormat(escapeHtml(trimmed.slice(2)))
-      out.push(`<blockquote class="border-l-4 border-amber-300 bg-amber-50/60 px-3 py-2 text-sm">${inner}</blockquote>`)
+      out.push(`<blockquote class="markdown-quote">${inner}</blockquote>`)
       continue
     }
     if (trimmed.startsWith('- ')) {

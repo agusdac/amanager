@@ -23,9 +23,9 @@ const { data, refresh, pending } = await useFetch('/api/projects')
     <p v-else-if="!data?.projects?.length" class="lede">{{ t('projects.empty') }}</p>
     <ul v-else class="list-card">
       <li v-for="project in data.projects" :key="project.id">
-        <NuxtLink :to="`/projects/${project.id}`" class="block px-4 py-3 hover:bg-stone-50">
-          <span class="font-medium text-stone-900">{{ project.name }}</span>
-          <span v-if="project.websiteUrl" class="ml-2 text-sm text-stone-500">{{ project.websiteUrl }}</span>
+        <NuxtLink :to="`/projects/${project.id}`" class="block px-4 py-3 hover:bg-surface-muted">
+          <span class="font-medium text-ink">{{ project.name }}</span>
+          <span v-if="project.websiteUrl" class="ml-2 text-sm text-subtle">{{ project.websiteUrl }}</span>
         </NuxtLink>
       </li>
     </ul>

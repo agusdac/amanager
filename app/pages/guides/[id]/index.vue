@@ -86,12 +86,12 @@ async function startExecution() {
 </script>
 
 <template>
-  <div v-if="pending" class="text-sm text-stone-500">{{ t('common.loading') }}</div>
+  <div v-if="pending" class="text-sm text-subtle">{{ t('common.loading') }}</div>
   <div v-else-if="data?.runbook" class="space-y-8">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h1 class="page-title">{{ data.runbook.title }}</h1>
-        <p class="text-sm text-stone-600">{{ data.runbook.templateSlug ?? t('guides.customRunbook') }}</p>
+        <p class="text-sm text-muted">{{ data.runbook.templateSlug ?? t('guides.customRunbook') }}</p>
       </div>
       <div class="flex flex-wrap gap-2">
         <a :href="`/api/runbooks/${id}/export.md`" class="btn-secondary text-sm" download>
@@ -103,8 +103,8 @@ async function startExecution() {
       </div>
     </div>
 
-    <label class="flex items-center gap-2 text-sm text-stone-600">
-      <input v-model="execLive" type="checkbox" class="rounded border-stone-300" />
+    <label class="flex items-center gap-2 text-sm text-muted">
+      <input v-model="execLive" type="checkbox" class="checkbox" />
       {{ t('guides.liveBinding') }}
     </label>
 
@@ -112,7 +112,7 @@ async function startExecution() {
 
     <section class="card space-y-3 p-5">
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <h2 class="text-sm font-medium uppercase tracking-wide text-stone-500">{{ t('guides.overview') }}</h2>
+        <h2 class="text-sm font-medium uppercase tracking-wide text-subtle">{{ t('guides.overview') }}</h2>
         <button type="button" class="text-xs underline" @click="overviewPreview = !overviewPreview">
           {{ overviewPreview ? t('guides.editMarkdown') : t('guides.previewMarkdown') }}
         </button>
@@ -126,15 +126,15 @@ async function startExecution() {
 
     <section class="space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <h2 class="text-sm font-medium uppercase tracking-wide text-stone-500">{{ t('guides.steps') }}</h2>
+        <h2 class="text-sm font-medium uppercase tracking-wide text-subtle">{{ t('guides.steps') }}</h2>
         <button type="button" class="btn-secondary text-sm" @click="loadRefreshDiff">{{ t('guides.refreshInventory') }}</button>
       </div>
 
       <div v-if="refreshDiff.length" class="card space-y-3 border-amber-200 bg-amber-50/50 p-4">
-        <p class="text-sm text-stone-800">{{ t('guides.refreshPreview') }}</p>
+        <p class="text-sm text-stone-800 dark:text-stone-200">{{ t('guides.refreshPreview') }}</p>
         <ul class="space-y-2 text-sm">
           <li v-for="d in refreshDiff" :key="d.stepKey" class="flex gap-2">
-            <input v-model="selectedMerge" type="checkbox" :value="d.stepKey" />
+            <input v-model="selectedMerge" type="checkbox" class="checkbox" :value="d.stepKey" />
             <span>{{ d.title }}</span>
           </li>
         </ul>
@@ -151,7 +151,7 @@ async function startExecution() {
     </section>
 
     <section v-if="data.executions?.length" class="card p-5">
-      <h2 class="text-sm font-medium uppercase tracking-wide text-stone-500">{{ t('guides.executionHistory') }}</h2>
+      <h2 class="text-sm font-medium uppercase tracking-wide text-subtle">{{ t('guides.executionHistory') }}</h2>
       <ul class="mt-3 space-y-2 text-sm">
         <li v-for="ex in data.executions" :key="ex.id">
           <NuxtLink :to="`/guides/${id}/execute/${ex.id}`" class="underline">

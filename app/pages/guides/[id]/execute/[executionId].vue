@@ -60,12 +60,12 @@ async function closeExecution(status: 'completed' | 'cancelled') {
 </script>
 
 <template>
-  <div v-if="pending" class="text-sm text-stone-500">{{ t('common.loading') }}</div>
+  <div v-if="pending" class="text-sm text-subtle">{{ t('common.loading') }}</div>
   <div v-else-if="data" class="space-y-6">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h1 class="page-title">{{ data.runbook?.title }}</h1>
-        <p class="text-sm text-stone-600">
+        <p class="text-sm text-muted">
           {{
             t('guides.executionMode', {
               mode: t(`guides.contentBinding.${data.execution.contentBinding}`),
@@ -106,9 +106,9 @@ async function closeExecution(status: 'completed' | 'cancelled') {
 
     <ol class="space-y-4">
       <li v-for="step in data.steps" :key="step.id" class="card p-4" :class="{ 'opacity-60': step.orphaned }">
-        <h2 class="font-medium text-stone-900">{{ step.title }}</h2>
+        <h2 class="font-medium text-ink">{{ step.title }}</h2>
         <p v-if="step.updatedSinceStart" class="mt-1 text-xs text-amber-800">{{ t('guides.updatedSinceStart') }}</p>
-        <p v-if="step.orphaned" class="mt-1 text-xs text-stone-500">{{ t('guides.stepOrphaned') }}</p>
+        <p v-if="step.orphaned" class="mt-1 text-xs text-subtle">{{ t('guides.stepOrphaned') }}</p>
         <AppMarkdownPreview class="mt-2" :markdown="step.bodyMarkdown" />
 
         <div v-if="data.execution.status === 'in_progress' && !step.orphaned" class="mt-4 space-y-3">
@@ -116,7 +116,7 @@ async function closeExecution(status: 'completed' | 'cancelled') {
             v-if="step.result"
             class="inline-flex items-center gap-2 text-sm font-medium"
           >
-            <span class="text-stone-500">{{ t('guides.currentStatus') }}</span>
+            <span class="text-subtle">{{ t('guides.currentStatus') }}</span>
             <span
               class="inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ring-1 ring-inset"
               :class="stepStatusUi(step.result.status).badge"
@@ -124,7 +124,7 @@ async function closeExecution(status: 'completed' | 'cancelled') {
               {{ stepStatusLabel(step.result.status) }}
             </span>
           </p>
-          <p v-else class="text-sm text-stone-500">{{ t('guides.stepStatusUnset') }}</p>
+          <p v-else class="text-sm text-subtle">{{ t('guides.stepStatusUnset') }}</p>
 
           <textarea
             v-model="noteByStep[step.id]"
@@ -154,7 +154,7 @@ async function closeExecution(status: 'completed' | 'cancelled') {
           v-else-if="step.result && data.execution.status !== 'in_progress'"
           class="mt-3 inline-flex items-center gap-2 text-sm"
         >
-          <span class="text-stone-500">{{ t('guides.currentStatus') }}</span>
+          <span class="text-subtle">{{ t('guides.currentStatus') }}</span>
           <span
             class="inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ring-1 ring-inset"
             :class="stepStatusUi(step.result.status).badge"

@@ -7,6 +7,9 @@ const router = useRouter()
 const { data, refresh, pending } = await useFetch('/api/me')
 const name = ref('')
 const localeChoice = ref<'en' | 'es'>('en')
+const themeChoice = ref<'light' | 'dark'>('light')
+const { setTheme } = useAppTheme()
+const themeAutoPersistSkip = ref(true)
 const profileSaving = ref(false)
 const profileError = ref('')
 const profileSaved = ref(false)
@@ -22,9 +25,24 @@ watch(
     if (!pack?.user) return
     name.value = pack.user.name
     localeChoice.value = pack.user.locale === 'es' ? 'es' : 'en'
+    themeChoice.value = pack.user.theme === 'dark' ? 'dark' : 'light'
+    nextTick(() => {
+      themeAutoPersistSkip.value = false
+    })
   },
   { immediate: true },
 )
+
+watch(themeChoice, async (theme) => {
+  setTheme(theme)
+  if (themeAutoPersistSkip.value || !data.value?.user) return
+  try {
+    await $fetch('/api/me', { method: 'PATCH', body: { theme } })
+    await refreshNuxtData('session')
+  } catch {
+    /* revert on next full load; avoid blocking the UI */
+  }
+})
 
 async function saveProfile() {
   profileError.value = ''
@@ -33,7 +51,7 @@ async function saveProfile() {
   try {
     await $fetch('/api/me', {
       method: 'PATCH',
-      body: { name: name.value.trim(), locale: localeChoice.value },
+      body: { name: name.value.trim(), locale: localeChoice.value, theme: themeChoice.value },
     })
     if (localeChoice.value !== locale.value) await setLocale(localeChoice.value)
     await refreshNuxtData('session')
@@ -73,7 +91,7 @@ async function confirmDeleteAccount() {
 </script>
 
 <template>
-  <div v-if="pending" class="text-stone-600">{{ t('common.loading') }}</div>
+  <div v-if="pending" class="text-stone-600 dark:text-faint">{{ t('common.loading') }}</div>
   <div v-else-if="data?.user" class="mx-auto max-w-2xl space-y-8">
     <header class="space-y-1">
       <h1 class="page-title">{{ t('account.title') }}</h1>
@@ -90,25 +108,39 @@ async function confirmDeleteAccount() {
         </label>
         <label class="block text-sm">
           <span class="label">{{ t('account.email') }}</span>
-          <input :value="data.user.email" class="field mt-1.5 bg-stone-50" disabled />
-          <span class="mt-1 block text-xs text-stone-500">{{ t('account.emailHint') }}</span>
+          <input :value="data.user.email" class="field mt-1.5 bg-stone-50 dark:bg-stone-800/60" disabled />
+          <span class="mt-1 block text-xs text-stone-500 dark:text-subtle">{{ t('account.emailHint') }}</span>
         </label>
         <fieldset class="text-sm">
           <legend class="label">{{ t('account.language') }}</legend>
           <div class="mt-2 flex flex-wrap gap-2">
-            <label class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-stone-200 px-3 py-2 has-[:checked]:border-stone-800 has-[:checked]:bg-stone-50">
+            <label class="pref-option">
               <input v-model="localeChoice" type="radio" value="en" class="sr-only" />
-              <span class="font-medium text-stone-800">English</span>
+              <span class="pref-option__label">English</span>
             </label>
-            <label class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-stone-200 px-3 py-2 has-[:checked]:border-stone-800 has-[:checked]:bg-stone-50">
+            <label class="pref-option">
               <input v-model="localeChoice" type="radio" value="es" class="sr-only" />
-              <span class="font-medium text-stone-800">Español</span>
+              <span class="pref-option__label">Español</span>
             </label>
           </div>
-          <p class="mt-2 text-xs text-stone-500">{{ t('account.languageHint') }}</p>
+          <p class="mt-2 text-xs text-subtle">{{ t('account.languageHint') }}</p>
+        </fieldset>
+        <fieldset class="text-sm">
+          <legend class="label">{{ t('account.appearance') }}</legend>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <label class="pref-option">
+              <input v-model="themeChoice" type="radio" value="light" class="sr-only" />
+              <span class="pref-option__label">{{ t('account.themeLight') }}</span>
+            </label>
+            <label class="pref-option">
+              <input v-model="themeChoice" type="radio" value="dark" class="sr-only" />
+              <span class="pref-option__label">{{ t('account.themeDark') }}</span>
+            </label>
+          </div>
+          <p class="mt-2 text-xs text-subtle">{{ t('account.appearanceHint') }}</p>
         </fieldset>
         <p v-if="profileError" class="error-text">{{ profileError }}</p>
-        <p v-else-if="profileSaved" class="text-sm text-emerald-700">{{ t('account.saved') }}</p>
+        <p v-else-if="profileSaved" class="text-sm text-emerald-700 dark:text-emerald-400">{{ t('account.saved') }}</p>
         <button type="submit" class="btn-primary" :disabled="profileSaving">
           {{ t('common.save') }}
         </button>

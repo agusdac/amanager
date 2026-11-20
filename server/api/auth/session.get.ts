@@ -11,6 +11,7 @@ export default defineEventHandler(async (event) => {
       email: user.email,
       name: user.name,
       locale: user.locale,
+      theme: user.theme,
       workspaceId: user.workspaceId,
       workspaceRole: user.workspaceRole,
     },

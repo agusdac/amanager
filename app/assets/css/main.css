@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-stone-50 text-stone-900 antialiased;
+    @apply bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100;
   }
 
   ::selection {
@@ -12,49 +12,205 @@
     color: #1c1917;
   }
 
+  .dark ::selection {
+    background-color: #44403c;
+    color: #fafaf9;
+  }
+
   a {
     text-underline-offset: 0.18em;
   }
 
-  input,
+  input:not([type='checkbox']):not([type='radio']),
   textarea,
   select {
     caret-color: #1c1917;
+  }
+
+  .dark input:not([type='checkbox']):not([type='radio']),
+  .dark textarea,
+  .dark select {
+    caret-color: #e7e5e4;
+  }
+
+  input[type='checkbox'] {
+    @apply h-4 w-4 shrink-0 cursor-pointer appearance-none rounded border border-stone-300 bg-white align-middle;
+    @apply transition-[color,background-color,border-color,box-shadow];
+    @apply dark:border-stone-600 dark:bg-stone-900;
+    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-500;
+    @apply dark:focus-visible:outline-stone-400;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  input[type='checkbox']:checked {
+    @apply border-stone-900 bg-stone-900;
+    @apply dark:border-stone-200 dark:bg-stone-200;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fafaf9' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 8.5 3 3 6-6.5'/%3E%3C/svg%3E");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 0.75rem;
+  }
+
+  .dark input[type='checkbox']:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%231c1917' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 8.5 3 3 6-6.5'/%3E%3C/svg%3E");
   }
 
   :focus-visible {
     outline: 2px solid #78716c;
     outline-offset: 2px;
   }
+
+  .dark :focus-visible {
+    outline-color: #a8a29e;
+  }
+}
+
+/* Semantic tokens in utilities so @apply works in Vue SFC <style> blocks */
+@layer utilities {
+  .text-ink {
+    @apply text-stone-900 dark:text-stone-100;
+  }
+
+  .text-ink-secondary {
+    @apply text-stone-700 dark:text-stone-300;
+  }
+
+  .text-muted {
+    @apply text-stone-600 dark:text-stone-300;
+  }
+
+  .text-subtle {
+    @apply text-stone-500 dark:text-stone-400;
+  }
+
+  .text-faint {
+    @apply text-stone-400 dark:text-stone-400;
+  }
+
+  .bg-surface {
+    @apply bg-white dark:bg-stone-900;
+  }
+
+  .bg-surface-muted {
+    @apply bg-stone-50 dark:bg-stone-900/60;
+  }
+
+  .bg-surface-soft {
+    @apply bg-stone-100 dark:bg-stone-800;
+  }
+
+  .border-rule {
+    @apply border-stone-200 dark:border-stone-700;
+  }
+
+  .border-rule-light {
+    @apply border-stone-100 dark:border-stone-800;
+  }
+
+  .divide-rule {
+    @apply divide-stone-100 dark:divide-stone-800;
+  }
+
+  .divide-rule-md {
+    @apply divide-stone-200 dark:divide-stone-700;
+  }
 }
 
 @layer components {
+  .table-head {
+    @apply border-b border-rule bg-surface-muted text-xs uppercase tracking-wide text-subtle;
+  }
+
+  .table-row {
+    @apply border-b border-rule-light;
+  }
+
+  .filter-pill {
+    @apply rounded-full border border-rule bg-surface px-3 py-1 text-ink-secondary transition-colors;
+    @apply hover:bg-surface-muted;
+  }
+
+  .filter-pill--active {
+    @apply border-stone-800 bg-stone-900 text-white;
+    @apply dark:border-stone-300 dark:bg-stone-100 dark:text-stone-900;
+  }
+
+  .filter-pill--success-active {
+    @apply border-emerald-700 bg-emerald-50 text-emerald-900;
+    @apply dark:border-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-300;
+  }
+
+  .onboarding-panel {
+    @apply rounded-xl border border-rule bg-surface shadow-sm dark:shadow-none;
+  }
+
+  .onboarding-draft-box {
+    @apply rounded-lg border border-rule bg-stone-50/80 p-3 dark:bg-stone-900/80 sm:p-4;
+  }
+
+  .onboarding-provider-tile {
+    @apply flex cursor-pointer items-center gap-3 rounded-lg border border-rule bg-surface px-3 py-2.5 transition-colors;
+    @apply hover:bg-surface-muted has-[:checked]:border-stone-800 has-[:checked]:bg-surface-muted;
+    @apply dark:has-[:checked]:border-stone-300;
+  }
+
+  .markdown-preview {
+    @apply space-y-2 text-ink-secondary;
+  }
+
+  .markdown-preview p {
+    @apply text-sm leading-relaxed;
+  }
+
+  .markdown-preview a {
+    @apply font-medium text-ink underline;
+  }
+
+  .markdown-preview code {
+    @apply rounded bg-surface-soft px-1 text-xs text-ink;
+  }
+
+  .markdown-preview blockquote,
+  .markdown-quote {
+    @apply border-l-4 border-amber-300 bg-amber-50/60 px-3 py-2 text-sm;
+    @apply dark:border-amber-600 dark:bg-amber-950/40 dark:text-amber-100/90;
+  }
+
+  .markdown-preview ul {
+    @apply list-disc space-y-1 pl-5 text-sm;
+  }
+
   .page-title {
-    @apply text-2xl font-semibold text-stone-900;
+    @apply text-2xl font-semibold text-stone-900 dark:text-stone-50;
   }
 
   .section-title {
-    @apply text-lg font-semibold text-stone-900;
+    @apply text-lg font-semibold text-stone-900 dark:text-stone-50;
   }
 
   .lede {
-    @apply max-w-2xl text-sm leading-relaxed text-stone-600;
+    @apply max-w-2xl text-sm leading-relaxed text-stone-600 dark:text-stone-400;
   }
 
   .label {
-    @apply text-sm font-medium text-stone-700;
+    @apply text-sm font-medium text-stone-700 dark:text-stone-300;
   }
 
   .field {
     @apply w-full rounded-md border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 placeholder:text-stone-500 focus:border-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-200 disabled:bg-stone-100;
+    @apply dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:border-stone-500 dark:focus:ring-stone-700 dark:disabled:bg-stone-800;
   }
 
   select.field {
-    @apply cursor-pointer appearance-none bg-white pr-10;
+    @apply cursor-pointer appearance-none bg-white pr-10 dark:bg-stone-900;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2378716c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 1rem 1rem;
+  }
+
+  .dark select.field {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23a8a29e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   }
 
   .form-grid {
@@ -66,63 +222,72 @@
   }
 
   .form-section {
-    @apply rounded-lg border border-stone-200 bg-stone-50/60 p-4 sm:p-5;
+    @apply rounded-lg border border-stone-200 bg-stone-50/60 p-4 sm:p-5 dark:border-stone-700 dark:bg-stone-900/50;
   }
 
   .field-wizard {
     @apply w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 shadow-sm placeholder:text-stone-500 focus:border-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-200 disabled:bg-stone-100;
+    @apply dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:shadow-none dark:focus:ring-stone-700 dark:disabled:bg-stone-800;
   }
 
   .btn-primary {
     @apply inline-flex items-center justify-center gap-1 rounded bg-stone-900 px-4 py-2 text-sm text-white transition-colors hover:bg-stone-800 disabled:opacity-60;
+    @apply dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200;
   }
 
   .btn-wizard {
     @apply inline-flex items-center justify-center gap-1 rounded-lg bg-stone-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-stone-800 disabled:opacity-60;
+    @apply dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200;
   }
 
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-1 rounded border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50;
+    @apply dark:border-stone-600 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800;
   }
 
   .btn-secondary-wizard {
     @apply inline-flex items-center justify-center gap-1 rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50;
+    @apply dark:border-stone-600 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800;
   }
 
   .btn-quiet {
     @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm text-stone-600 transition-colors hover:bg-stone-100 hover:text-stone-900;
+    @apply dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100;
   }
 
   .btn-danger {
     @apply inline-flex items-center justify-center rounded-lg border border-red-300/80 bg-white px-4 py-2 text-sm font-medium text-red-800 transition-colors hover:border-red-400 hover:bg-red-50;
+    @apply dark:border-red-800 dark:bg-stone-900 dark:text-red-300 dark:hover:border-red-700 dark:hover:bg-red-950/40;
   }
 
   .btn-danger-primary {
     @apply inline-flex items-center justify-center rounded-lg bg-red-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-900 disabled:opacity-50;
+    @apply dark:bg-red-700 dark:hover:bg-red-600;
   }
 
   .card {
-    @apply rounded-lg border border-stone-200 bg-white;
+    @apply rounded-lg border border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900;
   }
 
   .list-card {
-    @apply divide-y divide-stone-200 overflow-hidden rounded-lg border border-stone-200 bg-white;
+    @apply divide-y divide-stone-200 overflow-hidden rounded-lg border border-stone-200 bg-white text-ink-secondary;
+    @apply dark:divide-stone-700 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200;
   }
 
   .callout {
-    @apply flex gap-3 rounded-xl border border-stone-200 bg-white p-4 shadow-sm;
+    @apply flex gap-3 rounded-xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:shadow-none;
   }
 
   .callout-icon {
-    @apply mt-0.5 h-5 w-5 shrink-0 text-stone-500;
+    @apply mt-0.5 h-5 w-5 shrink-0 text-stone-500 dark:text-stone-400;
   }
 
   .callout-warning .callout-icon {
-    @apply text-amber-700;
+    @apply text-amber-700 dark:text-amber-400;
   }
 
   .callout-info .callout-icon {
-    @apply text-stone-500;
+    @apply text-stone-500 dark:text-stone-400;
   }
 
   .callout-body {
@@ -130,7 +295,7 @@
   }
 
   .callout-title {
-    @apply text-sm font-semibold text-stone-900;
+    @apply text-sm font-semibold text-stone-900 dark:text-stone-50;
   }
 
   .callout-actions {
@@ -138,23 +303,24 @@
   }
 
   .callout-warning {
-    @apply border-stone-200 bg-stone-50/50;
+    @apply border-stone-200 bg-stone-50/50 dark:border-stone-700 dark:bg-stone-900/80;
   }
 
   .callout-info {
-    @apply border-stone-200 bg-white;
+    @apply border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900;
   }
 
   .callout-neutral {
-    @apply border-stone-200 bg-stone-50/80 text-stone-700;
+    @apply border-stone-200 bg-stone-50/80 text-stone-700 dark:border-stone-700 dark:bg-stone-900/60 dark:text-stone-300;
   }
 
   .notice {
     @apply flex gap-3 rounded-xl border border-stone-200 bg-stone-50/80 p-4 text-sm text-stone-700 shadow-sm;
+    @apply dark:border-stone-700 dark:bg-stone-900/70 dark:text-stone-300 dark:shadow-none;
   }
 
   .danger-zone {
-    @apply relative overflow-hidden rounded-xl border border-stone-200 bg-stone-50/90;
+    @apply relative overflow-hidden rounded-xl border border-stone-200 bg-stone-50/90 dark:border-stone-700 dark:bg-stone-900/80;
   }
 
   .danger-zone-marker {
@@ -166,11 +332,11 @@
   }
 
   .danger-zone-title {
-    @apply text-base font-semibold text-stone-900;
+    @apply text-base font-semibold text-stone-900 dark:text-stone-50;
   }
 
   .danger-zone-description {
-    @apply max-w-prose text-sm leading-relaxed text-stone-600;
+    @apply max-w-prose text-sm leading-relaxed text-stone-600 dark:text-stone-400;
   }
 
   .danger-zone-actions {
@@ -178,15 +344,25 @@
   }
 
   .error-text {
-    @apply text-sm text-red-600;
+    @apply text-sm text-red-600 dark:text-red-400;
   }
 
   .stat-value {
-    @apply mt-1 text-2xl font-semibold tabular-nums text-stone-900;
+    @apply mt-1 text-2xl font-semibold tabular-nums text-stone-900 dark:text-stone-50;
+  }
+
+  .pref-option {
+    @apply inline-flex cursor-pointer items-center gap-2 rounded-lg border border-stone-200 px-3 py-2 has-[:checked]:border-stone-800 has-[:checked]:bg-stone-50;
+    @apply dark:border-stone-600 dark:has-[:checked]:border-stone-300 dark:has-[:checked]:bg-stone-800;
+  }
+
+  .pref-option__label {
+    @apply font-medium text-stone-800 dark:text-stone-100;
   }
 
   .detail-tabs-shell {
     @apply overflow-x-auto rounded-xl border border-stone-200 bg-stone-100/90 p-1 shadow-inner;
+    @apply dark:border-stone-700 dark:bg-stone-900/90 dark:shadow-none;
     scrollbar-width: thin;
   }
 
@@ -196,9 +372,10 @@
 
   .detail-tabs-trigger {
     @apply shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-stone-600 transition-[color,background-color,box-shadow] duration-150;
-    @apply hover:text-stone-900;
+    @apply hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100;
     @apply data-[state=active]:bg-white data-[state=active]:text-stone-900 data-[state=active]:shadow-sm;
-    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-500;
+    @apply dark:data-[state=active]:bg-stone-800 dark:data-[state=active]:text-stone-50 dark:data-[state=active]:shadow-none;
+    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-500 dark:focus-visible:outline-stone-400;
   }
 
   .detail-tabs-panel {
@@ -206,11 +383,12 @@
   }
 
   .app-shell {
-    @apply flex min-h-screen bg-stone-50;
+    @apply flex min-h-screen bg-stone-50 dark:bg-stone-950;
   }
 
   .app-shell__sidebar {
     @apply sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-stone-200 bg-white md:flex;
+    @apply dark:border-stone-800 dark:bg-stone-900;
   }
 
   .app-shell--collapsed .app-shell__sidebar {
@@ -218,7 +396,7 @@
   }
 
   .app-shell__brand {
-    @apply flex h-14 items-center gap-2.5 border-b border-stone-200 px-4 text-sm no-underline;
+    @apply flex h-14 items-center gap-2.5 border-b border-stone-200 px-4 text-sm no-underline dark:border-stone-800;
   }
 
   .app-shell__nav {
@@ -226,15 +404,16 @@
   }
 
   .app-shell__nav-heading {
-    @apply px-2 pb-1 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-stone-400;
+    @apply px-2 pb-1 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-stone-400 dark:text-stone-500;
   }
 
   .app-shell__sidebar-footer {
-    @apply border-t border-stone-200 p-2;
+    @apply border-t border-stone-200 p-2 dark:border-stone-800;
   }
 
   .app-shell__collapse-btn {
     @apply flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-stone-600 transition-colors hover:bg-stone-100 hover:text-stone-900;
+    @apply dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100;
   }
 
   .app-shell--collapsed .app-shell__collapse-btn span {
@@ -247,6 +426,7 @@
 
   .app-shell__topbar {
     @apply sticky top-0 z-20 flex h-14 items-center justify-between gap-4 border-b border-stone-200 bg-white/95 px-4 backdrop-blur-sm sm:px-6;
+    @apply dark:border-stone-800 dark:bg-stone-900/95;
   }
 
   .app-shell__project-focus {
@@ -260,6 +440,7 @@
 
   .app-shell__user {
     @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-stone-200 bg-stone-50 text-stone-800 no-underline transition-colors hover:border-stone-300 hover:bg-stone-100;
+    @apply dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-700;
   }
 
   .app-shell__user-avatar {
@@ -271,11 +452,11 @@
   }
 
   .app-nav-link {
-    @apply flex items-center gap-2.5 rounded-lg text-sm text-stone-600 no-underline transition-colors;
+    @apply flex items-center gap-2.5 rounded-lg text-sm text-stone-600 no-underline transition-colors dark:text-stone-400;
   }
 
   .app-nav-link--side {
-    @apply px-2.5 py-2 hover:bg-stone-100 hover:text-stone-900;
+    @apply px-2.5 py-2 hover:bg-stone-100 hover:text-stone-900 dark:hover:bg-stone-800 dark:hover:text-stone-100;
   }
 
   .app-nav-link--side.app-nav-link--collapsed {
@@ -283,18 +464,24 @@
   }
 
   .app-nav-link--top {
-    @apply shrink-0 px-3 py-1.5 font-medium hover:bg-stone-100 hover:text-stone-900;
+    @apply shrink-0 px-3 py-1.5 font-medium hover:bg-stone-100 hover:text-stone-900 dark:hover:bg-stone-800 dark:hover:text-stone-100;
   }
 
   .app-nav-link--active {
-    @apply bg-stone-100 text-stone-900;
+    @apply bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-stone-50;
   }
 
   .app-nav-link--top.app-nav-link--active {
     @apply bg-stone-900 text-white hover:bg-stone-800 hover:text-white;
+    @apply dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200 dark:hover:text-stone-900;
   }
 
   .app-nav-link__label {
     @apply truncate;
+  }
+
+  .list-row-link {
+    @apply flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm text-ink transition-colors no-underline;
+    @apply hover:bg-surface-muted;
   }
 }

@@ -12,7 +12,7 @@ const { t } = useI18n()
 <template>
   <NuxtLink
     to="/guide/verification"
-    class="text-stone-600 underline decoration-stone-300 underline-offset-2 hover:text-stone-900"
+    class="text-muted underline decoration-stone-300 underline-offset-2 hover:text-ink"
     :class="inline ? 'text-xs' : 'text-sm'"
   >
     {{ t('guide.verification.openGuide') }}

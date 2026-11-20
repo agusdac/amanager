@@ -15,7 +15,7 @@ const { data, pending } = await useFetch('/api/runbook-templates')
   <div class="flex flex-wrap items-end justify-between gap-3">
     <div>
       <p class="text-sm">
-        <NuxtLink to="/guides" class="text-stone-600 underline">{{ t('guides.templates.backToGuides') }}</NuxtLink>
+        <NuxtLink to="/guides" class="text-muted underline">{{ t('guides.templates.backToGuides') }}</NuxtLink>
       </p>
       <h1 class="page-title mt-2">{{ t('guides.templates.catalogTitle') }}</h1>
       <p class="lede">{{ t('guides.templates.catalogSubtitle') }}</p>
@@ -29,7 +29,7 @@ const { data, pending } = await useFetch('/api/runbook-templates')
     {{ t('guides.templates.howGenerationWorksBody') }}
   </AppCallout>
 
-  <p v-if="pending" class="text-sm text-stone-500">{{ t('common.loading') }}</p>
+  <p v-if="pending" class="text-sm text-subtle">{{ t('common.loading') }}</p>
 
   <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
     <RunbookTemplateCard

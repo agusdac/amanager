@@ -13,7 +13,7 @@ const showShell = computed(() => {
   <AppShell v-if="showShell">
     <slot />
   </AppShell>
-  <div v-else class="min-h-screen bg-stone-50">
+  <div v-else class="min-h-screen bg-surface-muted">
     <slot />
   </div>
 </template>

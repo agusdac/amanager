@@ -62,10 +62,10 @@ function reset() {
     <header class="space-y-2">
       <h1 class="page-title">{{ t('checklist.title') }}</h1>
       <p class="lede">{{ t('checklist.subtitle') }}</p>
-      <p class="text-sm font-medium tabular-nums text-stone-700">
+      <p class="text-sm font-medium tabular-nums text-ink-secondary">
         {{ t('checklist.progress', { done: doneCount, total: questionIds.length }) }}
       </p>
-      <button type="button" class="text-sm text-stone-500 underline hover:text-stone-800" @click="reset">
+      <button type="button" class="text-sm text-subtle underline hover:text-stone-800 dark:text-stone-200" @click="reset">
         {{ t('checklist.reset') }}
       </button>
     </header>
@@ -79,16 +79,16 @@ function reset() {
         <label class="flex cursor-pointer gap-3">
           <input
             type="checkbox"
-            class="mt-1 rounded border-stone-300"
+            class="checkbox mt-1"
             :checked="!!checked[id]"
             @change="toggle(id)"
           />
           <span class="flex-1 space-y-2">
-            <span class="block font-medium text-stone-900">
+            <span class="block font-medium text-ink">
               {{ index + 1 }}. {{ t(`checklist.${id}`) }}
             </span>
-            <span class="block text-sm text-stone-600">
-              <span class="font-medium text-stone-500">{{ t('checklist.whereToLook') }}:</span>
+            <span class="block text-sm text-muted">
+              <span class="font-medium text-subtle">{{ t('checklist.whereToLook') }}:</span>
               {{ t(`checklist.${id}hint`) }}
             </span>
             <span v-if="linksFor(id).length" class="flex flex-wrap gap-2 pt-1">
@@ -96,7 +96,7 @@ function reset() {
                 v-for="(link, li) in linksFor(id)"
                 :key="`${link.to}-${li}`"
                 :to="link.to"
-                class="rounded-full border border-stone-200 bg-stone-50 px-3 py-0.5 text-xs font-medium text-stone-700 hover:bg-stone-100"
+                class="rounded-full border border-rule bg-surface-muted px-3 py-0.5 text-xs font-medium text-ink-secondary hover:bg-surface-soft"
               >
                 {{ t(link.labelKey) }}
               </NuxtLink>

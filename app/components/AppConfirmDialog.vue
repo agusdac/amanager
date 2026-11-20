@@ -49,14 +49,14 @@ function onConfirm() {
         class="fixed inset-0 z-[100] bg-stone-900/45 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
       />
       <AlertDialogContent
-        class="fixed left-1/2 top-1/2 z-[101] w-[min(calc(100vw-2rem),26rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-stone-200 bg-white p-6 shadow-2xl shadow-stone-900/10 focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+        class="fixed left-1/2 top-1/2 z-[101] w-[min(calc(100vw-2rem),26rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-rule bg-surface p-6 shadow-2xl shadow-stone-900/10 focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
       >
-        <AlertDialogTitle class="text-lg font-semibold tracking-tight text-stone-900">
+        <AlertDialogTitle class="text-lg font-semibold tracking-tight text-ink">
           {{ title }}
         </AlertDialogTitle>
         <AlertDialogDescription
           v-if="description"
-          class="mt-3 text-sm leading-relaxed text-stone-600"
+          class="mt-3 text-sm leading-relaxed text-muted"
         >
           {{ description }}
         </AlertDialogDescription>

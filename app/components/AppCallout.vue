@@ -32,7 +32,7 @@ const icon = computed(() => (props.variant === 'info' ? Info : AlertTriangle))
     />
     <div class="callout-body">
       <p v-if="title" class="callout-title">{{ title }}</p>
-      <div class="callout-content text-sm leading-relaxed text-stone-600">
+      <div class="callout-content text-sm leading-relaxed text-muted">
         <slot />
       </div>
       <div v-if="$slots.actions" class="callout-actions">

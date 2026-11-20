@@ -58,48 +58,48 @@ const hasResults = computed(() => {
     />
   </label>
 
-  <p v-if="pending && debouncedQ.length >= 2" class="mt-2 text-sm text-stone-500">{{ t('common.loading') }}</p>
+  <p v-if="pending && debouncedQ.length >= 2" class="mt-2 text-sm text-subtle">{{ t('common.loading') }}</p>
 
-  <div v-else-if="hasResults" class="mt-4 space-y-4 rounded-xl border border-stone-200 bg-white p-4 text-sm">
+  <div v-else-if="hasResults" class="mt-4 space-y-4 rounded-xl border border-rule bg-surface p-4 text-sm">
     <section v-if="data?.assets?.length">
-      <h3 class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ t('nav.assets') }}</h3>
+      <h3 class="text-xs font-medium uppercase tracking-wide text-subtle">{{ t('nav.assets') }}</h3>
       <ul class="mt-2 space-y-1">
         <li v-for="a in data.assets" :key="a.id">
-          <NuxtLink :to="`/assets/${a.id}`" class="font-medium text-stone-900 hover:underline">
+          <NuxtLink :to="`/assets/${a.id}`" class="font-medium text-ink hover:underline">
             {{ a.name }}
           </NuxtLink>
-          <span class="ml-2 text-stone-500">
+          <span class="ml-2 text-subtle">
             <AssetTypeLabel :type="a.type" :provider-slug="a.providerSlug" />
           </span>
         </li>
       </ul>
     </section>
     <section v-if="data?.emails?.length">
-      <h3 class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ t('accounts.emails') }}</h3>
+      <h3 class="text-xs font-medium uppercase tracking-wide text-subtle">{{ t('accounts.emails') }}</h3>
       <ul class="mt-2 space-y-2">
         <li v-for="em in data.emails" :key="em.id">
           <span class="font-medium">{{ em.address }}</span>
-          <ul v-if="em.linkedAssets?.length" class="ml-3 mt-1 list-inside list-disc text-stone-600">
+          <ul v-if="em.linkedAssets?.length" class="ml-3 mt-1 list-inside list-disc text-muted">
             <li v-for="asset in em.linkedAssets" :key="asset.id">
               <NuxtLink :to="`/assets/${asset.id}`" class="underline">{{ asset.name }}</NuxtLink>
             </li>
           </ul>
-          <NuxtLink v-else to="/accounts" class="ml-2 text-stone-500 underline">{{ t('search.openAccounts') }}</NuxtLink>
+          <NuxtLink v-else to="/accounts" class="ml-2 text-subtle underline">{{ t('search.openAccounts') }}</NuxtLink>
         </li>
       </ul>
     </section>
     <section v-if="data?.identities?.length">
-      <h3 class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ t('accounts.identities') }}</h3>
+      <h3 class="text-xs font-medium uppercase tracking-wide text-subtle">{{ t('accounts.identities') }}</h3>
       <ul class="mt-2 space-y-1">
         <li v-for="ident in data.identities" :key="ident.id">
-          <NuxtLink :to="`/identities/${ident.id}`" class="font-medium text-stone-900 hover:underline">
+          <NuxtLink :to="`/identities/${ident.id}`" class="font-medium text-ink hover:underline">
             {{ ident.label }}
           </NuxtLink>
-          <span v-if="ident.providerName" class="ml-2 text-stone-500">{{ ident.providerName }}</span>
+          <span v-if="ident.providerName" class="ml-2 text-subtle">{{ ident.providerName }}</span>
         </li>
       </ul>
     </section>
   </div>
 
-  <p v-else-if="debouncedQ.length >= 2 && !pending" class="mt-2 text-sm text-stone-500">{{ t('search.empty') }}</p>
+  <p v-else-if="debouncedQ.length >= 2 && !pending" class="mt-2 text-sm text-subtle">{{ t('search.empty') }}</p>
 </template>
