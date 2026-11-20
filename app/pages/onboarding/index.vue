@@ -3,7 +3,7 @@ import { ASSET_TYPE_KEYS } from '~/constants/inventory'
 import { onboardingDefaultForProvider, suggestOnboardingDependencies } from '~/constants/onboardingDefaults'
 
 const ASSET_TYPES = ASSET_TYPE_KEYS
-import { ONBOARDING_MAX_STEP } from '../../../shared/schemas/inventory'
+import { ONBOARDING_MAX_STEP } from '~/constants/onboarding'
 
 const TOTAL_STEPS = ONBOARDING_MAX_STEP
 

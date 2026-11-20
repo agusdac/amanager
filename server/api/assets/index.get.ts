@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm'
+import { and, desc, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm'
 import { assets, projectAssets, providers } from '../../../db/schema'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
@@ -12,16 +12,26 @@ export default defineEventHandler(async (event) => {
   const search = (query.q as string | undefined)?.trim()
   const providerId = query.providerId as string | undefined
   const projectId = query.projectId as string | undefined
+  const environmentId = query.environmentId as string | undefined
   const verification = query.verification as string | undefined
 
   const db = useDb()
   let assetIds: string[] | undefined
 
   if (projectId) {
+    const linkFilters = [
+      eq(projectAssets.workspaceId, session.workspaceId),
+      eq(projectAssets.projectId, projectId),
+    ]
+    if (environmentId === '_none') {
+      linkFilters.push(isNull(projectAssets.environmentId))
+    } else if (environmentId) {
+      linkFilters.push(eq(projectAssets.environmentId, environmentId))
+    }
     const links = await db
       .select({ assetId: projectAssets.assetId })
       .from(projectAssets)
-      .where(and(eq(projectAssets.workspaceId, session.workspaceId), eq(projectAssets.projectId, projectId)))
+      .where(and(...linkFilters))
     assetIds = links.map((l) => l.assetId)
     if (assetIds.length === 0) {
       return { assets: [], page, limit, total: 0 }

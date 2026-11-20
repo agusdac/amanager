@@ -1,5 +1,6 @@
 import { createVaultRefSchema } from '../../../shared/schemas/inventory'
 import { vaultReferences } from '../../../db/schema'
+import { recordAudit } from '../../utils/audit'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
 
@@ -23,6 +24,13 @@ export default defineEventHandler(async (event) => {
       notes: parsed.data.notes ?? null,
     })
     .returning()
+
+  await recordAudit(db, { workspaceId: session.workspaceId, userId: session.id }, {
+    entityType: 'vault_reference',
+    entityId: ref.id,
+    action: 'vault_reference.create',
+    safeDiff: { label: ref.label, assetId: ref.assetId, projectId: ref.projectId },
+  })
 
   return { vaultReference: ref }
 })

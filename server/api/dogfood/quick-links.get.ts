@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
     )
 
   const googleA = identityRows.find((i) => i.label === 'Work Google Workspace admin')?.id
-  const googleB = identityRows.find((i) => i.label === 'Google B')?.id
+  const googleB = identityRows.find((i) => i.label === 'Client Google Cloud billing')?.id
 
   const assetIdByKey: Partial<Record<keyof typeof ASSET_NAMES, string>> = {}
   if (project) {
@@ -77,12 +77,12 @@ export default defineEventHandler(async (event) => {
   const questions: Record<string, QuickLink[]> = {
     q1: [
       link('/accounts?tab=identities', 'checklist.links.identities'),
-      ...(googleA ? [link(`/identities/${googleA}?tab=access`, 'checklist.links.googleA')] : []),
-      ...(googleB ? [link(`/identities/${googleB}?tab=access`, 'checklist.links.googleB')] : []),
+      ...(googleA ? [link(`/identities/${googleA}?tab=access`, 'checklist.links.workspaceAdmin')] : []),
+      ...(googleB ? [link(`/identities/${googleB}?tab=access`, 'checklist.links.billingAdmin')] : []),
     ],
     q2: [
       link('/accounts?tab=emails', 'checklist.links.emails'),
-      ...(googleA ? [link(`/identities/${googleA}?tab=impact`, 'checklist.links.impactEmailA')] : []),
+      ...(googleA ? [link(`/identities/${googleA}?tab=impact`, 'checklist.links.impactWorkspaceAdmin')] : []),
     ],
     q3: a.oauth
       ? [

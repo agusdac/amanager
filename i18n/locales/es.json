@@ -85,8 +85,11 @@
     "identities": "Identidades",
     "emails": "Correos",
     "providerAccounts": "Cuentas de proveedor",
-    "identityLabel": "Etiqueta (ej. Google A)",
+    "identityLabel": "Etiqueta (ej. admin Google trabajo)",
     "emailAddress": "Dirección de correo",
+    "emailLabel": "Etiqueta (ej. buzón equipo)",
+    "emailLabelPlaceholder": "Buzón equipo, avisos facturación…",
+    "emailLinkCounts": "Enlazado a {identities} identidades · {assets} recursos",
     "accountLabel": "Etiqueta de cuenta",
     "noProvider": "Sin proveedor",
     "emptyIdentities": "Aún no hay identidades.",
@@ -233,21 +236,21 @@
     "linkedAssets": "Recursos enlazados a esta identidad"
   },
   "checklist": {
-    "title": "Dogfood Mini Críptico (§4.4)",
+    "title": "Dogfood demo Northline (§4.4)",
     "subtitle": "Responde cada pregunta con datos en Hilko — sin guardar secretos.",
     "progress": "{done} de {total} marcadas revisadas",
     "reset": "Borrar marcas",
     "whereToLook": "Dónde mirar",
-    "q1": "¿Qué servicios usan Google A y cuáles Google B?",
-    "q1hint": "Cuentas → pulsa Google A o B → lista de recursos; compara ambas.",
-    "q2": "Si pierdes el Email A, ¿qué recuperación/login afecta?",
-    "q2hint": "Cuentas → correos; Impacto por identidad.",
+    "q1": "¿Qué servicios usan admin Workspace frente a facturación Cloud?",
+    "q1hint": "Correos y acceso → identidades → abre ambas Google y compara roles.",
+    "q2": "Si pierdes Team inbox, ¿qué recuperación/login afecta?",
+    "q2hint": "Pestaña Correos; Impacto desde esa identidad o recursos enlazados.",
     "q3": "¿Dónde está configurado el OAuth de Google?",
-    "q3hint": "Recurso «Google OAuth client»; referencias vault.",
+    "q3hint": "Recurso «Google OAuth client»; vault; config; entornos prod/dev.",
     "q4": "¿Canal YouTube y qué identidades administran?",
-    "q4hint": "Recurso YouTube + roles (Google A).",
-    "q5": "Search Console y verificación de minicriptico.com",
-    "q5hint": "Recurso GSC (Google B); dominio.",
+    "q4hint": "Recurso YouTube + roles (admin Workspace).",
+    "q5": "Search Console y verificación de northline.example",
+    "q5hint": "Recurso GSC (facturación Cloud); dominio.",
     "q6": "Registrar vs DNS vs buzón vs AWS SES",
     "q6hint": "Impacto en dominio / mail / SES.",
     "q7": "Qué corre en cada VPS, repo de despliegue, ref SSH",
@@ -260,10 +263,10 @@
     "q10hint": "Listas de impacto (planes Fase 3).",
     "links": {
       "identities": "Identidades",
-      "googleA": "Google A",
-      "googleB": "Google B",
+      "workspaceAdmin": "Admin Workspace",
+      "billingAdmin": "Facturación Cloud",
       "emails": "Correos",
-      "impactEmailA": "Impacto desde Google A",
+      "impactWorkspaceAdmin": "Impacto admin Workspace",
       "oauthConfig": "Config OAuth",
       "vaultRefs": "Referencias vault",
       "environments": "Entornos del proyecto",
@@ -495,7 +498,7 @@
       "region": "Región / datacenter",
       "planLabel": "Nombre del plan",
       "siteDomain": "Dominio del sitio / propiedad",
-      "siteDomainPlaceholder": "minicriptico.com",
+      "siteDomainPlaceholder": "northline.example",
       "paymentAccountId": "ID de comercio (metadato)",
       "aiModelHint": "Modelo o workspace por defecto",
       "designTeamId": "Equipo o biblioteca"
@@ -528,7 +531,7 @@
     "confirmControl": "Lo controlo — marcar confirmado",
     "verificationMethod": "Método",
     "verificationEvidence": "Nota de evidencia",
-    "verificationEvidencePlaceholder": "p. ej. TXT en _acme-challenge.minicriptico.com",
+    "verificationEvidencePlaceholder": "p. ej. TXT en _acme-challenge.northline.example",
     "addVerification": "Añadir registro de verificación",
     "noVerifications": "Aún no hay método de verificación documentado.",
     "verificationChecked": "Última revisión {date}",
@@ -554,6 +557,11 @@
       "custom": "Clave personalizada…"
     },
     "inventoryTitle": "Inventario de recursos",
+    "filterProject": "Proyecto",
+    "filterProjectAll": "Todos los proyectos",
+    "filterEnvironment": "Entorno",
+    "filterEnvironmentAll": "Todos los entornos",
+    "filterEnvironmentUnset": "Sin etiqueta",
     "search": "Buscar recursos o email de login…",
     "export": "Exportar CSV",
     "provider": "Proveedor",
@@ -677,6 +685,71 @@
     "connectionsDepsEmpty": "Elige más proveedores relacionados (p. ej. DNS + registrador) para ver sugerencias.",
     "reviewNextSteps": "Tras crear: checklist",
     "reviewNextStepsHint": "Llegarás al proyecto con siguientes pasos: confirmar recursos, enlaces, dependencias y verificar.",
+    "defaults": {
+      "generic": {
+        "identity": "Acceso a {project}",
+        "asset": "{project} — recurso principal",
+        "roleHint": "Quién entra — no es el repo ni el dominio en sí."
+      },
+      "github": {
+        "identity": "Miembro org GitHub (trabajo)",
+        "asset": "{project} — repositorio principal",
+        "roleHint": "Login GitHub — distinto del repo que despliegas."
+      },
+      "gitlab": {
+        "identity": "Cuenta mantenedor GitLab",
+        "asset": "{project} — proyecto GitLab principal",
+        "roleHint": "Cuenta que entra a GitLab — no la URL del proyecto."
+      },
+      "google": {
+        "identity": "Admin Google Workspace (trabajo)",
+        "asset": "{project} — cliente OAuth Google",
+        "roleHint": "Acceso Workspace/Cloud — distinto del cliente OAuth en recursos."
+      },
+      "cloudflare": {
+        "identity": "Login cuenta Cloudflare",
+        "asset": "{project} — zona DNS",
+        "roleHint": "Quién gestiona DNS — la zona es el recurso."
+      },
+      "namecheap": {
+        "identity": "Login Namecheap",
+        "asset": "{project} — dominio principal",
+        "roleHint": "Login registrador vs recurso dominio."
+      },
+      "aws": {
+        "identity": "Usuario IAM Identity Center",
+        "asset": "{project} — cuenta AWS (prod)",
+        "roleHint": "Login humano vs cuenta/carga AWS."
+      },
+      "hetzner": {
+        "identity": "Login Hetzner Cloud",
+        "asset": "{project} — VPS producción",
+        "roleHint": "Consola — el servidor es el recurso."
+      },
+      "bitwarden": {
+        "identity": "Login vault Bitwarden",
+        "asset": "{project} — colección compartida",
+        "roleHint": "Quién abre el vault — solo referencias, sin secretos."
+      },
+      "stripe": {
+        "identity": "Login Stripe Dashboard",
+        "asset": "{project} — pagos Stripe",
+        "roleHint": "Usuario panel vs recurso de pagos."
+      },
+      "vercel": {
+        "identity": "Login equipo Vercel",
+        "asset": "{project} — proyecto Vercel",
+        "roleHint": "Acceso equipo vs app hospedada."
+      }
+    },
+    "suggestedDeps": {
+      "dnsManaged": "DNS en registrador",
+      "deployedFrom": "App desplegada desde repo",
+      "deployedToVps": "App en VPS",
+      "oauthLogin": "Repo OAuth vía Google",
+      "awsDeploy": "Despliegue repo → AWS",
+      "vaultRecovery": "Recuperación vía gestor contraseñas"
+    },
     "categories": {
       "cloud": "Nube",
       "platform": "Plataformas",

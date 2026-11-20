@@ -1,6 +1,7 @@
 import { and, eq } from 'drizzle-orm'
 import { createAssetRoleSchema } from '../../../shared/schemas/inventory'
 import { assetRoles, assets, identities } from '../../../db/schema'
+import { recordAudit } from '../../utils/audit'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
 
@@ -35,6 +36,17 @@ export default defineEventHandler(async (event) => {
       providerRoleLabel: parsed.data.providerRoleLabel ?? null,
     })
     .returning()
+
+  await recordAudit(db, { workspaceId: session.workspaceId, userId: session.id }, {
+    entityType: 'asset_role',
+    entityId: role.id,
+    action: 'asset_role.create',
+    safeDiff: {
+      assetId: role.assetId,
+      identityId: role.identityId,
+      roleType: role.roleType,
+    },
+  })
 
   return { role }
 })

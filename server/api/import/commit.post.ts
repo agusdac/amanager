@@ -11,6 +11,7 @@ import {
 import { parseCsv } from '../../utils/csv'
 import { findOrCreateEmail, linkAssetLoginEmail } from '../../utils/inventory-links'
 import { scanCsvHeaders, rowHasSuspiciousSecret } from '../../utils/secret-scan'
+import { recordAudit } from '../../utils/audit'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
 import { slugify } from '../../utils/slug'
@@ -114,6 +115,13 @@ export default defineEventHandler(async (event) => {
 
     created++
   }
+
+  await recordAudit(db, { workspaceId: session.workspaceId, userId: session.id }, {
+    entityType: 'import_batch',
+    entityId: batch.id,
+    action: 'import.commit',
+    safeDiff: { rowCount: created, status: batch.status },
+  })
 
   return { batchId: batch.id, created }
 })

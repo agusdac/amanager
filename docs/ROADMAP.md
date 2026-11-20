@@ -6,13 +6,13 @@
 
 ## Visión del roadmap
 
-Construir de forma incremental un mapa de control de infraestructura digital **sin almacenar credenciales**. El primer hito utilizable es **dogfood de inventario** (Fase 1): registrar Mini Críptico y responder las preguntas de la spec §4.4. Runbooks y planes de migración vienen después.
+Construir de forma incremental un mapa de control de infraestructura digital **sin almacenar credenciales**. El primer hito utilizable es **dogfood de inventario** (Fase 1): seed demo **Northline** y responder las preguntas de la spec §4.4. Runbooks y planes de migración vienen después.
 
 ```mermaid
 flowchart LR
   F0[Fase0_Foundation]
   F1[Fase1_Inventory]
-  DF[Dogfood_MiniCriptico]
+  DF[Dogfood_Northline]
   F2[Fase2_Runbooks]
   F3[Fase3_Migrations]
   F4[Fase4_Team]
@@ -69,9 +69,9 @@ Login → workspace personal → crear proyecto → crear un asset persistido en
 | **OR-1a** | CRUD: `project_environments`, `providers`, `provider_accounts`, `identities`, `email_addresses`, relaciones email↔identity |
 | **OR-1a** | CRUD: `assets`, `project_assets`, `asset_roles`, `config_entries`, `vault_references`, `verifications` |
 | **OR-1b** | `asset_dependencies`, API + UI de impacto (lista, BFS, profundidad máxima, estados de verificación) |
-| **OR-1c** | Wizard 5 pasos (spec §6): borradores, «not sure yet», solo «My projects» en paso 1 |
+| **OR-1c** | Wizard 7 pasos (spec §6 + conexiones): borradores, «not sure yet», enlaces identidad/recurso y dependencias sugeridas |
 | **OR-1d** | CSV import preview/commit + export; rechazo de columnas con patrones de secreto |
-| **OR-1e** | Búsqueda y filtros con paginación servidor; seed ficticio Mini Críptico (`unverified` markers). **Re-ejecutar** `bun run db:seed --workspace=<uuid>` **sustituye** el demo Mini Críptico del workspace (no hace skip). |
+| **OR-1e** | Búsqueda y filtros con paginación servidor; seed ficticio **Northline** (`northline-demo`, `unverified` markers). **Re-ejecutar** `bun run db:seed --workspace=<uuid>` **sustituye** el demo del workspace (no hace skip). |
 | **OR-1f** | UI `config_entries` en detalle de asset (OAuth: client ID, redirect URIs por entorno, orígenes JS); solo metadatos públicos o referencia sensible. |
 | **OR-1g** | **Grafo visual de dependencias** (cierre F1): vista en proyecto y acceso desde asset; aristas con tipos traducidos y estados de verificación. Lista BFS (OR-1b) sigue siendo la vista por defecto. |
 | **OR-1h** | **Tabs en vistas de detalle** (proyecto, activo, identidad, accounts): navegación por secciones con Reka UI + query `?tab=` compartible. |
@@ -85,7 +85,7 @@ Login → workspace personal → crear proyecto → crear un asset persistido en
 
 ### Criterio de salida
 
-Inventariar Mini Críptico (manual, wizard o CSV) y responder las 10 preguntas de §4.4 con datos trazables y sin secretos. Checklist: [DOGFOOD_CHECKLIST.md](./DOGFOOD_CHECKLIST.md) y página in-app `/checklist`.
+Inventariar el demo Northline (manual, wizard o CSV) y responder las 10 preguntas de §4.4 con datos trazables y sin secretos. Checklist: [DOGFOOD_CHECKLIST.md](./DOGFOOD_CHECKLIST.md) y página in-app `/checklist`.
 
 ---
 

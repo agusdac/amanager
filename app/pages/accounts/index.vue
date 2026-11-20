@@ -11,6 +11,7 @@ const { data: assetList } = await useFetch('/api/assets?limit=100')
 const idLabel = ref('')
 const idProvider = ref('')
 const emailAddress = ref('')
+const emailLabel = ref('')
 const accLabel = ref('')
 const accProvider = ref('')
 const emailPmUrls = ref<Record<string, string>>({})
@@ -56,8 +57,15 @@ async function addIdentity() {
 }
 
 async function addEmail() {
-  await $fetch('/api/email-addresses', { method: 'POST', body: { address: emailAddress.value } })
+  await $fetch('/api/email-addresses', {
+    method: 'POST',
+    body: {
+      address: emailAddress.value,
+      label: emailLabel.value.trim() || undefined,
+    },
+  })
   emailAddress.value = ''
+  emailLabel.value = ''
   await refreshEmail()
 }
 
@@ -130,10 +138,14 @@ const accountTabs = computed(() => [
     <section class="card space-y-4 p-5">
       <h2 class="text-sm font-semibold text-stone-900">{{ t('accounts.emails') }}</h2>
       <p class="text-sm text-stone-600">{{ t('accounts.emailsHint') }}</p>
-      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="addEmail">
+      <form class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end" @submit.prevent="addEmail">
         <label class="block min-w-[14rem] flex-1 text-sm">
           <span class="label">{{ t('accounts.emailAddress') }}</span>
           <input v-model="emailAddress" type="email" required class="field mt-1.5" />
+        </label>
+        <label class="block min-w-[12rem] flex-1 text-sm">
+          <span class="label">{{ t('accounts.emailLabel') }}</span>
+          <input v-model="emailLabel" type="text" class="field mt-1.5" :placeholder="t('accounts.emailLabelPlaceholder')" />
         </label>
         <button type="submit" class="btn-primary">{{ t('common.add') }}</button>
       </form>
@@ -144,9 +156,15 @@ const accountTabs = computed(() => [
           class="space-y-2 px-4 py-3 text-sm"
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <span class="font-medium text-stone-900">{{ item.address }}</span>
+            <div>
+              <span class="font-medium text-stone-900">{{ item.address }}</span>
+              <p v-if="item.label" class="text-xs text-stone-500">{{ item.label }}</p>
+            </div>
             <VerificationChip v-if="item.verificationStatus" :status="item.verificationStatus" />
           </div>
+          <p v-if="item.identityLinkCount || item.assetLinkCount" class="text-xs text-stone-500">
+            {{ t('accounts.emailLinkCounts', { identities: item.identityLinkCount ?? 0, assets: item.assetLinkCount ?? 0 }) }}
+          </p>
           <PasswordManagerLinkField
             v-model="emailPmUrls[item.id]"
             hint-key="assets.emailPasswordManagerLink"

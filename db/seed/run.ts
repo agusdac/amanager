@@ -29,9 +29,9 @@ async function main() {
       process.exit(1)
     }
     await seedMiniCriptico(db, workspaceId)
-    console.log('Mini Críptico seed applied to workspace', workspaceId, '(re-run replaces prior demo data).')
+    console.log('Northline demo seed applied to workspace', workspaceId, '(re-run replaces prior demo data).')
   } else {
-    console.log('Providers seeded. Pass --workspace=<uuid> for Mini Críptico demo data.')
+    console.log('Providers seeded. Pass --workspace=<uuid> for Northline demo data.')
   }
 
   await pool.end()

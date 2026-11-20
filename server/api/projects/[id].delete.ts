@@ -1,5 +1,6 @@
 import { and, eq } from 'drizzle-orm'
 import { configEntries, projects, vaultReferences } from '../../../db/schema'
+import { recordAudit } from '../../utils/audit'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
 import { assertSameWorkspace } from '../../utils/workspace'
@@ -30,6 +31,13 @@ export default defineEventHandler(async (event) => {
     .returning()
 
   if (!deleted) throw createError({ statusCode: 404, statusMessage: 'Not Found' })
+
+  await recordAudit(db, { workspaceId: session.workspaceId, userId: session.id }, {
+    entityType: 'project',
+    entityId: deleted.id,
+    action: 'project.delete',
+    safeDiff: { name: deleted.name, slug: deleted.slug },
+  })
 
   return { ok: true, deletedId: deleted.id }
 })

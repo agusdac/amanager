@@ -29,12 +29,49 @@ function setVerificationFilter(value: VerificationFilter) {
   router.replace({ query })
 }
 
+const projectFilter = computed(() => {
+  const p = route.query.projectId
+  return typeof p === 'string' ? p : ''
+})
+
+const environmentFilter = computed(() => {
+  const e = route.query.environmentId
+  return typeof e === 'string' ? e : ''
+})
+
+const envListUrl = computed(() =>
+  projectFilter.value ? `/api/environments?projectId=${projectFilter.value}` : null,
+)
+
+const { data: projects } = await useFetch('/api/projects')
+const { data: envPack } = await useFetch(envListUrl, { watch: [envListUrl] })
+
+function setProjectFilter(projectId: string) {
+  const query = { ...route.query }
+  if (projectId) query.projectId = projectId
+  else delete query.projectId
+  delete query.environmentId
+  page.value = 1
+  router.replace({ query })
+}
+
+function setEnvironmentFilter(environmentId: string) {
+  const query = { ...route.query }
+  if (!projectFilter.value) return
+  if (environmentId) query.environmentId = environmentId
+  else delete query.environmentId
+  page.value = 1
+  router.replace({ query })
+}
+
 const fetchUrl = computed(() => {
   const params = new URLSearchParams()
   params.set('page', String(page.value))
   params.set('limit', '25')
   if (q.value.trim()) params.set('q', q.value.trim())
   if (verificationFilter.value) params.set('verification', verificationFilter.value)
+  if (projectFilter.value) params.set('projectId', projectFilter.value)
+  if (projectFilter.value && environmentFilter.value) params.set('environmentId', environmentFilter.value)
   return `/api/assets?${params.toString()}`
 })
 
@@ -74,6 +111,34 @@ const impactIdentities = computed(() =>
         </a>
       </div>
     </header>
+
+    <div class="flex flex-wrap items-end gap-3 text-sm">
+      <label class="block">
+        <span class="label text-xs">{{ t('assets.filterProject') }}</span>
+        <select
+          class="field mt-1 w-auto min-w-[10rem]"
+          :value="projectFilter"
+          @change="setProjectFilter(($event.target as HTMLSelectElement).value)"
+        >
+          <option value="">{{ t('assets.filterProjectAll') }}</option>
+          <option v-for="p in projects?.projects ?? []" :key="p.id" :value="p.id">{{ p.name }}</option>
+        </select>
+      </label>
+      <label v-if="projectFilter" class="block">
+        <span class="label text-xs">{{ t('assets.filterEnvironment') }}</span>
+        <select
+          class="field mt-1 w-auto min-w-[10rem]"
+          :value="environmentFilter"
+          @change="setEnvironmentFilter(($event.target as HTMLSelectElement).value)"
+        >
+          <option value="">{{ t('assets.filterEnvironmentAll') }}</option>
+          <option value="_none">{{ t('assets.filterEnvironmentUnset') }}</option>
+          <option v-for="env in envPack?.environments ?? []" :key="env.id" :value="env.id">
+            {{ env.name }}
+          </option>
+        </select>
+      </label>
+    </div>
 
     <div class="flex flex-wrap gap-2 text-sm">
       <button

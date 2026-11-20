@@ -1,5 +1,6 @@
 import { and, eq } from 'drizzle-orm'
 import { assets, importBatches, projectAssets } from '../../../../db/schema'
+import { recordAudit } from '../../../utils/audit'
 import { useDb } from '../../../utils/db'
 import { requireSession } from '../../../utils/session'
 
@@ -32,6 +33,13 @@ export default defineEventHandler(async (event) => {
     .update(importBatches)
     .set({ status: 'reverted' })
     .where(eq(importBatches.id, batchId))
+
+  await recordAudit(db, { workspaceId: session.workspaceId, userId: session.id }, {
+    entityType: 'import_batch',
+    entityId: batchId,
+    action: 'import.revert',
+    safeDiff: { assetsRemoved: toRemove.length },
+  })
 
   return { reverted: toRemove.length }
 })

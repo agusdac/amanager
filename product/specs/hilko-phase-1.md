@@ -47,7 +47,7 @@ Unique constraints per workspace; composite checks on junction tables.
 3. **Given** same SES asset, **when** linked to a second project, **then** one `assets` row and two `project_assets` rows.
 4. **Given** dependency chain within depth 8, **when** impact from VPS-01, **then** list shows relation types and `unverified` edges.
 5. **Given** CSV with column `api_key`, **when** preview import, **then** batch rejected/redacted per `no-secrets`.
-6. **Given** onboarding step 4 incomplete, **when** user returns, **then** draft restores from API.
+6. **Given** onboarding step incomplete, **when** user returns, **then** draft restores from API (7 steps; `completedAt` cleared on save after prior finish).
 7. **Given** workspace B user, **when** GET workspace A asset by UUID, **then** 404 without leak.
 
 ## Build tickets

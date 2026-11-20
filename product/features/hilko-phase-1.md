@@ -12,7 +12,7 @@
 
 ## Description
 
-Expand the foundation into a structured map of projects, identities, emails, provider accounts, assets, roles, dependencies, and verification state—without storing credentials. Onboarding wizard and CSV accelerate first setup; Mini Críptico seed supports dogfood.
+Expand the foundation into a structured map of projects, identities, emails, provider accounts, assets, roles, dependencies, and verification state—without storing credentials. 7-step onboarding wizard and CSV accelerate first setup; **Northline** demo seed supports dogfood.
 
 ## Value
 
@@ -20,8 +20,8 @@ Validates the core product hypothesis: a single place to see **what account cont
 
 ## Primary user stories
 
-1. I complete the 5-step wizard or CSV and have ≥5 assets with declared identities.
-2. I distinguish Google A vs Google B and four emails with different purposes.
+1. I complete the 7-step wizard or CSV and have ≥5 assets with declared identities.
+2. I distinguish two Google identities and mailbox labels (login/recovery/billing) via links.
 3. I link dependencies and run an **impact list** before changing VPS or an identity.
 4. I import assets via CSV preview without secrets being stored.
 5. I search/filter a growing inventory with server pagination.
@@ -34,7 +34,8 @@ Validates the core product hypothesis: a single place to see **what account cont
 - `verification_status` visible; never fake verified
 - Wizard with “not sure yet” and DB draft resume
 - CSV import preview/commit + export (no-secrets scan)
-- Seed: fictional Mini Críptico with `unverified` markers
+- Seed: fictional Northline (`northline-demo`) with `unverified` markers
+- Minimal audit trail on import, vault, roles, project delete
 - Multi-tenant tests extended for new APIs
 
 ## Constraints

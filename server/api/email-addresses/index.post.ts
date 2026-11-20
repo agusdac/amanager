@@ -1,5 +1,6 @@
 import { createEmailSchema } from '../../../shared/schemas/inventory'
 import { emailAddresses, identityEmails } from '../../../db/schema'
+import { recordAudit } from '../../utils/audit'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
 
@@ -31,6 +32,13 @@ export default defineEventHandler(async (event) => {
       })),
     )
   }
+
+  await recordAudit(db, { workspaceId: session.workspaceId, userId: session.id }, {
+    entityType: 'email_address',
+    entityId: email.id,
+    action: 'email.create',
+    safeDiff: { address: email.address, label: email.label },
+  })
 
   return { email }
 })
