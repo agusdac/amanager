@@ -4,6 +4,7 @@ import pg from 'pg'
 import * as schema from '../schema'
 import { workspaces } from '../schema'
 import { seedProviders } from './providers'
+import { seedRunbookTemplates } from './runbookTemplates'
 import { seedMiniCriptico } from './minicriptico'
 
 const { Pool } = pg
@@ -16,6 +17,7 @@ async function main() {
   const db = drizzle(pool, { schema })
 
   await seedProviders(db)
+  await seedRunbookTemplates(db)
 
   const workspaceArg = process.argv.find((a) => a.startsWith('--workspace='))
   const workspaceId = workspaceArg?.split('=')[1]

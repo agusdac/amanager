@@ -1,5 +1,14 @@
 import { and, asc, count, eq, inArray } from 'drizzle-orm'
-import { assets, assetDependencies, emailAddresses, identities, onboardingDrafts, projects } from '../../db/schema'
+import {
+  assets,
+  assetDependencies,
+  emailAddresses,
+  identities,
+  onboardingDrafts,
+  projects,
+  runbookExecutions,
+  runbooks,
+} from '../../db/schema'
 import { useDb } from '../utils/db'
 import { requireSession } from '../utils/session'
 
@@ -8,14 +17,26 @@ export default defineEventHandler(async (event) => {
   const db = useDb()
   const ws = session.workspaceId
 
-  const [[{ projectCount }], [{ assetCount }], [{ emailCount }], [{ identityCount }], [{ depCount }]] =
-    await Promise.all([
-      db.select({ projectCount: count() }).from(projects).where(eq(projects.workspaceId, ws)),
-      db.select({ assetCount: count() }).from(assets).where(eq(assets.workspaceId, ws)),
-      db.select({ emailCount: count() }).from(emailAddresses).where(eq(emailAddresses.workspaceId, ws)),
-      db.select({ identityCount: count() }).from(identities).where(eq(identities.workspaceId, ws)),
-      db.select({ depCount: count() }).from(assetDependencies).where(eq(assetDependencies.workspaceId, ws)),
-    ])
+  const [
+    [{ projectCount }],
+    [{ assetCount }],
+    [{ emailCount }],
+    [{ identityCount }],
+    [{ depCount }],
+    [{ runbookCount }],
+    [{ activeExecutionCount }],
+  ] = await Promise.all([
+    db.select({ projectCount: count() }).from(projects).where(eq(projects.workspaceId, ws)),
+    db.select({ assetCount: count() }).from(assets).where(eq(assets.workspaceId, ws)),
+    db.select({ emailCount: count() }).from(emailAddresses).where(eq(emailAddresses.workspaceId, ws)),
+    db.select({ identityCount: count() }).from(identities).where(eq(identities.workspaceId, ws)),
+    db.select({ depCount: count() }).from(assetDependencies).where(eq(assetDependencies.workspaceId, ws)),
+    db.select({ runbookCount: count() }).from(runbooks).where(eq(runbooks.workspaceId, ws)),
+    db
+      .select({ activeExecutionCount: count() })
+      .from(runbookExecutions)
+      .where(and(eq(runbookExecutions.workspaceId, ws), eq(runbookExecutions.status, 'in_progress'))),
+  ])
 
   const unverified = await db
     .select({ count: count() })
@@ -49,6 +70,8 @@ export default defineEventHandler(async (event) => {
       emails: emailCount,
       identities: identityCount,
       dependencies: depCount,
+      runbooks: runbookCount,
+      activeExecutions: activeExecutionCount,
       unverifiedAssets: unverified[0]?.count ?? 0,
     },
     onboarding: draft && !draft.completedAt ? { step: draft.step, updatedAt: draft.updatedAt } : null,

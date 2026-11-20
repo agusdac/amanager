@@ -6,6 +6,10 @@ type VerificationFilter = '' | 'needs_confirmation' | (typeof VERIFICATION_STATU
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const { projectId, environmentId, setEnvironment } = useWorkspaceScope()
+
+const envListUrl = computed(() => (projectId.value ? `/api/environments?projectId=${projectId.value}` : null))
+const { data: envPack } = await useFetch(envListUrl, { watch: [envListUrl] })
 
 useAppPageTitle('pageTitles.assets')
 
@@ -29,57 +33,38 @@ function setVerificationFilter(value: VerificationFilter) {
   router.replace({ query })
 }
 
-const projectFilter = computed(() => {
-  const p = route.query.projectId
-  return typeof p === 'string' ? p : ''
+const scopedParams = computed(() => {
+  const params = new URLSearchParams()
+  if (projectId.value) params.set('projectId', projectId.value)
+  if (projectId.value && environmentId.value) params.set('environmentId', environmentId.value)
+  return params
 })
-
-const environmentFilter = computed(() => {
-  const e = route.query.environmentId
-  return typeof e === 'string' ? e : ''
-})
-
-const envListUrl = computed(() =>
-  projectFilter.value ? `/api/environments?projectId=${projectFilter.value}` : null,
-)
-
-const { data: projects } = await useFetch('/api/projects')
-const { data: envPack } = await useFetch(envListUrl, { watch: [envListUrl] })
-
-function setProjectFilter(projectId: string) {
-  const query = { ...route.query }
-  if (projectId) query.projectId = projectId
-  else delete query.projectId
-  delete query.environmentId
-  page.value = 1
-  router.replace({ query })
-}
-
-function setEnvironmentFilter(environmentId: string) {
-  const query = { ...route.query }
-  if (!projectFilter.value) return
-  if (environmentId) query.environmentId = environmentId
-  else delete query.environmentId
-  page.value = 1
-  router.replace({ query })
-}
 
 const fetchUrl = computed(() => {
-  const params = new URLSearchParams()
+  const params = new URLSearchParams(scopedParams.value)
   params.set('page', String(page.value))
   params.set('limit', '25')
   if (q.value.trim()) params.set('q', q.value.trim())
   if (verificationFilter.value) params.set('verification', verificationFilter.value)
-  if (projectFilter.value) params.set('projectId', projectFilter.value)
-  if (projectFilter.value && environmentFilter.value) params.set('environmentId', environmentFilter.value)
+  return `/api/assets?${params.toString()}`
+})
+
+const impactListUrl = computed(() => {
+  const params = new URLSearchParams(scopedParams.value)
+  params.set('limit', '100')
   return `/api/assets?${params.toString()}`
 })
 
 const { data } = await useFetch(fetchUrl, { watch: [fetchUrl] })
+const { data: impactAssetPack } = await useFetch(impactListUrl, { watch: [impactListUrl] })
 const { data: identities } = await useFetch('/api/identities')
 
+watch([projectId, environmentId], () => {
+  page.value = 1
+})
+
 const impactAssets = computed(() =>
-  (data.value?.assets ?? []).map((a: { id: string; name: string }) => ({ id: a.id, label: a.name })),
+  (impactAssetPack.value?.assets ?? []).map((a: { id: string; name: string }) => ({ id: a.id, label: a.name })),
 )
 const impactIdentities = computed(() =>
   (identities.value?.identities ?? []).map((i: { id: string; label: string }) => ({
@@ -87,16 +72,36 @@ const impactIdentities = computed(() =>
     label: i.label,
   })),
 )
+
+const assetTabs = computed(() => [
+  { id: 'inventory', label: t('tabs.assets.inventory') },
+  { id: 'impact', label: t('tabs.assets.impact') },
+])
 </script>
 
 <template>
-  <div class="space-y-8">
+  <div class="space-y-6">
     <header class="flex flex-wrap items-end justify-between gap-4">
       <div class="space-y-1">
         <h1 class="page-title">{{ t('assets.inventoryTitle') }}</h1>
         <p v-if="verificationFilter === 'needs_confirmation'" class="text-sm text-stone-600">
           {{ t('assets.verificationQueueHint') }}
         </p>
+        <p v-else class="text-sm text-stone-600">{{ t('assets.inventorySubtitle') }}</p>
+        <label v-if="projectId" class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+          <span class="text-xs font-medium uppercase tracking-wide text-stone-500">{{ t('assets.filterEnvironment') }}</span>
+          <select
+            class="field w-auto min-w-[10rem] py-1.5"
+            :value="environmentId"
+            @change="setEnvironment(($event.target as HTMLSelectElement).value)"
+          >
+            <option value="">{{ t('assets.filterEnvironmentAll') }}</option>
+            <option value="_none">{{ t('assets.filterEnvironmentUnset') }}</option>
+            <option v-for="env in envPack?.environments ?? []" :key="env.id" :value="env.id">
+              {{ env.name }}
+            </option>
+          </select>
+        </label>
       </div>
       <div class="flex flex-wrap gap-2">
         <input
@@ -112,91 +117,89 @@ const impactIdentities = computed(() =>
       </div>
     </header>
 
-    <div class="flex flex-wrap items-end gap-3 text-sm">
-      <label class="block">
-        <span class="label text-xs">{{ t('assets.filterProject') }}</span>
-        <select
-          class="field mt-1 w-auto min-w-[10rem]"
-          :value="projectFilter"
-          @change="setProjectFilter(($event.target as HTMLSelectElement).value)"
-        >
-          <option value="">{{ t('assets.filterProjectAll') }}</option>
-          <option v-for="p in projects?.projects ?? []" :key="p.id" :value="p.id">{{ p.name }}</option>
-        </select>
-      </label>
-      <label v-if="projectFilter" class="block">
-        <span class="label text-xs">{{ t('assets.filterEnvironment') }}</span>
-        <select
-          class="field mt-1 w-auto min-w-[10rem]"
-          :value="environmentFilter"
-          @change="setEnvironmentFilter(($event.target as HTMLSelectElement).value)"
-        >
-          <option value="">{{ t('assets.filterEnvironmentAll') }}</option>
-          <option value="_none">{{ t('assets.filterEnvironmentUnset') }}</option>
-          <option v-for="env in envPack?.environments ?? []" :key="env.id" :value="env.id">
-            {{ env.name }}
-          </option>
-        </select>
-      </label>
-    </div>
+    <AppDetailTabs :tabs="assetTabs" default-tab="inventory">
+      <template #inventory>
+        <div class="space-y-4">
+          <div class="flex flex-wrap gap-2 text-sm" role="tablist" :aria-label="t('assets.verificationFilterLabel')">
+            <button
+              type="button"
+              role="tab"
+              class="rounded-full border px-3 py-1 transition-colors"
+              :class="
+                verificationFilter === ''
+                  ? 'border-stone-800 bg-stone-900 text-white'
+                  : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'
+              "
+              :aria-selected="verificationFilter === ''"
+              @click="setVerificationFilter('')"
+            >
+              {{ t('assets.verificationFilter.all') }}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="rounded-full border px-3 py-1 transition-colors"
+              :class="
+                verificationFilter === 'needs_confirmation'
+                  ? 'border-stone-800 bg-stone-900 text-white'
+                  : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'
+              "
+              :aria-selected="verificationFilter === 'needs_confirmation'"
+              @click="setVerificationFilter('needs_confirmation')"
+            >
+              {{ t('assets.verificationFilter.needsConfirmation') }}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="rounded-full border px-3 py-1 transition-colors"
+              :class="
+                verificationFilter === 'confirmed_by_human'
+                  ? 'border-emerald-700 bg-emerald-50 text-emerald-900'
+                  : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'
+              "
+              :aria-selected="verificationFilter === 'confirmed_by_human'"
+              @click="setVerificationFilter('confirmed_by_human')"
+            >
+              {{ t('assets.verificationFilter.confirmed') }}
+            </button>
+          </div>
 
-    <div class="flex flex-wrap gap-2 text-sm">
-      <button
-        type="button"
-        class="rounded-full border px-3 py-1 transition-colors"
-        :class="verificationFilter === '' ? 'border-stone-800 bg-stone-900 text-white' : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'"
-        @click="setVerificationFilter('')"
-      >
-        {{ t('assets.verificationFilter.all') }}
-      </button>
-      <button
-        type="button"
-        class="rounded-full border px-3 py-1 transition-colors"
-        :class="verificationFilter === 'needs_confirmation' ? 'border-stone-800 bg-stone-900 text-white' : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'"
-        @click="setVerificationFilter('needs_confirmation')"
-      >
-        {{ t('assets.verificationFilter.needsConfirmation') }}
-      </button>
-      <button
-        type="button"
-        class="rounded-full border px-3 py-1 transition-colors"
-        :class="verificationFilter === 'confirmed_by_human' ? 'border-emerald-700 bg-emerald-50 text-emerald-900' : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'"
-        @click="setVerificationFilter('confirmed_by_human')"
-      >
-        {{ t('assets.verificationFilter.confirmed') }}
-      </button>
-    </div>
+          <div class="card overflow-x-auto">
+            <table class="w-full min-w-[32rem] text-left text-sm">
+              <thead class="border-b bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
+                <tr>
+                  <th class="px-4 py-3">{{ t('assets.name') }}</th>
+                  <th class="px-4 py-3">{{ t('assets.type') }}</th>
+                  <th class="px-4 py-3">{{ t('assets.provider') }}</th>
+                  <th class="px-4 py-3">{{ t('assets.verification') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="a in data?.assets" :key="a.id" class="border-b border-stone-100">
+                  <td class="px-4 py-3 font-medium">
+                    <NuxtLink :to="`/assets/${a.id}`" class="text-stone-900 hover:underline">{{ a.name }}</NuxtLink>
+                  </td>
+                  <td class="px-4 py-3 text-stone-700">
+                    <AssetTypeLabel :type="a.type" :provider-slug="a.providerSlug" show-description />
+                  </td>
+                  <td class="px-4 py-3 text-stone-600">{{ a.providerName ?? '—' }}</td>
+                  <td class="px-4 py-3">
+                    <NuxtLink :to="`/assets/${a.id}?tab=verifications`" class="inline-block hover:opacity-90">
+                      <VerificationChip :status="a.verificationStatus" />
+                    </NuxtLink>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p v-if="!data?.assets?.length" class="px-4 py-8 text-center text-sm text-stone-500">{{ t('assets.empty') }}</p>
+          </div>
+        </div>
+      </template>
 
-    <div class="card overflow-x-auto">
-      <table class="w-full min-w-[32rem] text-left text-sm">
-        <thead class="border-b bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
-          <tr>
-            <th class="px-4 py-3">{{ t('assets.name') }}</th>
-            <th class="px-4 py-3">{{ t('assets.type') }}</th>
-            <th class="px-4 py-3">{{ t('assets.provider') }}</th>
-            <th class="px-4 py-3">{{ t('assets.verification') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="a in data?.assets" :key="a.id" class="border-b border-stone-100">
-            <td class="px-4 py-3 font-medium">
-              <NuxtLink :to="`/assets/${a.id}`" class="text-stone-900 hover:underline">{{ a.name }}</NuxtLink>
-            </td>
-            <td class="px-4 py-3 text-stone-700">
-              <AssetTypeLabel :type="a.type" :provider-slug="a.providerSlug" show-description />
-            </td>
-            <td class="px-4 py-3 text-stone-600">{{ a.providerName ?? '—' }}</td>
-            <td class="px-4 py-3">
-              <NuxtLink :to="`/assets/${a.id}?tab=verifications`" class="inline-block hover:opacity-90">
-                <VerificationChip :status="a.verificationStatus" />
-              </NuxtLink>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <p v-if="!data?.assets?.length" class="px-4 py-8 text-center text-sm text-stone-500">{{ t('assets.empty') }}</p>
-    </div>
-
-    <ImpactExplorer :asset-options="impactAssets" :identity-options="impactIdentities" />
+      <template #impact>
+        <ImpactExplorer :asset-options="impactAssets" :identity-options="impactIdentities" embedded />
+      </template>
+    </AppDetailTabs>
   </div>
 </template>

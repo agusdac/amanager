@@ -17,6 +17,8 @@ const props = defineProps<{
   initialMode?: 'asset' | 'identity'
   initialEntityId?: string
   autoRun?: boolean
+  /** Hide page-level title when nested in a tab */
+  embedded?: boolean
 }>()
 
 const { t } = useI18n()
@@ -77,11 +79,14 @@ function relationLabel(type: string) {
 </script>
 
 <template>
-  <section class="card p-5">
-    <h2 class="section-title">{{ t('impact.title') }}</h2>
-    <p class="lede mt-1">{{ t('impact.hint') }}</p>
+  <section :class="embedded ? 'space-y-4' : 'card p-5'">
+    <template v-if="!embedded">
+      <h2 class="section-title">{{ t('impact.title') }}</h2>
+      <p class="lede mt-1">{{ t('impact.hint') }}</p>
+    </template>
+    <p v-else class="text-sm text-stone-600">{{ t('impact.hint') }}</p>
 
-    <div class="mt-4 flex flex-wrap gap-2">
+    <div class="flex flex-wrap gap-2" :class="embedded ? 'mt-2' : 'mt-4'">
       <button
         type="button"
         class="rounded border px-3 py-1.5 text-sm transition-colors"

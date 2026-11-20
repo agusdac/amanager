@@ -249,6 +249,10 @@
     @apply sticky top-0 z-20 flex h-14 items-center justify-between gap-4 border-b border-stone-200 bg-white/95 px-4 backdrop-blur-sm sm:px-6;
   }
 
+  .app-shell__project-focus {
+    @apply min-w-0 flex-1 sm:flex-none;
+  }
+
   .app-shell__topnav {
     @apply flex min-w-0 flex-1 items-center gap-1 overflow-x-auto;
     scrollbar-width: thin;

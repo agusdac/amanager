@@ -348,3 +348,104 @@ export const auditEvents = pgTable('audit_events', {
   safeDiffJson: jsonb('safe_diff_json'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
+
+/** System catalog (workspace_id null) or workspace-owned reusable templates. */
+export const runbookTemplates = pgTable('runbook_templates', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspaces.id, { onDelete: 'cascade' }),
+  slug: text('slug').notNull(),
+  version: integer('version').notNull().default(1),
+  title: text('title').notNull(),
+  schemaJson: jsonb('schema_json').notNull(),
+  contentMarkdown: text('content_markdown'),
+})
+
+export const runbooks = pgTable('runbooks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id')
+    .notNull()
+    .references(() => workspaces.id, { onDelete: 'cascade' }),
+  projectId: uuid('project_id')
+    .notNull()
+    .references(() => projects.id, { onDelete: 'cascade' }),
+  environmentId: uuid('environment_id').references(() => projectEnvironments.id),
+  templateId: uuid('template_id').references(() => runbookTemplates.id),
+  templateSlug: text('template_slug'),
+  title: text('title').notNull(),
+  status: text('status').notNull().default('draft'),
+  overviewMarkdown: text('overview_markdown'),
+  instanceVersion: integer('instance_version').notNull().default(1),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
+export const runbookSteps = pgTable(
+  'runbook_steps',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    workspaceId: uuid('workspace_id').notNull(),
+    runbookId: uuid('runbook_id')
+      .notNull()
+      .references(() => runbooks.id, { onDelete: 'cascade' }),
+    stepKey: text('step_key').notNull(),
+    position: integer('position').notNull(),
+    kind: text('kind').notNull().default('manual'),
+    title: text('title').notNull(),
+    bodyMarkdown: text('body_markdown').notNull().default(''),
+    risk: text('risk').notNull().default('low'),
+    dependsOnJson: jsonb('depends_on_json').notNull().default([]),
+    isRequired: boolean('is_required').notNull().default(true),
+    source: text('source').notNull().default('generated'),
+    hiddenAt: timestamp('hidden_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex('runbook_steps_key_idx').on(table.runbookId, table.stepKey)],
+)
+
+export const runbookExecutions = pgTable('runbook_executions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').notNull(),
+  runbookId: uuid('runbook_id')
+    .notNull()
+    .references(() => runbooks.id, { onDelete: 'cascade' }),
+  startedBy: uuid('started_by')
+    .notNull()
+    .references(() => users.id),
+  status: text('status').notNull().default('in_progress'),
+  contentBinding: text('content_binding').notNull().default('snapshot'),
+  startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+})
+
+export const runbookExecutionSteps = pgTable('runbook_execution_steps', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').notNull(),
+  executionId: uuid('execution_id')
+    .notNull()
+    .references(() => runbookExecutions.id, { onDelete: 'cascade' }),
+  stepKey: text('step_key').notNull(),
+  position: integer('position').notNull(),
+  kind: text('kind').notNull().default('manual'),
+  title: text('title').notNull(),
+  bodyMarkdown: text('body_markdown').notNull().default(''),
+  risk: text('risk').notNull().default('low'),
+  dependsOnJson: jsonb('depends_on_json').notNull().default([]),
+  originStepId: uuid('origin_step_id').references(() => runbookSteps.id),
+})
+
+export const runbookStepResults = pgTable('runbook_step_results', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').notNull(),
+  executionId: uuid('execution_id')
+    .notNull()
+    .references(() => runbookExecutions.id, { onDelete: 'cascade' }),
+  executionStepId: uuid('execution_step_id').references(() => runbookExecutionSteps.id, {
+    onDelete: 'cascade',
+  }),
+  runbookStepId: uuid('runbook_step_id').references(() => runbookSteps.id, { onDelete: 'cascade' }),
+  status: text('status').notNull().default('todo'),
+  resultNote: text('result_note'),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})

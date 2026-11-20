@@ -12,6 +12,7 @@
     "import": "Import",
     "checklist": "Dogfood",
     "verificationGuide": "Verification guide",
+    "guides": "Guides",
     "account": "Your account",
     "sectionPrimary": "Workspace",
     "sectionMore": "More",
@@ -43,6 +44,7 @@
   },
   "home": {
     "title": "Workspace overview",
+    "statsTitle": "Inventory snapshot",
     "projects": "Projects",
     "assets": "Assets",
     "identities": "Identities",
@@ -58,7 +60,18 @@
     "attentionTitle": "Needs confirmation",
     "attentionHint": "{count} assets are declared or unverified — confirm control or document how you checked.",
     "reviewVerificationQueue": "Open verification queue",
-    "attentionMore": "+ {count} more in the full queue"
+    "attentionMore": "+ {count} more in the full queue",
+    "guidesCardTitle": "Setup guides",
+    "guidesCardBody": "Turn inventory into onboarding and environment runbooks—export Markdown without storing secrets.",
+    "guidesInProgress": "{count} execution(s) in progress"
+  },
+  "workspaceScope": {
+    "regionLabel": "Workspace focus",
+    "project": "Project",
+    "environment": "Environment",
+    "allProjects": "All projects",
+    "allEnvironments": "All environments",
+    "openProject": "Open project"
   },
   "search": {
     "title": "Workspace search",
@@ -139,9 +152,11 @@
       "environments": "Environments",
       "graph": "Map",
       "dependencies": "Dependencies",
+      "runbooks": "Runbooks",
       "danger": "Danger zone"
     },
     "assets": {
+      "inventory": "Inventory",
       "overview": "Overview",
       "access": "Access",
       "dependencies": "Dependencies",
@@ -258,7 +273,7 @@
     "q8": "Image storage config and consuming app?",
     "q8hint": "Cloudflare storage asset; stores_data_in edges.",
     "q9": "Onboard another developer without sharing passwords?",
-    "q9hint": "Roles + vault refs (runbooks in Fase 2).",
+    "q9hint": "Create a developer onboarding runbook; export Markdown without pasting secrets.",
     "q10": "What to change before GitHub→Bitbucket, Namecheap→Hostinger, or OAuth account move?",
     "q10hint": "Impact lists on repos, domain, OAuth (migration plans Fase 3).",
     "links": {
@@ -285,7 +300,8 @@
       "oauthRoles": "OAuth roles",
       "repoImpact": "Repo impact",
       "oauthImpact": "OAuth impact",
-      "projectMap": "Dependency map"
+      "projectMap": "Dependency map",
+      "onboardingRunbook": "Onboarding runbook"
     }
   },
   "pageTitles": {
@@ -304,7 +320,297 @@
     "identity": "Identity",
     "guideVerification": "Verification guide",
     "account": "Your account",
+    "guides": "Guides",
+    "guidesNew": "New guide",
+    "guidesDetail": "Runbook",
+    "guidesExecution": "Execution",
+    "guidesTemplates": "Templates",
+    "guidesTemplateNew": "New template",
+    "guidesTemplateEdit": "Edit template",
     "loading": "Loading…"
+  },
+  "guides": {
+    "listTitle": "Setup guides",
+    "listSubtitle": "Runbooks generated from your inventory—editable Markdown, manual execution, export.",
+    "newFromTemplate": "New from template",
+    "empty": "No runbooks yet. Pick a template to generate steps from your project.",
+    "executionInProgress": "Execution in progress",
+    "newTitle": "Create runbook",
+    "newSubtitle": "Choose a system template and project; Hilko fills steps from metadata only.",
+    "fieldTemplate": "Template",
+    "fieldProject": "Project",
+    "fieldEnvironment": "Environment",
+    "fieldTitle": "Title",
+    "pickTemplate": "Select template",
+    "pickProject": "Select project",
+    "pickEnvironment": "Select environment",
+    "createRunbook": "Generate runbook",
+    "createMissingFields": "Pick a template and project.",
+    "createMissingEnvironment": "This template requires an environment.",
+    "liveBindingHint": "After creation you can start executions frozen (default) or follow live runbook edits.",
+    "customRunbook": "Custom runbook",
+    "exportMd": "Export Markdown",
+    "startExecution": "Start execution",
+    "liveBinding": "Follow live runbook (advanced)",
+    "overview": "Overview",
+    "editMarkdown": "Edit",
+    "previewMarkdown": "Preview",
+    "steps": "Steps",
+    "refreshInventory": "Refresh from inventory",
+    "refreshPreview": "Auto blocks changed—select steps to merge:",
+    "applyRefresh": "Merge selected",
+    "refreshApplied": "Inventory refresh merged.",
+    "executionHistory": "Execution history",
+    "executionMode": "Mode: {mode}",
+    "completeExecution": "Mark complete",
+    "updatedSinceStart": "Step content changed since execution started",
+    "stepOrphaned": "This step was removed from the runbook",
+    "resultNotePlaceholder": "Notes (optional)",
+    "currentStatus": "Current",
+    "stepStatusUnset": "Pick a status below when you work on this step.",
+    "stepKinds": {
+      "manual": "Manual",
+      "reference": "Reference",
+      "command_suggestion": "Command suggestion",
+      "validation": "Validation",
+      "approval": "Approval"
+    },
+    "stepRisks": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "stepStatus": {
+      "todo": "To do",
+      "blocked": "Blocked",
+      "in_progress": "In progress",
+      "done": "Done",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "contentBinding": {
+      "snapshot": "Frozen snapshot",
+      "live": "Follow live runbook"
+    },
+    "executionStatus": {
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "backToRunbook": "← Back to runbook",
+    "projectTabHint": "Runbooks scoped to this project.",
+    "yourRunbooks": "Your runbooks",
+    "templates": {
+      "browseAll": "System templates",
+      "catalogTitle": "System templates",
+      "catalogSubtitle": "Preview what each template covers before generating a runbook from your inventory.",
+      "backToGuides": "← Guides",
+      "backToCatalog": "← All templates",
+      "viewDetails": "View details",
+      "useTemplate": "Use this template",
+      "stepCount": "{count} steps",
+      "requiresProject": "Requires a project",
+      "requiresProjectEnv": "Requires project + environment",
+      "howGenerationWorksTitle": "How generation works",
+      "howGenerationWorksBody": "Hilko fills steps from linked assets, vault ref labels, and config keys—never secret values. Missing inventory shows as “pending” in the generated Markdown.",
+      "howToTitle": "How to use",
+      "stepsTitle": "Included steps",
+      "stepsHint": "Order and wording may change after you edit the runbook. Titles below come from the system template.",
+      "afterCreateTitle": "After you create",
+      "afterCreateBody": "Edit overview and steps, refresh auto blocks from inventory, run an execution, and export Markdown for the new person.",
+      "previewTitle": "Selected template",
+      "stepPreview": "Preview",
+      "previewProject": "Preview data from",
+      "previewSampleProject": "Example project (sample data)",
+      "previewProjectHint": "Inventory previews update as you edit. Pick a real project to see your workspace inventory.",
+      "previewSampleBadge": "Sample data",
+      "previewLiveBadge": "Your project",
+      "previewEmpty": "Add a step title to preview.",
+      "notFound": "Template not found.",
+      "seeAll": "Full catalog",
+      "createWorkspace": "Create template",
+      "editWorkspace": "Edit template",
+      "deleteWorkspace": "Delete template",
+      "deleteWorkspaceTitle": "Delete team template?",
+      "deleteWorkspaceDescription": "Runbooks already created from this template stay in your workspace; only the reusable template is removed.",
+      "deleteWorkspaceConfirm": "Delete",
+      "workspaceSection": "Team templates",
+      "workspaceBadge": "Team",
+      "workspaceNewTitle": "Create team template",
+      "workspaceEditTitle": "Edit team template",
+      "workspaceSubtitle": "Reusable runbook skeleton for your workspace—fixed Markdown steps you can turn into a runbook for any project.",
+      "workspaceHintTitle": "Checklist-style runbooks",
+      "workspaceHintBody": "Chain human steps with Hilko links (Emails, Assets…) and optional inventory blocks. Use **Insert workflow** for flows like changing a registrar contact email.",
+      "workflowPatternsTitle": "Insert workflow",
+      "workflowPatternsHint": "Adds several linked steps you can tweak—pick the registrar asset on the provider step.",
+      "insertPattern": "Insert…",
+      "insertLink": "Insert Hilko link",
+      "patterns": {
+        "changeRegistrarEmail": {
+          "label": "Change registrar / admin contact email",
+          "s1Title": "Confirm the new email is valid",
+          "s1Body": "Check inbox access and that the address is acceptable for WHOIS / registrar notifications (not a shared inbox unless policy allows).",
+          "s2Title": "Record the mailbox in Hilko",
+          "s2Body": "Open [Emails & access](/accounts?tab=emails) and add the address with a short label (e.g. “Northline admin 2025”). Link it to the domain asset if relevant.",
+          "s3Title": "Update the provider panel",
+          "s3Body": "Choose your **Namecheap (or registrar) asset** below, open its admin URL, and set the management / contact email to the new address. Save in the provider UI.",
+          "s4Title": "Review and document",
+          "s4Body": "Confirm the provider shows the new email, resend any verification message, and note the change in the runbook execution."
+        },
+        "recordEmail": {
+          "label": "Document a mailbox in Hilko",
+          "s1Title": "Add the email in Hilko",
+          "s1Body": "Go to [Emails & access](/accounts?tab=emails). Create the row with purpose (billing, admin, notifications…) — metadata only.",
+          "s2Title": "Link to assets",
+          "s2Body": "On each related [asset](/assets), attach the mailbox under **Emails** so impact search and runbooks stay accurate."
+        },
+        "verifyClose": {
+          "label": "Final review step",
+          "s1Title": "Review and mark complete",
+          "s1Body": "- [ ] Provider UI matches Hilko\n- [ ] No secrets pasted into tickets or runbook notes\n- [ ] Next owner knows where to look in Hilko"
+        },
+        "linkVault": {
+          "s1Title": "Open vault metadata rules",
+          "s1Body": "Never paste secret values into Hilko. Use [Assets](/assets) → vault hint field or project **Vault references** (labels + URLs only).",
+          "s2Title": "Pick the vault reference row",
+          "s2Body": "Choose the Bitwarden/1Password item below. Confirm `itemUrl` or location hint is enough for you to find credentials offline.",
+          "s3Title": "Attach to the asset that uses it",
+          "s3Body": "Select the asset (app, server, OAuth client…) and confirm the vault label matches what operators expect in a crisis."
+        },
+        "dnsCutover": {
+          "s1Title": "Prep TTL and targets",
+          "s1Body": "Write new public targets as **config entries** (non-secret). Lower TTL 24–48h before cutover. Note rollback values in execution notes.",
+          "s2Title": "Change records at DNS provider",
+          "s2Body": "Pick your **Cloudflare / DNS asset**, apply the new A/AAAA/CNAME. Do not paste zone secrets into Hilko.",
+          "s3Title": "Check dependents",
+          "s3Body": "Review dependency map below—mail, hosting, certs—before you declare done.",
+          "s4Title": "Smoke test & raise TTL",
+          "s4Body": "- [ ] Site resolves\n- [ ] TLS valid\n- [ ] Raise TTL after stable window"
+        },
+        "soloIdentity": {
+          "s1Title": "You are the only operator",
+          "s1Body": "Open [Identities](/accounts?tab=identities). One row should match the human who actually logs into providers. Delete ghost “Team” identities.",
+          "s2Title": "Roles should collapse to you",
+          "s2Body": "Below: every asset should show **your** identity. Fix [asset](/assets) → Access tabs when a vendor still lists a dead account.",
+          "s3Title": "Emails you still read",
+          "s3Body": "In [Emails & access](/accounts?tab=emails), drop aliases you ignore. Registrar and billing must reach a mailbox you monitor."
+        },
+        "soloVacation": {
+          "s1Title": "What breaks if you vanish for a week",
+          "s1Body": "Skim project assets. Star billing, DNS expiry, and anything without a second human—see [Projects](/projects).",
+          "s2Title": "Break-glass vault labels",
+          "s2Body": "Confirm vault refs name the items a helper would need (hosting, domain, PM). Still no secret paste.",
+          "s3Title": "Packet for future you",
+          "s3Body": "Export a runbook Markdown, store in PM, leave Hilko as source of truth. Optional: one trusted person gets vault—not shared passwords."
+        }
+      },
+      "patternIds": {
+        "change_registrar_email": "Change registrar / admin contact email",
+        "record_email_in_hilko": "Document mailbox in Hilko",
+        "link_vault_to_asset": "Link vault item ↔ asset",
+        "dns_cutover": "DNS cutover to new target",
+        "solo_identity_baseline": "Solo user: identity & roles audit",
+        "solo_vacation_packet": "Solo user: vacation packet",
+        "verify_and_close": "Final review step"
+      },
+      "snippets": {
+        "emails": "Emails & access",
+        "identities": "Identities",
+        "assets": "Assets",
+        "projects": "Projects",
+        "emailsMd": "[Emails & access](/accounts?tab=emails)",
+        "identitiesMd": "[Identities](/accounts?tab=identities)",
+        "assetsMd": "[Assets](/assets)",
+        "projectsMd": "[Projects](/projects)"
+      },
+      "workspaceOverview": "Introduction (Markdown, optional)",
+      "workspaceRequiresEnv": "Require environment when generating a runbook",
+      "workspaceStepLabel": "Step {n}",
+      "workspaceStepTitlePh": "Step title",
+      "workspaceStepBodyPh": "Instructions, links, checklists…",
+      "workspaceAddStep": "Add step",
+      "workspaceSave": "Save template",
+      "workspaceMissingFields": "Add a title and at least one step with a title.",
+      "workspaceMissingAssetType": "Pick an asset type for asset-linked steps.",
+      "workspaceMissingTarget": "Pick a specific reference or switch back to “all in project”.",
+      "stepKind": "Step kind",
+      "stepRisk": "Severity",
+      "inventoryScope": "Inventory scope",
+      "inventoryScopeAll": "All in project",
+      "inventoryScopeSpecific": "One specific…",
+      "noTargetSelected": "No reference selected",
+      "pickReference": "Choose…",
+      "pickerHint": "Search your workspace. Vault and config search use the preview project when set.",
+      "pickerSearchPh": "Search by name…",
+      "pickerEmpty": "No matches.",
+      "pickerTitle": {
+        "asset": "Pick an asset",
+        "identity": "Pick an identity",
+        "email": "Pick an email",
+        "vault_ref": "Pick a vault reference",
+        "config_entry": "Pick a config entry"
+      },
+      "workspaceStepSource": "Step content",
+      "workspaceSourceMarkdown": "Fixed Markdown",
+      "workspaceSourceInventory": "Pull from inventory when generating",
+      "workspaceInventoryKind": "Inventory block",
+      "workspaceAssetType": "Asset type",
+      "workspaceProviderSlug": "Provider (optional)",
+      "workspaceProviderOptional": "e.g. github",
+      "workspaceInventoryIntro": "Optional intro (Markdown)",
+      "workspaceInventoryIntroPh": "Shown above the generated list",
+      "workspaceDependsOn": "Depends on steps",
+      "inventoryGenerators": {
+        "inventory_overview": "All linked assets",
+        "environment_scope": "Environment scope",
+        "asset_by_type": "Assets by type (and provider)",
+        "vault_refs": "Vault references",
+        "config_entries": "Config entries (non-secret)",
+        "identities_roles": "Identities & asset roles",
+        "identities_overview": "Identities list",
+        "emails_overview": "Email addresses",
+        "asset_dependencies": "Asset dependencies"
+      }
+    }
+  },
+  "runbooks": {
+    "templates": {
+      "new-developer-onboarding": {
+        "title": "Onboard a new developer",
+        "description": "Hand repo and tooling access using individual accounts and vault refs.",
+        "howTo": "Choose the project and dev/staging environment.\nLink GitHub repos, OAuth, vault refs, and config entries in inventory first.\nGenerate the runbook and send the exported README—no shared passwords."
+      },
+      "staging-environment-bootstrap": {
+        "title": "Bootstrap staging / dev environment",
+        "description": "Stand up or rebuild a non-production environment from documented links.",
+        "howTo": "Pick the project and the environment you are rebuilding.\nEnsure VPS, domain, mail, and storage assets are linked to that environment.\nUse the runbook as a checklist while you stand up services; export for the team."
+      },
+      "access-handover-checklist": {
+        "title": "Access handover",
+        "description": "Document who takes over accounts, emails, and roles.",
+        "howTo": "Select the project whose ownership is changing.\nUpdate identities, asset roles, emails, and vault refs before generating.\nComplete the execution with notes so the next owner has an audit trail in Hilko."
+      },
+      "registrar-contact-email-change": {
+        "title": "Change registrar / admin contact email",
+        "description": "Checklist: validate mailbox → Hilko → Namecheap (or registrar) panel → review.",
+        "howTo": "Pick the project that owns the domain.\nEnsure the Namecheap (or registrar) domain asset is linked.\nGenerate and follow steps; link the specific registrar asset in team templates if you clone this flow."
+      },
+      "solo-founder-inventory-audit": {
+        "title": "Solo founder: inventory truth check",
+        "description": "One person: identities, roles, mailboxes, and vault refs match reality.",
+        "howTo": "Use when you are the only Hilko user.\nFix identities and roles before exporting.\nClear the verification queue so nothing is fake-“declared”."
+      },
+      "solo-vacation-handoff": {
+        "title": "Solo operator: vacation packet",
+        "description": "Before time off: scope, vault, domains, export—for you or one helper.",
+        "howTo": "No team required.\nComplete vault ref labels first.\nExport Markdown to your password manager; share access, not passwords."
+      },
+      "dns-cutover-checklist": {
+        "title": "DNS cutover to new host",
+        "description": "TTL prep, DNS asset change, dependency check, smoke test.",
+        "howTo": "Pick project + environment.\nLink Cloudflare (or DNS) and hosting assets.\nUse when repointing production or staging DNS."
+      }
+    }
   },
   "guide": {
     "verification": {
@@ -557,6 +863,8 @@
       "custom": "Custom key…"
     },
     "inventoryTitle": "Asset inventory",
+    "inventorySubtitle": "Scoped by the project in the header. Narrow by environment here when a project is selected.",
+    "verificationFilterLabel": "Verification status",
     "filterProject": "Project",
     "filterProjectAll": "All projects",
     "filterEnvironment": "Environment",
@@ -773,8 +1081,11 @@
     "save": "Save",
     "cancel": "Cancel",
     "loading": "Loading…",
+    "saving": "Saving…",
+    "errorGeneric": "Something went wrong",
     "add": "Add",
     "optional": "optional",
-    "remove": "Remove"
+    "remove": "Remove",
+    "clear": "Clear"
   }
 }

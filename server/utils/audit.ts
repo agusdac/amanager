@@ -7,9 +7,17 @@ type SessionActor = {
   userId: string
 }
 
+/** `requireSession` returns `{ id }`; some callers pass `{ userId }` explicitly. */
+export function resolveAuditActor(session: SessionActor | { workspaceId: string; id: string }): SessionActor {
+  if ('userId' in session && session.userId) {
+    return { workspaceId: session.workspaceId, userId: session.userId }
+  }
+  return { workspaceId: session.workspaceId, userId: session.id }
+}
+
 export async function recordAudit(
   db: NodePgDatabase<typeof schema>,
-  session: SessionActor,
+  session: SessionActor | { workspaceId: string; id: string },
   input: {
     entityType: string
     entityId?: string | null
@@ -17,9 +25,10 @@ export async function recordAudit(
     safeDiff?: Record<string, unknown> | null
   },
 ) {
+  const actor = resolveAuditActor(session)
   await db.insert(auditEvents).values({
-    workspaceId: session.workspaceId,
-    actorUserId: session.userId,
+    workspaceId: actor.workspaceId,
+    actorUserId: actor.userId,
     entityType: input.entityType,
     entityId: input.entityId ?? null,
     action: input.action,

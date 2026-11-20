@@ -2,6 +2,7 @@
 import {
   BookOpen,
   Boxes,
+  BookMarked,
   ClipboardList,
   Home,
   Mail,
@@ -26,6 +27,7 @@ const glyph = computed(() => {
     onboarding: Sparkles,
     checklist: ClipboardList,
     guide: BookOpen,
+    guides: BookMarked,
   } as const
   return map[props.icon]
 })

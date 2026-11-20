@@ -10,6 +10,7 @@ const id = computed(() => String(route.params.id))
 const showSetupChecklist = computed(() => route.query.setup === '1')
 
 const { data, refresh, pending } = await useFetch(() => `/api/projects/${id.value}`, { watch: [id] })
+const { data: projectRunbooks } = await useFetch(() => `/api/runbooks?projectId=${id.value}`, { watch: [id] })
 const { data: providers } = await useFetch('/api/providers')
 const { data: identities } = await useFetch('/api/identities')
 const { data: accounts } = await useFetch('/api/provider-accounts')
@@ -237,6 +238,7 @@ const projectTabs = computed(() => [
     visible: Boolean(data.value?.assets?.length),
   },
   { id: 'dependencies', label: t('tabs.projects.dependencies') },
+  { id: 'runbooks', label: t('tabs.projects.runbooks') },
   { id: 'danger', label: t('tabs.projects.danger') },
 ])
 
@@ -614,6 +616,20 @@ async function deleteProject() {
       </ul>
       <p v-else-if="data.assets?.length" class="lede">{{ t('projects.noDependencies') }}</p>
     </div>
+      </template>
+
+      <template #runbooks>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <p class="text-sm text-stone-600">{{ t('guides.projectTabHint') }}</p>
+          <NuxtLink :to="`/guides/templates?projectId=${id}`" class="btn-secondary text-sm">{{ t('guides.templates.browseAll') }}</NuxtLink>
+          <NuxtLink :to="`/guides/new?projectId=${id}`" class="btn-primary text-sm">{{ t('guides.newFromTemplate') }}</NuxtLink>
+        </div>
+        <ul v-if="projectRunbooks?.runbooks?.length" class="mt-4 space-y-2">
+          <li v-for="rb in projectRunbooks.runbooks" :key="rb.id">
+            <NuxtLink :to="`/guides/${rb.id}`" class="font-medium underline">{{ rb.title }}</NuxtLink>
+          </li>
+        </ul>
+        <p v-else class="mt-4 text-sm text-stone-500">{{ t('guides.empty') }}</p>
       </template>
 
       <template #danger>

@@ -115,7 +115,15 @@ export default defineEventHandler(async (event) => {
         ]
       : [link('/assets', 'nav.assets')],
     q9: [
-      link('/accounts?tab=identities', 'checklist.links.identities'),
+      ...(project
+        ? [
+            link(
+              `/guides/new?template=new-developer-onboarding&projectId=${project.id}`,
+              'checklist.links.onboardingRunbook',
+            ),
+          ]
+        : [link('/guides/new?template=new-developer-onboarding', 'checklist.links.onboardingRunbook')]),
+      link('/guides', 'nav.guides'),
       ...(a.oauth ? [link(`/assets/${a.oauth}?tab=access`, 'checklist.links.oauthRoles')] : []),
     ],
     q10: [

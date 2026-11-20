@@ -11,10 +11,29 @@ watch(q, (val) => {
   }, 280)
 })
 
-const { data, pending } = await useFetch(
-  () => (debouncedQ.value.length >= 2 ? `/api/search?q=${encodeURIComponent(debouncedQ.value)}` : null),
-  { watch: [debouncedQ] },
-)
+type SearchPayload = {
+  assets?: { id: string; name: string; type: string; providerSlug?: string | null }[]
+  emails?: { id: string; address: string; linkedAssets?: { id: string; name: string }[] }[]
+  identities?: { id: string; label: string; providerName?: string | null }[]
+}
+
+const data = ref<SearchPayload | null>(null)
+const pending = ref(false)
+
+watch(debouncedQ, async (q) => {
+  if (q.length < 2) {
+    data.value = null
+    return
+  }
+  pending.value = true
+  try {
+    data.value = await $fetch<SearchPayload>(`/api/search?q=${encodeURIComponent(q)}`)
+  } catch {
+    data.value = null
+  } finally {
+    pending.value = false
+  }
+})
 
 const hasResults = computed(() => {
   if (!data.value || debouncedQ.value.length < 2) return false

@@ -5,6 +5,9 @@ const { t } = useI18n()
 useSyncUserLocale()
 const { collapsed, toggle } = useSidebarCollapsed()
 const { data: session } = useSessionFetch()
+const { projectId, setProject } = useWorkspaceScope()
+
+const { data: projects } = await useFetch('/api/projects')
 
 const userInitial = computed(() => {
   const name = session.value?.user?.name?.trim()
@@ -16,7 +19,7 @@ const userInitial = computed(() => {
 
 <template>
   <div class="app-shell" :class="{ 'app-shell--collapsed': collapsed }">
-  <aside class="app-shell__sidebar" aria-label="Main navigation">
+    <aside class="app-shell__sidebar" aria-label="Main navigation">
       <NuxtLink to="/home" class="app-shell__brand" :title="t('app.name')">
         <IconFolder class="h-5 w-5 shrink-0 text-stone-800" />
         <span v-if="!collapsed" class="truncate font-semibold text-stone-900">{{ t('app.name') }}</span>
@@ -49,14 +52,18 @@ const userInitial = computed(() => {
 
     <div class="app-shell__main">
       <header class="app-shell__topbar">
-        <nav class="app-shell__topnav" aria-label="Quick navigation">
-          <AppShellNavLink
-            v-for="item in NAV_PRIMARY"
-            :key="`top-${item.to}`"
-            :item="item"
-            variant="top"
-          />
-        </nav>
+        <label class="app-shell__project-focus">
+          <span class="sr-only">{{ t('workspaceScope.project') }}</span>
+          <select
+            class="field max-w-[min(100%,14rem)] py-1.5 text-sm"
+            :value="projectId"
+            @change="setProject(($event.target as HTMLSelectElement).value)"
+          >
+            <option value="">{{ t('workspaceScope.allProjects') }}</option>
+            <option v-for="p in projects?.projects ?? []" :key="p.id" :value="p.id">{{ p.name }}</option>
+          </select>
+        </label>
+
         <NuxtLink
           to="/account"
           class="app-shell__user"
