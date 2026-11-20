@@ -553,19 +553,34 @@ async function deleteProject() {
             </li>
           </ul>
           <p v-else class="lede">{{ t('projects.noEnvironments') }}</p>
-          <section v-if="unassignedAssets.length" class="callout callout-neutral">
-            <p class="text-sm font-medium text-stone-800 dark:text-stone-200">{{ t('projects.unassignedAssetsTitle') }}</p>
-            <p class="mt-1 text-xs text-muted">{{ t('projects.unassignedAssetsHint') }}</p>
-            <ul class="mt-3 space-y-1 text-sm">
-              <li v-for="asset in unassignedAssets" :key="asset.id" class="flex flex-wrap items-center gap-2">
-                <NuxtLink :to="`/assets/${asset.id}`" class="font-medium underline">{{ asset.name }}</NuxtLink>
-                <select
-                  class="field max-w-[12rem] py-1 text-xs"
-                  @change="assignAssetEnvironment(asset.id, ($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="">{{ t('projects.assignEnvironment') }}</option>
-                  <option v-for="env in data.environments" :key="env.id" :value="env.id">{{ env.name }}</option>
-                </select>
+          <section
+            v-if="unassignedAssets.length"
+            class="mt-4 rounded-lg border border-rule bg-surface-muted p-4"
+          >
+            <header class="space-y-1">
+              <h3 class="text-sm font-semibold text-ink">{{ t('projects.unassignedAssetsTitle') }}</h3>
+              <p class="text-xs text-muted">{{ t('projects.unassignedAssetsHint') }}</p>
+            </header>
+            <ul class="list-card mt-3 text-sm">
+              <li
+                v-for="asset in unassignedAssets"
+                :key="asset.id"
+                class="flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <NuxtLink :to="`/assets/${asset.id}`" class="min-w-0 font-medium text-ink hover:underline">
+                  {{ asset.name }}
+                </NuxtLink>
+                <label class="flex w-full shrink-0 items-center gap-2 sm:w-auto">
+                  <span class="sr-only">{{ t('projects.assignEnvironment') }}</span>
+                  <select
+                    class="field w-full py-1.5 text-xs sm:max-w-[14rem]"
+                    :disabled="envAssignLoading === asset.id"
+                    @change="assignAssetEnvironment(asset.id, ($event.target as HTMLSelectElement).value)"
+                  >
+                    <option value="">{{ t('projects.assignEnvironment') }}</option>
+                    <option v-for="env in data.environments" :key="env.id" :value="env.id">{{ env.name }}</option>
+                  </select>
+                </label>
               </li>
             </ul>
           </section>
