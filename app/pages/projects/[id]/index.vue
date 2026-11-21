@@ -251,6 +251,14 @@ const pendingEnvironment = computed(() => {
   return data.value?.environments?.find((env) => env.id === envId) ?? null
 })
 
+watch(
+  () => route.query.openAction,
+  (openAction) => {
+    if (typeof openAction === 'string' && openAction) void navigateTo(`/actions/${openAction}`)
+  },
+  { immediate: true },
+)
+
 const projectTabs = computed(() => [
   { id: 'assets', label: t('tabs.projects.assets') },
   { id: 'environments', label: t('tabs.projects.environments') },
@@ -260,6 +268,7 @@ const projectTabs = computed(() => [
     visible: Boolean(data.value?.assets?.length),
   },
   { id: 'dependencies', label: t('tabs.projects.dependencies') },
+  { id: 'actions', label: t('tabs.projects.actions') },
   { id: 'runbooks', label: t('tabs.projects.runbooks') },
   { id: 'danger', label: t('tabs.projects.danger') },
 ])
@@ -656,6 +665,13 @@ async function deleteProject() {
       </ul>
       <p v-else-if="data.assets?.length" class="lede">{{ t('projects.noDependencies') }}</p>
     </div>
+      </template>
+
+      <template #actions>
+        <ActionsPanel
+          :list-url="`/api/projects/${id}/actions`"
+          :fixed-project-id="id"
+        />
       </template>
 
       <template #runbooks>

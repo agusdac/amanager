@@ -237,11 +237,22 @@ useAppPageTitle(
   computed(() => (data.value?.asset?.name ? data.value.asset.name : t('pageTitles.loading'))),
 )
 
+watch(
+  () => route.query.openAction,
+  (openAction) => {
+    if (typeof openAction === 'string' && openAction) {
+      void navigateTo(`/actions/${openAction}`)
+    }
+  },
+  { immediate: true },
+)
+
 const assetTabs = computed(() => [
   { id: 'overview', label: t('tabs.assets.overview') },
   { id: 'access', label: t('tabs.assets.access') },
   { id: 'dependencies', label: t('tabs.assets.dependencies') },
   { id: 'config', label: t('tabs.assets.config') },
+  { id: 'actions', label: t('tabs.assets.actions') },
   { id: 'verifications', label: t('tabs.assets.verifications') },
   {
     id: 'map',
@@ -484,7 +495,12 @@ async function removeConfigEntry(id: string) {
         </p>
         <p v-if="typeDescription" class="max-w-2xl text-sm text-subtle">{{ typeDescription }}</p>
       </div>
-      <div class="flex flex-wrap gap-2 text-sm">
+      <div class="flex flex-wrap items-center gap-2 text-sm">
+        <FavoriteStarButton
+          v-if="data?.asset"
+          target-type="asset"
+          :target-id="assetId"
+        />
         <NuxtLink to="/assets" class="btn-secondary">
           {{ t('assets.backToInventory') }}
         </NuxtLink>
@@ -1062,6 +1078,19 @@ async function removeConfigEntry(id: string) {
           />
         </ClientOnly>
       </section>
+      </template>
+
+      <template #actions>
+        <ActionsPanel
+          :list-url="`/api/assets/${assetId}/actions`"
+          :fixed-asset-id="assetId"
+          :asset-snippet="data?.asset ? {
+            name: data.asset.name,
+            adminUrl: data.asset.adminUrl,
+            publicUrl: data.asset.publicUrl,
+            attributesJson: data.asset.attributesJson,
+          } : undefined"
+        />
       </template>
 
       <template #impact>

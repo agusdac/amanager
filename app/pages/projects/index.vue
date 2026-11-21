@@ -2,7 +2,14 @@
 const { t } = useI18n()
 useAppPageTitle('pageTitles.projects')
 const { data: session } = useSessionFetch()
+const { projectId } = useWorkspaceScope()
 const { data, pending } = await useFetch('/api/projects')
+
+const visibleProjects = computed(() => {
+  const list = data.value?.projects ?? []
+  if (!projectId.value) return list
+  return list.filter((p) => p.id === projectId.value)
+})
 const { data: personalProjects } = await useFetch('/api/me/personal-projects')
 
 const showImportFromPersonal = computed(
@@ -35,9 +42,10 @@ const showImportFromPersonal = computed(
     </div>
 
     <p v-if="pending" class="lede">{{ t('common.loading') }}</p>
-    <p v-else-if="!data?.projects?.length" class="lede">{{ t('projects.empty') }}</p>
+    <ProjectScopeBanner v-if="projectId" />
+    <p v-else-if="!visibleProjects.length" class="lede">{{ t('projects.empty') }}</p>
     <ul v-else class="list-card">
-      <li v-for="project in data.projects" :key="project.id">
+      <li v-for="project in visibleProjects" :key="project.id">
         <NuxtLink :to="`/projects/${project.id}`" class="block px-4 py-3 hover:bg-surface-muted">
           <span class="font-medium text-ink">{{ project.name }}</span>
           <span v-if="project.websiteUrl" class="ml-2 text-sm text-subtle">{{ project.websiteUrl }}</span>

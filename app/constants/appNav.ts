@@ -13,6 +13,7 @@ export type AppNavItem = {
     | 'guide'
     | 'guides'
     | 'team'
+    | 'actions'
   match?: 'exact' | 'prefix'
 }
 
@@ -22,6 +23,7 @@ export const NAV_PRIMARY: AppNavItem[] = [
   { to: '/projects', labelKey: 'nav.projects', icon: 'projects' },
   { to: '/guides', labelKey: 'nav.guides', icon: 'guides' },
   { to: '/assets', labelKey: 'nav.assets', icon: 'assets' },
+  { to: '/actions', labelKey: 'nav.actions', icon: 'actions', match: 'prefix' },
 ]
 
 export const NAV_SECONDARY: AppNavItem[] = [

@@ -35,6 +35,7 @@ const workspaceTemplates = computed(() =>
       <div>
         <h1 class="page-title">{{ t('guides.listTitle') }}</h1>
         <p class="lede">{{ t('guides.listSubtitle') }}</p>
+        <ProjectScopeBanner />
       </div>
       <div class="flex flex-wrap gap-2">
         <NuxtLink :to="`/guides/templates/workspace`" class="btn-secondary">{{ t('guides.templates.createWorkspace') }}</NuxtLink>

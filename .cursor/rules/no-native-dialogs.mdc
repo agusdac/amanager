@@ -1,0 +1,15 @@
+---
+description: Use Hilko UI dialogs instead of window.alert / window.confirm
+globs: app/**/*.{vue,ts},server/**/*.{vue,ts}
+alwaysApply: true
+---
+
+# No native browser dialogs
+
+Never use `window.alert`, `window.confirm`, or `window.prompt` in product UI.
+
+Use **`AppConfirmDialog`** (reka-ui) for destructive or irreversible confirmations, matching existing patterns in project/asset/delete flows.
+
+For non-blocking feedback, use inline messages, `AppCallout`, or toasts consistent with the page — not `alert()`.
+
+If a third-party library triggers native dialogs, wrap or replace that path in app code.

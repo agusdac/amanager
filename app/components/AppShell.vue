@@ -7,6 +7,7 @@ useSyncUserTheme()
 const { collapsed, toggle } = useSidebarCollapsed()
 const { data: session } = useSessionFetch()
 const { projectId, setProject, validateProjectInList } = useWorkspaceScope()
+const { pathWithScope } = useScopedNavigation()
 
 const { data: projects } = await useFetch('/api/projects')
 
@@ -38,7 +39,7 @@ const userInitial = computed(() => {
 <template>
   <div class="app-shell" :class="{ 'app-shell--collapsed': collapsed }">
     <aside class="app-shell__sidebar" aria-label="Main navigation">
-      <NuxtLink to="/home" class="app-shell__brand" :title="t('app.name')">
+      <NuxtLink :to="pathWithScope('/home')" class="app-shell__brand" :title="t('app.name')">
         <IconFolder class="h-5 w-5 shrink-0 text-stone-800 dark:text-stone-200" />
         <span v-if="!collapsed" class="truncate font-semibold text-stone-900 dark:text-stone-100">{{ t('app.name') }}</span>
       </NuxtLink>
@@ -51,6 +52,15 @@ const userInitial = computed(() => {
           :item="item"
           :collapsed="collapsed"
         />
+
+        <div class="mt-4 px-2">
+          <FavoritesQuickAccess
+            variant="sidebar"
+            :compact="collapsed"
+            :max-items="collapsed ? 5 : 6"
+          />
+        </div>
+
         <p v-if="!collapsed" class="app-shell__nav-heading mt-4">{{ t('nav.sectionMore') }}</p>
         <AppShellNavLink
           v-for="item in NAV_SECONDARY"

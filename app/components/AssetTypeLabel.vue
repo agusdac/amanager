@@ -14,8 +14,9 @@ const props = withDefaults(
     showIcon?: boolean
     /** Table/list density: brand icon without extra frame padding. */
     dense?: boolean
+    iconOnly?: boolean
   }>(),
-  { showDescription: false, showIcon: true, providerSlug: null, dense: false },
+  { showDescription: false, showIcon: true, providerSlug: null, dense: false, iconOnly: false },
 )
 
 const { t, te } = useI18n()
@@ -58,7 +59,8 @@ const useVectorIcon = computed(() => assetTypeUsesVectorIcon(props.type))
       <IconFolderGit v-if="useVectorIcon && type === 'repository'" :size="13" />
       <span v-else class="px-0.5 text-[10px] font-semibold leading-none">{{ glyph }}</span>
     </span>
-    <span>{{ label }}</span>
+    <span v-if="!iconOnly">{{ label }}</span>
+    <span v-else class="sr-only">{{ label }}</span>
     <span
       v-if="showDescription && description"
       class="ml-1 text-subtle"

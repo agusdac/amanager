@@ -20,7 +20,8 @@
     "login": "Log in",
     "logout": "Log out",
     "register": "Register",
-    "team": "Team"
+    "team": "Team",
+    "actions": "Actions"
   },
   "account": {
     "title": "Your account",
@@ -82,7 +83,9 @@
     "environment": "Environment",
     "allProjects": "All projects",
     "allEnvironments": "All environments",
-    "openProject": "Open project"
+    "openProject": "Open project",
+    "filteredByProject": "Lists are filtered to the project selected above.",
+    "filteredByProjectNamed": "Showing only data for {name}."
   },
   "search": {
     "title": "Workspace search",
@@ -185,6 +188,7 @@
       "graph": "Map",
       "dependencies": "Dependencies",
       "runbooks": "Runbooks",
+      "actions": "Actions",
       "danger": "Danger zone"
     },
     "assets": {
@@ -193,6 +197,7 @@
       "access": "Access",
       "dependencies": "Dependencies",
       "config": "Configuration",
+      "actions": "Actions",
       "verifications": "Verifications",
       "map": "Map",
       "impact": "Impact"
@@ -341,6 +346,7 @@
     "projects": "Projects",
     "projectNew": "New project",
     "assets": "Assets",
+    "actions": "Actions",
     "accounts": "Accounts",
     "checklist": "Dogfood checklist",
     "onboarding": "Onboarding",
@@ -1429,10 +1435,91 @@
     "commit": "Import",
     "revert": "Revert batch"
   },
+  "actions": {
+    "title": "Actions",
+    "workspaceTitle": "Workspace actions",
+    "workspaceHint": "Shortcuts and checklists you use often — separate from setup runbooks.",
+    "add": "Add action",
+    "editTitle": "Edit action",
+    "newTitle": "New action",
+    "fieldTitle": "Title",
+    "fieldBody": "Body (Markdown)",
+    "fieldKind": "Type",
+    "kindHint": "Shapes the editor and default layout.",
+    "kindDescriptions": {
+      "command": "Commands in a code block",
+      "checklist": "Checkboxes you tick locally",
+      "reference": "Notes, headers, and links"
+    },
+    "fieldBodyPlaceholder": "Write steps or commands…",
+    "assetTabHint": "Tap a card to open, edit, or copy.",
+    "linkedAsset": "Resource:",
+    "fieldPinned": "Pin first on this asset",
+    "fieldAnchor": "Anchor",
+    "fieldProjectId": "Project ID",
+    "fieldAssetId": "Asset ID",
+    "anchorWorkspace": "Workspace",
+    "anchorProject": "Project",
+    "anchorAsset": "Asset",
+    "openAsset": "Resource",
+    "editor": {
+      "toolbar": "Insert blocks",
+      "heading": "Heading",
+      "headingPlaceholder": "Section title",
+      "link": "Link",
+      "linkLabel": "label",
+      "code": "Code",
+      "codePlaceholder": "command",
+      "checklist": "Checklist",
+      "checkItem": "Step",
+      "bullet": "Bullet"
+    },
+    "kinds": {
+      "command": "Command",
+      "checklist": "Checklist",
+      "reference": "Reference"
+    },
+    "insertFromAsset": "Insert from asset",
+    "copy": "Copy",
+    "copied": "Copied",
+    "empty": "No actions yet.",
+    "fieldsRequired": "Title and body are required.",
+    "confirmDelete": "This action will be removed permanently.",
+    "deleteTitle": "Delete action?",
+    "viewPreview": "Preview",
+    "viewRaw": "Markdown",
+    "pinned": "Pinned",
+    "open": "Open",
+    "filters": {
+      "all": "All",
+      "project": "By project",
+      "asset": "By asset",
+      "workspace": "Workspace"
+    },
+    "filterCount": "Showing {filtered} of {total}"
+  },
+  "favorites": {
+    "title": "Quick access",
+    "add": "Add to quick access",
+    "remove": "Remove from quick access",
+    "filterThisProject": "This project only",
+    "homeHint": "Star resources, emails, or actions with ★ anywhere in Hilko.",
+    "homeEmpty": "Nothing starred yet — open a resource and tap the star.",
+    "onResource": "On {name}",
+    "types": {
+      "asset": "Resource",
+      "identity": "Identity",
+      "email_address": "Email",
+      "action": "Action"
+    }
+  },
   "common": {
     "close": "Close",
     "save": "Save",
     "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "back": "Back",
     "loading": "Loading…",
     "saving": "Saving…",
     "errorGeneric": "Something went wrong",

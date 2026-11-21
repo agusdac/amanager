@@ -6,11 +6,42 @@ import { requireSession } from '../../utils/session'
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
   const db = useDb()
-  const list = await db
-    .select()
-    .from(emailAddresses)
-    .where(eq(emailAddresses.workspaceId, session.workspaceId))
-    .orderBy(emailAddresses.address)
+  const projectId = typeof getQuery(event).projectId === 'string' ? getQuery(event).projectId : undefined
+
+  let list
+  if (projectId) {
+    const rows = await db
+      .select({ id: emailAddresses.id })
+      .from(emailAddresses)
+      .innerJoin(assetEmails, eq(assetEmails.emailId, emailAddresses.id))
+      .where(
+        and(
+          eq(emailAddresses.workspaceId, session.workspaceId),
+          eq(assetEmails.workspaceId, session.workspaceId),
+          sql`exists (
+            select 1 from project_assets pa
+            where pa.workspace_id = ${session.workspaceId}
+              and pa.project_id = ${projectId}
+              and pa.asset_id = ${assetEmails.assetId}
+          )`,
+        ),
+      )
+    const uniqueIds = [...new Set(rows.map((r) => r.id))]
+    if (!uniqueIds.length) return { emails: [] }
+    list = await db
+      .select()
+      .from(emailAddresses)
+      .where(
+        and(eq(emailAddresses.workspaceId, session.workspaceId), inArray(emailAddresses.id, uniqueIds)),
+      )
+      .orderBy(emailAddresses.address)
+  } else {
+    list = await db
+      .select()
+      .from(emailAddresses)
+      .where(eq(emailAddresses.workspaceId, session.workspaceId))
+      .orderBy(emailAddresses.address)
+  }
 
   const ids = list.map((e) => e.id)
   if (!ids.length) return { emails: [] }

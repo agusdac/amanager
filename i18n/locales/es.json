@@ -20,7 +20,8 @@
     "login": "Entrar",
     "logout": "Salir",
     "register": "Registro",
-    "team": "Equipo"
+    "team": "Equipo",
+    "actions": "Acciones"
   },
   "account": {
     "title": "Tu cuenta",
@@ -81,7 +82,9 @@
     "environment": "Entorno",
     "allProjects": "Todos los proyectos",
     "allEnvironments": "Todos los entornos",
-    "openProject": "Abrir proyecto"
+    "openProject": "Abrir proyecto",
+    "filteredByProject": "Las listas están filtradas por el proyecto seleccionado arriba.",
+    "filteredByProjectNamed": "Solo se muestra contenido de {name}."
   },
   "search": {
     "title": "Búsqueda en el workspace",
@@ -184,6 +187,7 @@
       "graph": "Mapa",
       "dependencies": "Dependencias",
       "runbooks": "Runbooks",
+      "actions": "Acciones",
       "danger": "Zona de riesgo"
     },
     "assets": {
@@ -192,6 +196,7 @@
       "access": "Acceso",
       "dependencies": "Dependencias",
       "config": "Configuración",
+      "actions": "Acciones",
       "verifications": "Verificaciones",
       "map": "Mapa",
       "impact": "Impacto"
@@ -340,6 +345,7 @@
     "projects": "Proyectos",
     "projectNew": "Nuevo proyecto",
     "assets": "Activos",
+    "actions": "Acciones",
     "accounts": "Cuentas",
     "checklist": "Checklist dogfood",
     "onboarding": "Onboarding",
@@ -1428,10 +1434,91 @@
     "commit": "Importar",
     "revert": "Revertir lote"
   },
+  "actions": {
+    "title": "Acciones",
+    "workspaceTitle": "Acciones del workspace",
+    "workspaceHint": "Atajos y listas que usas a menudo — aparte de las guías de onboarding.",
+    "add": "Añadir acción",
+    "editTitle": "Editar acción",
+    "newTitle": "Nueva acción",
+    "fieldTitle": "Título",
+    "fieldBody": "Cuerpo (Markdown)",
+    "fieldKind": "Tipo",
+    "kindHint": "Define el editor y la plantilla inicial.",
+    "kindDescriptions": {
+      "command": "Comandos en bloque de código",
+      "checklist": "Casillas que marcas al usarlo",
+      "reference": "Notas, títulos y enlaces"
+    },
+    "fieldBodyPlaceholder": "Pasos o comandos…",
+    "assetTabHint": "Abre una tarjeta para leer, editar o copiar.",
+    "linkedAsset": "Recurso:",
+    "fieldPinned": "Fijar primero en este recurso",
+    "fieldAnchor": "Ancla",
+    "fieldProjectId": "ID de proyecto",
+    "fieldAssetId": "ID de recurso",
+    "anchorWorkspace": "Workspace",
+    "anchorProject": "Proyecto",
+    "anchorAsset": "Recurso",
+    "openAsset": "Recurso",
+    "editor": {
+      "toolbar": "Insertar bloques",
+      "heading": "Título",
+      "headingPlaceholder": "Título de sección",
+      "link": "Enlace",
+      "linkLabel": "texto",
+      "code": "Código",
+      "codePlaceholder": "comando",
+      "checklist": "Checklist",
+      "checkItem": "Paso",
+      "bullet": "Viñeta"
+    },
+    "kinds": {
+      "command": "Comando",
+      "checklist": "Checklist",
+      "reference": "Referencia"
+    },
+    "insertFromAsset": "Insertar del activo",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "empty": "Aún no hay acciones.",
+    "fieldsRequired": "Título y cuerpo son obligatorios.",
+    "confirmDelete": "Esta acción se eliminará de forma permanente.",
+    "deleteTitle": "¿Eliminar acción?",
+    "viewPreview": "Vista previa",
+    "viewRaw": "Markdown",
+    "pinned": "Fijada",
+    "open": "Abrir",
+    "filters": {
+      "all": "Todos",
+      "project": "Por proyecto",
+      "asset": "Por recurso",
+      "workspace": "Workspace"
+    },
+    "filterCount": "Mostrando {filtered} de {total}"
+  },
+  "favorites": {
+    "title": "Accesos rápidos",
+    "add": "Añadir a accesos rápidos",
+    "remove": "Quitar de accesos rápidos",
+    "filterThisProject": "Solo este proyecto",
+    "homeHint": "Marca recursos, correos o acciones con ★ en cualquier parte de Hilko.",
+    "homeEmpty": "Nada destacado aún — abre un recurso y pulsa la estrella.",
+    "onResource": "En {name}",
+    "types": {
+      "asset": "Recurso",
+      "identity": "Identidad",
+      "email_address": "Correo",
+      "action": "Acción"
+    }
+  },
   "common": {
     "close": "Cerrar",
     "save": "Guardar",
     "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "back": "Volver",
     "loading": "Cargando…",
     "saving": "Guardando…",
     "errorGeneric": "Algo salió mal",

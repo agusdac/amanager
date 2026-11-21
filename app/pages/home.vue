@@ -2,18 +2,29 @@
 const { t } = useI18n()
 useAppPageTitle('pageTitles.home')
 
-const { data, pending, error: fetchError } = await useFetch('/api/dashboard')
+const { projectId } = useWorkspaceScope()
+const { pathWithScope } = useScopedNavigation()
+
+const { data, pending, error: fetchError } = await useFetch('/api/dashboard', {
+  query: computed(() => (projectId.value ? { projectId: projectId.value } : {})),
+  watch: [projectId],
+})
 </script>
 
 <template>
   <div class="space-y-8">
-    <header>
+    <header class="space-y-2">
       <h1 class="page-title">{{ t('home.title') }}</h1>
       <p class="lede">{{ t('app.tagline') }}</p>
+      <ProjectScopeBanner />
     </header>
 
     <section class="card p-5">
       <WorkspaceSearch />
+    </section>
+
+    <section class="card p-5" aria-labelledby="home-favorites-heading">
+      <FavoritesQuickAccess variant="home" :max-items="12" />
     </section>
 
     <div v-if="data?.onboarding" class="notice">
@@ -50,7 +61,7 @@ const { data, pending, error: fetchError } = await useFetch('/api/dashboard')
         {{ t('home.attentionMore', { count: data.counts.unverifiedAssets - (data.attentionAssets?.length ?? 0) }) }}
       </p>
       <template #actions>
-        <NuxtLink to="/assets?verification=needs_confirmation" class="btn-primary text-sm">
+        <NuxtLink :to="pathWithScope('/assets?verification=needs_confirmation')" class="btn-primary text-sm">
           {{ t('home.reviewVerificationQueue') }}
         </NuxtLink>
         <NuxtLink to="/checklist" class="btn-secondary text-sm">
@@ -82,27 +93,27 @@ const { data, pending, error: fetchError } = await useFetch('/api/dashboard')
       </div>
 
       <div v-else-if="data" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <NuxtLink to="/accounts?tab=emails" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
+        <NuxtLink :to="pathWithScope('/accounts?tab=emails')" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
           <p class="text-xs uppercase tracking-wide text-subtle">{{ t('home.emails') }}</p>
           <p class="stat-value">{{ data.counts.emails }}</p>
         </NuxtLink>
-        <NuxtLink to="/projects" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
+        <NuxtLink :to="pathWithScope('/projects')" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
           <p class="text-xs uppercase tracking-wide text-subtle">{{ t('home.projects') }}</p>
           <p class="stat-value">{{ data.counts.projects }}</p>
         </NuxtLink>
-        <NuxtLink to="/accounts?tab=identities" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
+        <NuxtLink :to="pathWithScope('/accounts?tab=identities')" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
           <p class="text-xs uppercase tracking-wide text-subtle">{{ t('home.identities') }}</p>
           <p class="stat-value">{{ data.counts.identities }}</p>
         </NuxtLink>
-        <NuxtLink to="/assets" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
+        <NuxtLink :to="pathWithScope('/assets')" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
           <p class="text-xs uppercase tracking-wide text-subtle">{{ t('home.assets') }}</p>
           <p class="stat-value">{{ data.counts.assets }}</p>
         </NuxtLink>
-        <NuxtLink to="/assets" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
+        <NuxtLink :to="pathWithScope('/assets')" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
           <p class="text-xs uppercase tracking-wide text-subtle">{{ t('home.dependencies') }}</p>
           <p class="stat-value">{{ data.counts.dependencies }}</p>
         </NuxtLink>
-        <NuxtLink to="/guides" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
+        <NuxtLink :to="pathWithScope('/guides')" class="card p-4 hover:bg-stone-50 dark:hover:bg-stone-800/80 dark:bg-stone-900/80">
           <p class="text-xs uppercase tracking-wide text-subtle">{{ t('nav.guides') }}</p>
           <p class="stat-value">{{ data.counts.runbooks ?? 0 }}</p>
         </NuxtLink>

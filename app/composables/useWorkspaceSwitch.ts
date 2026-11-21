@@ -19,6 +19,10 @@ export function useWorkspaceSwitch() {
       await refreshSession()
       hydrateScopeForWorkspace(workspaceId)
 
+      const { reset, refresh } = useFavorites()
+      reset()
+      await refresh()
+
       await refreshNuxtData()
       await navigateTo('/home')
     } finally {

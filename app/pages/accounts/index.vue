@@ -2,11 +2,27 @@
 const { t } = useI18n()
 
 useAppPageTitle('pageTitles.accounts')
-const { data: identities, refresh: refreshId } = await useFetch('/api/identities')
-const { data: emails, refresh: refreshEmail } = await useFetch('/api/email-addresses')
+const { projectId } = useWorkspaceScope()
+
+const scopedQuery = computed(() => (projectId.value ? { projectId: projectId.value } : {}))
+
+const { data: identities, refresh: refreshId } = await useFetch('/api/identities', {
+  query: scopedQuery,
+  watch: [projectId],
+})
+const { data: emails, refresh: refreshEmail } = await useFetch('/api/email-addresses', {
+  query: scopedQuery,
+  watch: [projectId],
+})
 const { data: accounts, refresh: refreshAcc } = await useFetch('/api/provider-accounts')
 const { data: providers } = await useFetch('/api/providers')
-const { data: assetList } = await useFetch('/api/assets?limit=100')
+
+const assetListUrl = computed(() => {
+  const params = new URLSearchParams({ limit: '100' })
+  if (projectId.value) params.set('projectId', projectId.value)
+  return `/api/assets?${params}`
+})
+const { data: assetList } = await useFetch(assetListUrl, { watch: [assetListUrl] })
 
 const idLabel = ref('')
 const idProvider = ref('')
@@ -124,6 +140,7 @@ const accountTabs = computed(() => [
     <header class="space-y-1">
       <h1 class="page-title">{{ t('accounts.title') }}</h1>
       <p class="lede">{{ t('accounts.subtitle') }}</p>
+      <ProjectScopeBanner />
     </header>
 
     <AppCallout :title="t('accounts.identityVsEmailTitle')" variant="info">
@@ -186,18 +203,23 @@ const accountTabs = computed(() => [
       </form>
       <p v-if="identityFormMessage" class="text-sm text-emerald-800 dark:text-emerald-300">{{ identityFormMessage }}</p>
       <ul v-if="identities?.identities?.length" class="divide-y divide-rule border-t border-rule-light">
-        <li v-for="item in identities.identities" :key="item.id">
-          <NuxtLink
-            :to="`/identities/${item.id}`"
-            class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm transition-colors hover:bg-surface-muted"
-          >
-            <div class="flex items-center gap-2">
+        <li
+          v-for="item in identities.identities"
+          :key="item.id"
+          class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
+        >
+          <div class="flex min-w-0 items-center gap-2">
+            <FavoriteStarButton target-type="identity" :target-id="item.id" size="sm" />
+            <NuxtLink
+              :to="`/identities/${item.id}`"
+              class="flex min-w-0 items-center gap-2 transition-colors hover:text-ink"
+            >
               <span class="font-medium text-ink">{{ item.label }}</span>
               <span v-if="item.providerName" class="text-subtle">{{ item.providerName }}</span>
               <IconChevronRight class="h-4 w-4 text-faint" />
-            </div>
-            <VerificationChip :status="item.verificationStatus" />
-          </NuxtLink>
+            </NuxtLink>
+          </div>
+          <VerificationChip :status="item.verificationStatus" />
         </li>
       </ul>
       <p v-else class="text-sm text-subtle">{{ t('accounts.emptyIdentities') }}</p>
@@ -227,9 +249,12 @@ const accountTabs = computed(() => [
           class="space-y-2 px-4 py-3 text-sm"
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
+            <div class="flex items-start gap-2">
+              <FavoriteStarButton target-type="email_address" :target-id="item.id" size="sm" />
+              <div>
               <span class="font-medium text-ink">{{ item.address }}</span>
               <p v-if="item.label" class="text-xs text-subtle">{{ item.label }}</p>
+              </div>
             </div>
             <VerificationChip v-if="item.verificationStatus" :status="item.verificationStatus" />
           </div>

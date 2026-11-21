@@ -9,6 +9,7 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const route = useRoute()
+const { pathWithScope } = useScopedNavigation()
 
 const isActive = computed(() => {
   if (props.item.match === 'exact') return route.path === props.item.to
@@ -18,7 +19,7 @@ const isActive = computed(() => {
 
 <template>
   <NuxtLink
-    :to="item.to"
+    :to="pathWithScope(item.to)"
     :title="collapsed ? t(item.labelKey) : undefined"
     class="app-nav-link"
     :class="[

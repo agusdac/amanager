@@ -71,6 +71,13 @@
       "when": 1795184000000,
       "tag": "0009_asset_email_vault",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795188000000,
+      "tag": "0010_actions_favorites",
+      "breakpoints": true
     }
   ]
 }

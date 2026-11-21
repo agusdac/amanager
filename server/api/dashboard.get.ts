@@ -1,21 +1,125 @@
-import { and, asc, count, eq, inArray } from 'drizzle-orm'
+import { and, asc, count, eq, inArray, sql } from 'drizzle-orm'
 import {
-  assets,
   assetDependencies,
+  assetEmails,
+  assets,
   emailAddresses,
   identities,
+  identityEmails,
   onboardingDrafts,
   projects,
   runbookExecutions,
   runbooks,
 } from '../../db/schema'
 import { useDb } from '../utils/db'
+import { assetIdsForProject } from '../utils/projectScope'
 import { requireSession } from '../utils/session'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
   const db = useDb()
   const ws = session.workspaceId
+  const projectId = typeof getQuery(event).projectId === 'string' ? getQuery(event).projectId : undefined
+
+  let scopedAssetIds: string[] | undefined
+  if (projectId) {
+    scopedAssetIds = await assetIdsForProject(db, ws, projectId)
+  }
+
+  const assetInScope = scopedAssetIds
+    ? scopedAssetIds.length
+      ? inArray(assets.id, scopedAssetIds)
+      : sql`false`
+    : undefined
+
+  const projectCountPromise = projectId
+    ? Promise.resolve([{ projectCount: 1 }])
+    : db.select({ projectCount: count() }).from(projects).where(eq(projects.workspaceId, ws))
+
+  const assetCountPromise = scopedAssetIds
+    ? scopedAssetIds.length
+      ? db
+          .select({ assetCount: count() })
+          .from(assets)
+          .where(and(eq(assets.workspaceId, ws), assetInScope!))
+      : Promise.resolve([{ assetCount: 0 }])
+    : db.select({ assetCount: count() }).from(assets).where(eq(assets.workspaceId, ws))
+
+  const emailCountPromise =
+    scopedAssetIds && scopedAssetIds.length
+      ? db
+          .select({ emailCount: sql<number>`count(distinct ${assetEmails.emailId})::int` })
+          .from(assetEmails)
+          .where(and(eq(assetEmails.workspaceId, ws), inArray(assetEmails.assetId, scopedAssetIds)))
+      : scopedAssetIds
+        ? Promise.resolve([{ emailCount: 0 }])
+        : db.select({ emailCount: count() }).from(emailAddresses).where(eq(emailAddresses.workspaceId, ws))
+
+  const identityCountPromise =
+    scopedAssetIds && scopedAssetIds.length
+      ? db
+          .select({ identityCount: sql<number>`count(distinct ${identityEmails.identityId})::int` })
+          .from(identityEmails)
+          .innerJoin(assetEmails, eq(assetEmails.emailId, identityEmails.emailId))
+          .where(
+            and(
+              eq(identityEmails.workspaceId, ws),
+              eq(assetEmails.workspaceId, ws),
+              inArray(assetEmails.assetId, scopedAssetIds),
+            ),
+          )
+      : scopedAssetIds
+        ? Promise.resolve([{ identityCount: 0 }])
+        : db.select({ identityCount: count() }).from(identities).where(eq(identities.workspaceId, ws))
+
+  const depCountPromise =
+    scopedAssetIds && scopedAssetIds.length
+      ? db
+          .select({ depCount: count() })
+          .from(assetDependencies)
+          .where(
+            and(
+              eq(assetDependencies.workspaceId, ws),
+              inArray(assetDependencies.fromAssetId, scopedAssetIds),
+              inArray(assetDependencies.toAssetId, scopedAssetIds),
+            ),
+          )
+      : scopedAssetIds
+        ? Promise.resolve([{ depCount: 0 }])
+        : db.select({ depCount: count() }).from(assetDependencies).where(eq(assetDependencies.workspaceId, ws))
+
+  const runbookConditions = [eq(runbooks.workspaceId, ws)]
+  if (projectId) runbookConditions.push(eq(runbooks.projectId, projectId))
+
+  const runbookCountPromise = db
+    .select({ runbookCount: count() })
+    .from(runbooks)
+    .where(and(...runbookConditions))
+
+  const executionConditions = [
+    eq(runbookExecutions.workspaceId, ws),
+    eq(runbookExecutions.status, 'in_progress'),
+  ]
+  if (projectId) {
+    executionConditions.push(eq(runbooks.projectId, projectId))
+  }
+
+  const activeExecutionCountPromise = projectId
+    ? db
+        .select({ activeExecutionCount: count() })
+        .from(runbookExecutions)
+        .innerJoin(runbooks, eq(runbooks.id, runbookExecutions.runbookId))
+        .where(and(...executionConditions))
+    : db
+        .select({ activeExecutionCount: count() })
+        .from(runbookExecutions)
+        .where(and(eq(runbookExecutions.workspaceId, ws), eq(runbookExecutions.status, 'in_progress')))
+
+  const unverifiedWhere = and(
+    eq(assets.workspaceId, ws),
+    inArray(assets.verificationStatus, ['unverified', 'declared']),
+    ...(assetInScope ? [assetInScope] : []),
+  )
 
   const [
     [{ projectCount }],
@@ -26,34 +130,21 @@ export default defineEventHandler(async (event) => {
     [{ runbookCount }],
     [{ activeExecutionCount }],
   ] = await Promise.all([
-    db.select({ projectCount: count() }).from(projects).where(eq(projects.workspaceId, ws)),
-    db.select({ assetCount: count() }).from(assets).where(eq(assets.workspaceId, ws)),
-    db.select({ emailCount: count() }).from(emailAddresses).where(eq(emailAddresses.workspaceId, ws)),
-    db.select({ identityCount: count() }).from(identities).where(eq(identities.workspaceId, ws)),
-    db.select({ depCount: count() }).from(assetDependencies).where(eq(assetDependencies.workspaceId, ws)),
-    db.select({ runbookCount: count() }).from(runbooks).where(eq(runbooks.workspaceId, ws)),
-    db
-      .select({ activeExecutionCount: count() })
-      .from(runbookExecutions)
-      .where(and(eq(runbookExecutions.workspaceId, ws), eq(runbookExecutions.status, 'in_progress'))),
+    projectCountPromise,
+    assetCountPromise,
+    emailCountPromise,
+    identityCountPromise,
+    depCountPromise,
+    runbookCountPromise,
+    activeExecutionCountPromise,
   ])
 
-  const unverified = await db
-    .select({ count: count() })
-    .from(assets)
-    .where(
-      and(
-        eq(assets.workspaceId, ws),
-        inArray(assets.verificationStatus, ['unverified', 'declared']),
-      ),
-    )
+  const unverified = await db.select({ count: count() }).from(assets).where(unverifiedWhere)
 
   const attentionAssets = await db
     .select({ id: assets.id, name: assets.name, type: assets.type, verificationStatus: assets.verificationStatus })
     .from(assets)
-    .where(
-      and(eq(assets.workspaceId, ws), inArray(assets.verificationStatus, ['unverified', 'declared'])),
-    )
+    .where(unverifiedWhere)
     .orderBy(asc(assets.verificationStatus), asc(assets.name))
     .limit(8)
 
@@ -76,5 +167,6 @@ export default defineEventHandler(async (event) => {
     },
     onboarding: draft && !draft.completedAt ? { step: draft.step, updatedAt: draft.updatedAt } : null,
     attentionAssets,
+    scopedProjectId: projectId ?? null,
   }
 })

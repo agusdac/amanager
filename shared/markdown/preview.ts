@@ -32,11 +32,16 @@ export function renderMarkdownPreview(md: string): string {
   const lines = md.split('\n')
   const out: string[] = []
   let inUl = false
+  let inTaskUl = false
 
   const closeUl = () => {
     if (inUl) {
       out.push('</ul>')
       inUl = false
+    }
+    if (inTaskUl) {
+      out.push('</ul>')
+      inTaskUl = false
     }
   }
 
@@ -47,14 +52,39 @@ export function renderMarkdownPreview(md: string): string {
       out.push('<br />')
       continue
     }
+    const heading = trimmed.match(/^(#{1,6})\s+(.+)$/)
+    if (heading) {
+      closeUl()
+      const level = Math.min(heading[1]!.length, 6)
+      const inner = inlineFormat(escapeHtml(heading[2]!))
+      out.push(
+        `<h${level} class="font-semibold text-ink ${level === 1 ? 'text-lg' : level === 2 ? 'text-base' : 'text-sm'} mt-3 first:mt-0">${inner}</h${level}>`,
+      )
+      continue
+    }
     if (trimmed.startsWith('> ')) {
       closeUl()
       const inner = inlineFormat(escapeHtml(trimmed.slice(2)))
       out.push(`<blockquote class="markdown-quote">${inner}</blockquote>`)
       continue
     }
+    const task = trimmed.match(/^- \[([ xX])\]\s+(.*)$/)
+    if (task) {
+      if (!inTaskUl) {
+        closeUl()
+        out.push('<ul class="space-y-1 pl-1 text-sm">')
+        inTaskUl = true
+      }
+      const done = task[1]!.toLowerCase() === 'x'
+      const box = done ? '☑' : '☐'
+      out.push(
+        `<li class="flex gap-2"><span class="shrink-0 text-subtle" aria-hidden="true">${box}</span><span>${inlineFormat(escapeHtml(task[2]!))}</span></li>`,
+      )
+      continue
+    }
     if (trimmed.startsWith('- ')) {
       if (!inUl) {
+        closeUl()
         out.push('<ul class="list-disc space-y-1 pl-5 text-sm">')
         inUl = true
       }

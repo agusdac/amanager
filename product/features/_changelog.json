@@ -1,4 +1,10 @@
 {
+  "v0.3.1": {
+    "status": "unreleased",
+    "date": null,
+    "theme": "Operational memory",
+    "features": ["actions"]
+  },
   "v0.4.0": {
     "status": "unreleased",
     "date": null,

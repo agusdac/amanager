@@ -88,6 +88,7 @@ const assetTabs = computed(() => [
           {{ t('assets.verificationQueueHint') }}
         </p>
         <p v-else class="text-sm text-muted">{{ t('assets.inventorySubtitle') }}</p>
+        <ProjectScopeBanner />
         <label v-if="projectId" class="mt-3 flex flex-wrap items-center gap-2 text-sm">
           <span class="text-xs font-medium uppercase tracking-wide text-subtle">{{ t('assets.filterEnvironment') }}</span>
           <select
@@ -166,7 +167,10 @@ const assetTabs = computed(() => [
               <tbody>
                 <tr v-for="a in data?.assets" :key="a.id" class="border-b border-rule-light">
                   <td class="px-4 py-3 font-medium">
-                    <NuxtLink :to="`/assets/${a.id}`" class="text-ink hover:underline">{{ a.name }}</NuxtLink>
+                    <div class="flex items-center gap-1">
+                      <FavoriteStarButton target-type="asset" :target-id="a.id" size="sm" />
+                      <NuxtLink :to="`/assets/${a.id}`" class="text-ink hover:underline">{{ a.name }}</NuxtLink>
+                    </div>
                   </td>
                   <td class="px-4 py-3 text-ink-secondary">
                     <AssetTypeLabel :type="a.type" :provider-slug="a.providerSlug" show-description dense />

@@ -97,11 +97,24 @@ export function useWorkspaceScope() {
     () => [route.query.projectId, route.query.environmentId],
     () => {
       if (!hydrated.value) return
-      const qProject = typeof route.query.projectId === 'string' ? route.query.projectId : ''
-      const qEnv = typeof route.query.environmentId === 'string' ? route.query.environmentId : ''
-      if (qProject !== projectId.value) projectId.value = qProject
-      if (qEnv !== environmentId.value) environmentId.value = qProject ? qEnv : ''
-      persist()
+      const hasProjectParam = typeof route.query.projectId === 'string'
+      const hasEnvParam = typeof route.query.environmentId === 'string'
+      if (hasProjectParam) {
+        const qProject = route.query.projectId as string
+        const qEnv = hasEnvParam ? (route.query.environmentId as string) : ''
+        if (qProject !== projectId.value) projectId.value = qProject
+        environmentId.value = qProject ? qEnv : ''
+        persist()
+        return
+      }
+      if (projectId.value) syncRouteQuery()
+    },
+  )
+
+  watch(
+    () => route.path,
+    () => {
+      if (hydrated.value && projectId.value) syncRouteQuery()
     },
   )
 

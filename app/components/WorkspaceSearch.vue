@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { t } = useI18n()
+const { projectId } = useWorkspaceScope()
 const q = ref('')
 const debouncedQ = ref('')
 
@@ -27,7 +28,9 @@ watch(debouncedQ, async (q) => {
   }
   pending.value = true
   try {
-    data.value = await $fetch<SearchPayload>(`/api/search?q=${encodeURIComponent(q)}`)
+    const params = new URLSearchParams({ q })
+    if (projectId.value) params.set('projectId', projectId.value)
+    data.value = await $fetch<SearchPayload>(`/api/search?${params}`)
   } catch {
     data.value = null
   } finally {
