@@ -27,7 +27,7 @@ export const NAV_PRIMARY: AppNavItem[] = [
 ]
 
 export const NAV_SECONDARY: AppNavItem[] = [
-  { to: '/import', labelKey: 'nav.import', icon: 'import' },
+  { to: '/import', labelKey: 'nav.importInventory', icon: 'import' },
   { to: '/onboarding', labelKey: 'nav.onboarding', icon: 'onboarding' },
   { to: '/checklist', labelKey: 'nav.checklist', icon: 'checklist' },
   { to: '/team', labelKey: 'nav.team', icon: 'team' },

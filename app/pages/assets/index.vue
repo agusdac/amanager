@@ -112,7 +112,7 @@ const assetTabs = computed(() => [
           class="field w-auto sm:w-64"
           @input="page = 1"
         />
-        <a href="/api/export/assets" class="btn-secondary">
+        <a href="/api/export/inventory" class="btn-secondary">
           {{ t('assets.export') }}
         </a>
       </div>

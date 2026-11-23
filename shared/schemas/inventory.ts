@@ -176,6 +176,7 @@ export const onboardingDraftSchema = z.object({
   payload: z.record(z.string(), z.unknown()),
 })
 
+/** @deprecated Use `legacyCsvImportSchema` from `shared/schemas/import.ts` */
 export const csvImportSchema = z.object({
   csv: z.string().min(1).max(2_000_000),
 })

@@ -10,6 +10,7 @@
     "assets": "Assets",
     "onboarding": "Onboarding",
     "import": "Import",
+    "importInventory": "Import inventory",
     "checklist": "Dogfood",
     "verificationGuide": "Verification guide",
     "guides": "Guides",
@@ -1430,10 +1431,108 @@
     }
   },
   "import": {
-    "title": "Import assets (CSV)",
+    "title": "Import inventory",
+    "lede": "Load or refresh resources from Hilko export, a spreadsheet, or Notion/Confluence CSV.",
     "preview": "Preview",
     "commit": "Import",
-    "revert": "Revert batch"
+    "revert": "Revert batch",
+    "back": "Back",
+    "reverted": "Import batch reverted.",
+    "downloadTemplate": "Download template (ZIP)",
+    "downloadExport": "Download current export",
+    "csvPlaceholder": "Paste CSV or use the sample from template…",
+    "targetTitle": "Import target",
+    "targetWorkspace": "Respect project column per row",
+    "targetFocusedProject": "Attach all rows to the project selected in the top bar",
+    "targetNewProject": "Create a new project",
+    "targetNewProjectHint": "Every row will go into the new project «{name}». The file’s project column is ignored — you are not importing twice.",
+    "targetFocusedProjectHint": "Every row will attach to «{name}» from the top bar. The file’s project column is ignored.",
+    "newProjectPlaceholder": "Project name",
+    "columnMapTitle": "Map columns",
+    "columnMapHint": "Match your sheet headers to Hilko field names before preview.",
+    "sourceLabel": "Data source",
+    "sourceHint": "Changes suggested column mapping and default file type.",
+    "exportGuidesButton": "Other sources (Notion, Sheets…)",
+    "exportGuidesTitle": "Export guides",
+    "exportGuidesHint": "Reference only — import works the same for any CSV or Hilko ZIP. Use these steps to prepare your file elsewhere.",
+    "exportGuidesClose": "Got it",
+    "getFileTitle": "Need a file to start?",
+    "getFileBody": "Download a blank template for a new inventory, or export what is already in Hilko to edit elsewhere — then upload below.",
+    "chooseCsvFile": "Choose CSV file",
+    "chooseZipFile": "Choose ZIP file",
+    "fileTitle": "File",
+    "fileBundleHint": "(Hilko export)",
+    "applySuggestedMap": "Apply suggested mapping",
+    "columnSkip": "— ignore —",
+    "previewBlockedTitle": "Fix issues before import",
+    "previewBlockedHint": "Resolve row errors or duplicate rows in the file, then run Preview again.",
+    "intraBatchTitle": "Duplicate rows in this file",
+    "doneTitle": "Import complete",
+    "importAnother": "Import another file",
+    "summaryLine": "{assetRows} asset rows · {duplicates} duplicates · {errors} errors · {warnings} warnings",
+    "rowErrors": "Row errors",
+    "rowWarnings": "Notes (import will continue)",
+    "rowError": "Row {row}: {code}",
+    "duplicatesTitle": "Duplicates",
+    "duplicateRow": "Row {row} matches existing “{name}”",
+    "resolution": {
+      "skip": "Skip row",
+      "merge": "Merge into existing",
+      "duplicate": "Create duplicate"
+    },
+    "colProject": "Project",
+    "colName": "Name",
+    "colProvider": "Provider",
+    "commitSuccess": "Import committed (batch {id}).",
+    "steps": {
+      "prepare": "Prepare",
+      "preview": "Review",
+      "done": "Done"
+    },
+    "rowErrorCodes": {
+      "missing_asset_name": "Missing asset name",
+      "invalid_asset_type": "Invalid asset type",
+      "missing_provider": "Missing provider",
+      "unknown_provider": "Provider not in catalog — resource will import without a catalog provider (e.g. empty provider or a type name in the wrong column)",
+      "invalid_verification_status": "Invalid verification status",
+      "project_scope_mismatch": "Row project does not match import target"
+    },
+    "sources": {
+      "hilko": {
+        "title": "Hilko export",
+        "hint": "Round-trip ZIP from this workspace.",
+        "recipe": "Download export, edit CSVs, re-upload the ZIP or assets.csv."
+      },
+      "sheet": {
+        "title": "Spreadsheet",
+        "hint": "Excel, Google Sheets, or Numbers → CSV.",
+        "recipe": "File → Download CSV, then map columns if headers differ."
+      },
+      "notion": {
+        "title": "Notion",
+        "hint": "Full-page database export.",
+        "recipe": "Open database → ⋯ → Export → Markdown & CSV. Use a dedicated view with Hilko columns, then map headers."
+      },
+      "confluence": {
+        "title": "Confluence",
+        "hint": "Table copied or exported to CSV.",
+        "recipe": "Copy the table to Sheets or use a table-export app; unmerge cells before export."
+      },
+      "other": {
+        "title": "Other",
+        "hint": "Any CSV that you can map to Hilko fields.",
+        "recipe": "Upload CSV or ZIP and map columns in the next step."
+      }
+    },
+    "errors": {
+      "noFile": "Add a CSV or paste content first.",
+      "noZip": "Choose a ZIP file (export or template).",
+      "needProjectName": "Enter a name for the new project.",
+      "needProjectFocus": "Select a project in the top bar or choose another target.",
+      "invalidTarget": "Choose where rows should be imported.",
+      "missingColumns": "Map these required columns: {cols}",
+      "unresolvedDuplicates": "Choose an action for every duplicate before importing."
+    }
   },
   "actions": {
     "title": "Actions",

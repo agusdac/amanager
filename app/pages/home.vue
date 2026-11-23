@@ -75,7 +75,7 @@ const { data, pending, error: fetchError } = await useFetch('/api/dashboard', {
         <h2 id="home-stats-heading" class="text-base font-semibold text-ink">
           {{ t('home.statsTitle') }}
         </h2>
-        <NuxtLink to="/import" class="text-sm text-muted underline hover:text-ink">
+        <NuxtLink :to="pathWithScope('/import')" class="text-sm text-muted underline hover:text-ink">
           {{ t('nav.import') }}
         </NuxtLink>
       </div>

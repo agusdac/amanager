@@ -78,6 +78,13 @@
       "when": 1795188000000,
       "tag": "0010_actions_favorites",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795192000000,
+      "tag": "0011_import_preview",
+      "breakpoints": true
     }
   ]
 }

@@ -363,6 +363,7 @@ export const importBatches = pgTable('import_batches', {
     .references(() => workspaces.id, { onDelete: 'cascade' }),
   status: text('status').notNull().default('committed'),
   rowCount: integer('row_count').notNull().default(0),
+  previewJson: jsonb('preview_json'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
 

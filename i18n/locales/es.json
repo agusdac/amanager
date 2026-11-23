@@ -10,6 +10,7 @@
     "assets": "Recursos",
     "onboarding": "Onboarding",
     "import": "Importar",
+    "importInventory": "Importar inventario",
     "checklist": "Dogfood",
     "verificationGuide": "Guía de verificación",
     "guides": "Guías",
@@ -1429,10 +1430,108 @@
     }
   },
   "import": {
-    "title": "Importar recursos (CSV)",
+    "title": "Importar inventario",
+    "lede": "Carga o actualiza recursos desde export de Hilko, una hoja de cálculo o CSV de Notion/Confluence.",
     "preview": "Vista previa",
     "commit": "Importar",
-    "revert": "Revertir lote"
+    "revert": "Revertir lote",
+    "back": "Atrás",
+    "reverted": "Lote de importación revertido.",
+    "downloadTemplate": "Descargar plantilla (ZIP)",
+    "downloadExport": "Descargar export actual",
+    "csvPlaceholder": "Pega CSV o usa la plantilla…",
+    "targetTitle": "Destino del import",
+    "targetWorkspace": "Respetar columna proyecto por fila",
+    "targetFocusedProject": "Adjuntar todas las filas al proyecto del selector superior",
+    "targetNewProject": "Crear proyecto nuevo",
+    "targetNewProjectHint": "Todas las filas irán al proyecto nuevo «{name}». Se ignora la columna proyecto del fichero — no hace falta importar dos veces.",
+    "targetFocusedProjectHint": "Todas las filas se adjuntan a «{name}» del selector superior. Se ignora la columna proyecto del CSV.",
+    "newProjectPlaceholder": "Nombre del proyecto",
+    "columnMapTitle": "Mapear columnas",
+    "columnMapHint": "Relaciona las cabeceras de tu hoja con los campos Hilko antes de la vista previa.",
+    "sourceLabel": "Origen de los datos",
+    "sourceHint": "Cambia el mapeo sugerido y el tipo de fichero por defecto.",
+    "exportGuidesButton": "Otras fuentes (Notion, hojas…)",
+    "exportGuidesTitle": "Guías de exportación",
+    "exportGuidesHint": "Solo referencia: el import funciona igual con cualquier CSV o ZIP Hilko. Sigue estos pasos para preparar el fichero fuera.",
+    "exportGuidesClose": "Entendido",
+    "getFileTitle": "¿Necesitas un archivo?",
+    "getFileBody": "Descarga la plantilla vacía para inventario nuevo, o exporta lo que ya hay en Hilko, edítalo fuera y súbelo abajo.",
+    "chooseCsvFile": "Elegir archivo CSV",
+    "chooseZipFile": "Elegir archivo ZIP",
+    "fileTitle": "Archivo",
+    "fileBundleHint": "(export Hilko)",
+    "applySuggestedMap": "Aplicar mapeo sugerido",
+    "columnSkip": "— ignorar —",
+    "previewBlockedTitle": "Corrige antes de importar",
+    "previewBlockedHint": "Resuelve los errores de fila o duplicados en el archivo y vuelve a la vista previa.",
+    "intraBatchTitle": "Filas duplicadas en este archivo",
+    "doneTitle": "Importación lista",
+    "importAnother": "Importar otro archivo",
+    "summaryLine": "{assetRows} filas de recursos · {duplicates} duplicados · {errors} errores · {warnings} avisos",
+    "rowErrors": "Errores por fila",
+    "rowWarnings": "Avisos (la importación puede continuar)",
+    "rowError": "Fila {row}: {code}",
+    "duplicatesTitle": "Duplicados",
+    "duplicateRow": "Fila {row} coincide con «{name}»",
+    "resolution": {
+      "skip": "Omitir fila",
+      "merge": "Fusionar con existente",
+      "duplicate": "Crear duplicado"
+    },
+    "colProject": "Proyecto",
+    "colName": "Nombre",
+    "colProvider": "Proveedor",
+    "commitSuccess": "Importación confirmada (lote {id}).",
+    "steps": {
+      "prepare": "Preparar",
+      "preview": "Revisar",
+      "done": "Listo"
+    },
+    "rowErrorCodes": {
+      "missing_asset_name": "Falta el nombre del recurso",
+      "invalid_asset_type": "Tipo de recurso no válido",
+      "missing_provider": "Falta el proveedor",
+      "unknown_provider": "Proveedor no está en el catálogo — el recurso se importará sin proveedor del catálogo (p. ej. proveedor vacío o el tipo en la columna equivocada)",
+      "invalid_verification_status": "Estado de verificación no válido",
+      "project_scope_mismatch": "El proyecto de la fila no coincide con el destino"
+    },
+    "sources": {
+      "hilko": {
+        "title": "Export Hilko",
+        "hint": "ZIP round-trip de este workspace.",
+        "recipe": "Descarga el export, edita los CSV y vuelve a subir el ZIP o assets.csv."
+      },
+      "sheet": {
+        "title": "Hoja de cálculo",
+        "hint": "Excel, Google Sheets o Numbers → CSV.",
+        "recipe": "Archivo → Descargar CSV; mapea columnas si las cabeceras no coinciden."
+      },
+      "notion": {
+        "title": "Notion",
+        "hint": "Export de base de datos a página completa.",
+        "recipe": "Base de datos → ⋯ → Exportar → Markdown y CSV. Usa una vista con columnas tipo Hilko y mapea cabeceras."
+      },
+      "confluence": {
+        "title": "Confluence",
+        "hint": "Tabla copiada o exportada a CSV.",
+        "recipe": "Copia la tabla a Sheets o usa una app de export; deshaz celdas combinadas antes."
+      },
+      "other": {
+        "title": "Otro",
+        "hint": "Cualquier CSV mapeable a campos Hilko.",
+        "recipe": "Sube CSV o ZIP y mapea columnas en el siguiente paso."
+      }
+    },
+    "errors": {
+      "noFile": "Añade un CSV o pega el contenido.",
+      "noZip": "Elige un archivo ZIP (export o plantilla).",
+      "needProjectName": "Escribe el nombre del proyecto nuevo.",
+      "needProjectFocus": "Elige un proyecto arriba o otro destino.",
+      "invalidTarget": "Elige dónde deben entrar las filas.",
+      "missingColumns": "Mapea estas columnas obligatorias: {cols}",
+      "unresolvedDuplicates": "Elige una acción para cada duplicado antes de importar."
+    }
   },
   "actions": {
     "title": "Acciones",
