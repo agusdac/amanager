@@ -25,10 +25,6 @@ const { data, pending } = await useFetch('/api/runbook-templates')
     </NuxtLink>
   </div>
 
-  <AppCallout :title="t('guides.templates.howGenerationWorksTitle')" variant="info">
-    {{ t('guides.templates.howGenerationWorksBody') }}
-  </AppCallout>
-
   <p v-if="pending" class="text-sm text-subtle">{{ t('common.loading') }}</p>
 
   <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

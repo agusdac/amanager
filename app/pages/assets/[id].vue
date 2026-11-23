@@ -516,21 +516,12 @@ async function removeConfigEntry(id: string) {
 
     <p v-if="pending" class="text-muted">{{ t('common.loading') }}</p>
 
-    <AppCallout
-      v-else-if="data?.asset && needsConfirmation"
-      :title="t('assets.verificationCalloutTitle')"
-      variant="warning"
-    >
-      {{ t('assets.verificationCalloutBody') }}
-      <template #actions>
-        <NuxtLink :to="{ query: { ...route.query, tab: 'verifications' } }" class="btn-primary text-sm">
-          {{ t('assets.verificationCalloutCta') }}
-        </NuxtLink>
-        <NuxtLink to="/assets?verification=needs_confirmation" class="btn-secondary text-sm">
-          {{ t('assets.openVerificationQueue') }}
-        </NuxtLink>
-      </template>
-    </AppCallout>
+    <p v-else-if="data?.asset && needsConfirmation" class="text-sm text-muted">
+      {{ t('assets.verificationInlineHint') }}
+      <NuxtLink :to="{ query: { ...route.query, tab: 'verifications' } }" class="font-medium text-ink underline">
+        {{ t('assets.verificationCalloutCta') }}
+      </NuxtLink>
+    </p>
 
     <AppDetailTabs v-if="!pending && data?.asset" :tabs="assetTabs" default-tab="overview">
       <template #overview>

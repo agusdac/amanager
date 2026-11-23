@@ -2,14 +2,25 @@
 const { t } = useI18n()
 useAppPageTitle('pageTitles.projects')
 const { data: session } = useSessionFetch()
-const { projectId } = useWorkspaceScope()
+const { projectId, hydrated } = useWorkspaceScope()
 const { data, pending } = await useFetch('/api/projects')
 
-const visibleProjects = computed(() => {
-  const list = data.value?.projects ?? []
-  if (!projectId.value) return list
-  return list.filter((p) => p.id === projectId.value)
+const projects = computed(() => data.value?.projects ?? [])
+
+const focusedProjectId = computed(() => {
+  if (!hydrated.value || pending.value || !projectId.value) return null
+  const exists = projects.value.some((p) => p.id === projectId.value)
+  return exists ? projectId.value : null
 })
+
+watch(
+  focusedProjectId,
+  (id) => {
+    if (id) navigateTo(`/projects/${id}`, { replace: true })
+  },
+  { immediate: true },
+)
+
 const { data: personalProjects } = await useFetch('/api/me/personal-projects')
 
 const showImportFromPersonal = computed(
@@ -21,7 +32,7 @@ const showImportFromPersonal = computed(
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div v-if="!focusedProjectId" class="space-y-6">
     <div class="flex items-center justify-between gap-4">
       <div>
         <h1 class="page-title">{{ t('projects.title') }}</h1>
@@ -42,10 +53,9 @@ const showImportFromPersonal = computed(
     </div>
 
     <p v-if="pending" class="lede">{{ t('common.loading') }}</p>
-    <ProjectScopeBanner v-if="projectId" />
-    <p v-else-if="!visibleProjects.length" class="lede">{{ t('projects.empty') }}</p>
+    <p v-else-if="!projects.length" class="lede">{{ t('projects.empty') }}</p>
     <ul v-else class="list-card">
-      <li v-for="project in visibleProjects" :key="project.id">
+      <li v-for="project in projects" :key="project.id">
         <NuxtLink :to="`/projects/${project.id}`" class="block px-4 py-3 hover:bg-surface-muted">
           <span class="font-medium text-ink">{{ project.name }}</span>
           <span v-if="project.websiteUrl" class="ml-2 text-sm text-subtle">{{ project.websiteUrl }}</span>
@@ -53,4 +63,5 @@ const showImportFromPersonal = computed(
       </li>
     </ul>
   </div>
+  <p v-else class="lede">{{ t('common.loading') }}</p>
 </template>

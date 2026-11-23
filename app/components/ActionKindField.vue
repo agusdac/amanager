@@ -28,8 +28,12 @@ function pick(next: ActionKind) {
         v-for="k in ACTION_KINDS"
         :key="k"
         type="button"
-        class="action-kind-card"
-        :class="kind === k ? 'action-kind-card--active' : ''"
+        class="flex flex-col items-start gap-1 rounded-lg border border-stone-200 bg-white px-3 py-2.5 text-left transition hover:border-stone-400 dark:border-stone-700 dark:bg-stone-900 dark:hover:border-stone-600"
+        :class="
+          kind === k
+            ? 'border-stone-800 ring-1 ring-stone-800/20 dark:border-stone-300 dark:ring-stone-300/20'
+            : ''
+        "
         @click="pick(k)"
       >
         <component :is="icons[k]" class="h-5 w-5 shrink-0" aria-hidden="true" />
@@ -39,12 +43,3 @@ function pick(next: ActionKind) {
     </div>
   </fieldset>
 </template>
-
-<style scoped>
-.action-kind-card {
-  @apply flex flex-col items-start gap-1 rounded-lg border border-rule bg-surface px-3 py-2.5 text-left transition hover:border-stone-400 dark:hover:border-stone-600;
-}
-.action-kind-card--active {
-  @apply border-stone-800 ring-1 ring-stone-800/20 dark:border-stone-300 dark:ring-stone-300/20;
-}
-</style>

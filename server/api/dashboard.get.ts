@@ -1,4 +1,4 @@
-import { and, asc, count, eq, inArray, sql } from 'drizzle-orm'
+import { and, count, eq, inArray, sql } from 'drizzle-orm'
 import {
   assetDependencies,
   assetEmails,
@@ -121,6 +121,20 @@ export default defineEventHandler(async (event) => {
     ...(assetInScope ? [assetInScope] : []),
   )
 
+  const emailLinkWhere = and(
+    eq(assetEmails.workspaceId, ws),
+    ...(scopedAssetIds
+      ? scopedAssetIds.length
+        ? [inArray(assetEmails.assetId, scopedAssetIds)]
+        : [sql`false`]
+      : []),
+  )
+
+  const emailAssetLinkCountPromise = db
+    .select({ linkCount: count() })
+    .from(assetEmails)
+    .where(emailLinkWhere)
+
   const [
     [{ projectCount }],
     [{ assetCount }],
@@ -129,6 +143,7 @@ export default defineEventHandler(async (event) => {
     [{ depCount }],
     [{ runbookCount }],
     [{ activeExecutionCount }],
+    [{ linkCount: emailAssetLinkCount }],
   ] = await Promise.all([
     projectCountPromise,
     assetCountPromise,
@@ -137,16 +152,34 @@ export default defineEventHandler(async (event) => {
     depCountPromise,
     runbookCountPromise,
     activeExecutionCountPromise,
+    emailAssetLinkCountPromise,
   ])
 
   const unverified = await db.select({ count: count() }).from(assets).where(unverifiedWhere)
 
-  const attentionAssets = await db
-    .select({ id: assets.id, name: assets.name, type: assets.type, verificationStatus: assets.verificationStatus })
-    .from(assets)
-    .where(unverifiedWhere)
-    .orderBy(asc(assets.verificationStatus), asc(assets.name))
-    .limit(8)
+  let soleActiveExecution: { executionId: string; runbookId: string } | null = null
+  if (activeExecutionCount === 1) {
+    const execQuery = projectId
+      ? db
+          .select({
+            executionId: runbookExecutions.id,
+            runbookId: runbookExecutions.runbookId,
+          })
+          .from(runbookExecutions)
+          .innerJoin(runbooks, eq(runbooks.id, runbookExecutions.runbookId))
+          .where(and(...executionConditions))
+          .limit(1)
+      : db
+          .select({
+            executionId: runbookExecutions.id,
+            runbookId: runbookExecutions.runbookId,
+          })
+          .from(runbookExecutions)
+          .where(and(eq(runbookExecutions.workspaceId, ws), eq(runbookExecutions.status, 'in_progress')))
+          .limit(1)
+    const [row] = await execQuery
+    if (row) soleActiveExecution = row
+  }
 
   const [draft] = await db
     .select()
@@ -164,9 +197,10 @@ export default defineEventHandler(async (event) => {
       runbooks: runbookCount,
       activeExecutions: activeExecutionCount,
       unverifiedAssets: unverified[0]?.count ?? 0,
+      emailAssetLinks: emailAssetLinkCount,
     },
     onboarding: draft && !draft.completedAt ? { step: draft.step, updatedAt: draft.updatedAt } : null,
-    attentionAssets,
+    soleActiveExecution,
     scopedProjectId: projectId ?? null,
   }
 })

@@ -253,16 +253,16 @@ const exportHref = computed(() =>
         <ProjectScopeBanner />
       </div>
 
-      <AppCallout v-if="step === 'prepare'" variant="info" :title="t('import.getFileTitle')">
-        {{ t('import.getFileBody') }}
-        <template #actions>
+      <div v-if="step === 'prepare'" class="space-y-2">
+        <p class="text-sm text-muted">{{ t('import.getFileBody') }}</p>
+        <div class="flex flex-wrap gap-2">
           <a href="/api/import/template" class="btn-secondary text-sm">{{ t('import.downloadTemplate') }}</a>
           <a :href="exportHref" class="btn-secondary text-sm">{{ t('import.downloadExport') }}</a>
           <button type="button" class="btn-secondary text-sm" @click="sourceGuideOpen = true">
             {{ t('import.exportGuidesButton') }}
           </button>
-        </template>
-      </AppCallout>
+        </div>
+      </div>
     </header>
 
     <ImportSourceGuideDialog v-model:open="sourceGuideOpen" />

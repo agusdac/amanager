@@ -143,15 +143,6 @@ const accountTabs = computed(() => [
       <ProjectScopeBanner />
     </header>
 
-    <AppCallout :title="t('accounts.identityVsEmailTitle')" variant="info">
-      <p>{{ t('accounts.identityVsEmailBody') }}</p>
-      <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
-        <li>{{ t('accounts.identityVsEmailIdentity') }}</li>
-        <li>{{ t('accounts.identityVsEmailEmail') }}</li>
-        <li>{{ t('accounts.identityVsEmailTogether') }}</li>
-      </ul>
-    </AppCallout>
-
     <section class="card space-y-4 p-5">
       <div class="space-y-1">
         <h2 class="text-sm font-semibold text-ink">{{ t('accounts.quickAddTitle') }}</h2>

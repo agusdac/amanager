@@ -328,10 +328,7 @@ async function save() {
         {{ isEdit ? t('guides.templates.workspaceEditTitle') : t('guides.templates.workspaceNewTitle') }}
       </h1>
       <p class="lede">{{ t('guides.templates.workspaceSubtitle') }}</p>
-
-      <AppCallout :title="t('guides.templates.workspaceHintTitle')" variant="info">
-        {{ t('guides.templates.workspaceHintBody') }}
-      </AppCallout>
+      <p class="text-sm text-muted">{{ t('guides.templates.workspaceHintBody') }}</p>
 
       <form class="card space-y-5 p-5" @submit.prevent="save">
         <label class="block text-sm">

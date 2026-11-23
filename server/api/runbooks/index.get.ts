@@ -1,4 +1,4 @@
-import { and, asc, desc, eq } from 'drizzle-orm'
+import { and, desc, eq, inArray } from 'drizzle-orm'
 import { projects, runbookExecutions, runbooks } from '../../../db/schema'
 import { useDb } from '../../utils/db'
 import { requireSession } from '../../utils/session'
@@ -27,14 +27,29 @@ export default defineEventHandler(async (event) => {
     .where(and(...conditions))
     .orderBy(desc(runbooks.updatedAt))
 
-  const activeExecutions = await db
-    .select()
-    .from(runbookExecutions)
-    .where(
-      and(eq(runbookExecutions.workspaceId, session.workspaceId), eq(runbookExecutions.status, 'in_progress')),
-    )
+  const runbookIds = rows.map((r) => r.runbook.id)
+  const executions =
+    runbookIds.length > 0
+      ? await db
+          .select()
+          .from(runbookExecutions)
+          .where(
+            and(
+              eq(runbookExecutions.workspaceId, session.workspaceId),
+              inArray(runbookExecutions.runbookId, runbookIds),
+            ),
+          )
+          .orderBy(desc(runbookExecutions.startedAt))
+      : []
 
-  const activeByRunbook = new Map(activeExecutions.map((e) => [e.runbookId, e]))
+  const activeByRunbook = new Map<string, (typeof executions)[number]>()
+  const latestByRunbook = new Map<string, (typeof executions)[number]>()
+  for (const ex of executions) {
+    if (!latestByRunbook.has(ex.runbookId)) latestByRunbook.set(ex.runbookId, ex)
+    if (ex.status === 'in_progress' && !activeByRunbook.has(ex.runbookId)) {
+      activeByRunbook.set(ex.runbookId, ex)
+    }
+  }
 
   return {
     runbooks: rows.map((r) => ({
@@ -42,6 +57,7 @@ export default defineEventHandler(async (event) => {
       projectName: r.projectName,
       projectSlug: r.projectSlug,
       activeExecution: activeByRunbook.get(r.runbook.id) ?? null,
+      latestExecution: latestByRunbook.get(r.runbook.id) ?? null,
     })),
   }
 })

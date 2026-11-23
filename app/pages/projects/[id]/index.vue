@@ -2,7 +2,6 @@
 import {
   ASSET_TYPE_KEYS,
   ENVIRONMENT_KINDS,
-  RELATION_TYPE_KEYS,
   assetTypeShowsAdminUrl,
 } from '~/constants/inventory'
 
@@ -15,7 +14,11 @@ const id = computed(() => String(route.params.id))
 const showSetupChecklist = computed(() => route.query.setup === '1')
 
 const { data, refresh, pending } = await useFetch(() => `/api/projects/${id.value}`, { watch: [id] })
-const { data: projectRunbooks } = await useFetch(() => `/api/runbooks?projectId=${id.value}`, { watch: [id] })
+const { data: projectRunbooks, pending: runbooksPending } = await useFetch(
+  () => `/api/runbooks?projectId=${id.value}`,
+  { watch: [id] },
+)
+const { data: templateCatalog } = await useFetch('/api/runbook-templates')
 const { data: providers } = await useFetch('/api/providers')
 const { data: identities } = await useFetch('/api/identities')
 const { data: accounts } = await useFetch('/api/provider-accounts')
@@ -33,9 +36,7 @@ const assetAdminUrl = ref('')
 const assetError = ref('')
 const assetLoading = ref(false)
 
-const depFrom = ref('')
-const depTo = ref('')
-const depType = ref<(typeof RELATION_TYPE_KEYS)[number]>('depends_on')
+const depDialogOpen = ref(false)
 const depRemovingId = ref<string | null>(null)
 const depConfirmOpen = ref(false)
 const pendingDepId = ref<string | null>(null)
@@ -102,15 +103,45 @@ function resetAssetForm() {
   assetError.value = ''
 }
 
-async function addDependency() {
-  await $fetch('/api/dependencies', {
-    method: 'POST',
-    body: { fromAssetId: depFrom.value, toAssetId: depTo.value, relationType: depType.value },
-  })
-  depFrom.value = ''
-  depTo.value = ''
-  await refresh()
+const projectAssetOptions = computed(() =>
+  (data.value?.assets ?? []).map((a) => ({ id: a.id, name: a.name })),
+)
+
+const quickTemplates = computed(() => {
+  const all = templateCatalog.value?.templates ?? []
+  const workspace = all.filter((tpl: { scope?: string }) => tpl.scope === 'workspace')
+  const system = all.filter((tpl: { scope?: string }) => tpl.scope !== 'workspace')
+  return [...workspace, ...system].slice(0, 4)
+})
+
+type ProjectRunbook = {
+  id: string
+  title: string
+  status: string
+  templateSlug?: string | null
+  updatedAt: string
+  activeExecution?: { id: string; status: string } | null
+  latestExecution?: { id: string; status: string } | null
 }
+
+function runbookActivityRank(rb: ProjectRunbook): number {
+  if (rb.activeExecution) return 0
+  const latest = rb.latestExecution?.status
+  if (latest === 'completed') return 1
+  if (latest === 'cancelled') return 2
+  if (latest === 'in_progress') return 0
+  if (rb.latestExecution) return 3
+  return 4
+}
+
+const sortedProjectRunbooks = computed(() => {
+  const list = (projectRunbooks.value?.runbooks ?? []) as ProjectRunbook[]
+  return [...list].sort((a, b) => {
+    const rankDiff = runbookActivityRank(a) - runbookActivityRank(b)
+    if (rankDiff !== 0) return rankDiff
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  })
+})
 
 function askRemoveDependency(dependencyId: string) {
   pendingDepId.value = dependencyId
@@ -633,22 +664,17 @@ async function deleteProject() {
       <template #dependencies>
     <div class="space-y-3">
       <h2 class="sr-only">{{ t('projects.dependencies') }}</h2>
-      <form v-if="data.assets?.length" class="flex flex-wrap items-center gap-2" @submit.prevent="addDependency">
-        <select v-model="depFrom" required class="field w-auto">
-          <option value="">{{ t('projects.depFrom') }}</option>
-          <option v-for="a in data.assets" :key="a.id" :value="a.id">{{ a.name }}</option>
-        </select>
-        <select v-model="depTo" required class="field w-auto">
-          <option value="">{{ t('projects.depTo') }}</option>
-          <option v-for="a in data.assets" :key="a.id" :value="a.id">{{ a.name }}</option>
-        </select>
-        <select v-model="depType" class="field w-auto max-w-[14rem]">
-          <option v-for="relation in RELATION_TYPE_KEYS" :key="relation" :value="relation">
-            {{ t(`dependencies.relationTypes.${relation}`) }}
-          </option>
-        </select>
-        <button type="submit" class="btn-secondary">{{ t('common.add') }}</button>
-      </form>
+      <div v-if="data.assets?.length" class="flex flex-wrap items-center justify-between gap-2">
+        <p class="text-sm text-muted">{{ t('dependencies.tabHint') }}</p>
+        <button type="button" class="btn-primary text-sm" @click="depDialogOpen = true">
+          {{ t('dependencies.addDialogOpen') }}
+        </button>
+      </div>
+      <AddDependenciesDialog
+        v-model:open="depDialogOpen"
+        :assets="projectAssetOptions"
+        @created="refresh"
+      />
       <ul v-if="data.dependencies?.length" class="list-card text-sm">
         <li v-for="d in data.dependencies" :key="d.id" class="px-4 py-3">
           <DependencyListRow
@@ -675,17 +701,81 @@ async function deleteProject() {
       </template>
 
       <template #runbooks>
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <p class="text-sm text-muted">{{ t('guides.projectTabHint') }}</p>
-          <NuxtLink :to="`/guides/templates?projectId=${id}`" class="btn-secondary text-sm">{{ t('guides.templates.browseAll') }}</NuxtLink>
-          <NuxtLink :to="`/guides/new?projectId=${id}`" class="btn-primary text-sm">{{ t('guides.newFromTemplate') }}</NuxtLink>
+        <div class="space-y-6">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="max-w-prose space-y-1">
+              <h2 class="text-base font-semibold text-ink">{{ t('guides.yourRunbooks') }}</h2>
+              <p class="text-sm text-muted">{{ t('guides.projectTabHint') }}</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <NuxtLink :to="`/guides/templates?projectId=${id}`" class="btn-secondary text-sm">
+                {{ t('guides.templates.browseAll') }}
+              </NuxtLink>
+              <NuxtLink :to="`/guides/new?projectId=${id}`" class="btn-primary text-sm">
+                {{ t('guides.newFromTemplate') }}
+              </NuxtLink>
+            </div>
+          </div>
+
+          <section class="space-y-2">
+            <p v-if="runbooksPending" class="text-sm text-subtle">{{ t('common.loading') }}</p>
+            <div v-else-if="!sortedProjectRunbooks.length" class="rounded-lg border border-stone-200 bg-stone-50/80 p-5 text-sm text-muted dark:border-stone-700 dark:bg-stone-900/50">
+              <p>{{ t('guides.empty') }}</p>
+              <NuxtLink :to="`/guides/new?projectId=${id}`" class="mt-3 inline-block font-medium text-ink underline">
+                {{ t('guides.newFromTemplate') }}
+              </NuxtLink>
+            </div>
+            <ul v-else class="list-card">
+              <li v-for="rb in sortedProjectRunbooks" :key="rb.id" class="px-4 py-3">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <NuxtLink :to="`/guides/${rb.id}`" class="font-medium text-ink underline">
+                      {{ rb.title }}
+                    </NuxtLink>
+                    <p v-if="rb.templateSlug" class="mt-1 text-xs text-subtle">{{ rb.templateSlug }}</p>
+                    <NuxtLink
+                      v-if="rb.activeExecution"
+                      :to="`/guides/${rb.id}/execute/${rb.activeExecution.id}`"
+                      class="mt-2 inline-block text-xs font-medium text-amber-800 underline dark:text-amber-300"
+                    >
+                      {{ t('guides.executionInProgress') }}
+                    </NuxtLink>
+                    <NuxtLink
+                      v-else-if="rb.latestExecution?.status === 'completed'"
+                      :to="`/guides/${rb.id}/execute/${rb.latestExecution.id}`"
+                      class="mt-2 inline-block text-xs text-muted underline"
+                    >
+                      {{ t('guides.projectTabLastExecutionCompleted') }}
+                    </NuxtLink>
+                    <p
+                      v-else-if="rb.latestExecution?.status === 'cancelled'"
+                      class="mt-2 text-xs text-subtle"
+                    >
+                      {{ t('guides.executionStatus.cancelled') }}
+                    </p>
+                  </div>
+                  <span class="rounded-full bg-stone-100 px-2 py-0.5 text-xs uppercase tracking-wide text-muted dark:bg-stone-800">
+                    {{ rb.status }}
+                  </span>
+                </div>
+              </li>
+            </ul>
+          </section>
+
+          <section v-if="quickTemplates.length" class="space-y-3 border-t border-stone-200 pt-6 dark:border-stone-700">
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-subtle">
+              {{ t('guides.projectTabQuickStart') }}
+            </h3>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <RunbookTemplateCard
+                v-for="tpl in quickTemplates"
+                :key="tpl.slug"
+                :template="tpl"
+                :create-query="`&projectId=${id}`"
+              />
+            </div>
+          </section>
         </div>
-        <ul v-if="projectRunbooks?.runbooks?.length" class="mt-4 space-y-2">
-          <li v-for="rb in projectRunbooks.runbooks" :key="rb.id">
-            <NuxtLink :to="`/guides/${rb.id}`" class="font-medium underline">{{ rb.title }}</NuxtLink>
-          </li>
-        </ul>
-        <p v-else class="mt-4 text-sm text-subtle">{{ t('guides.empty') }}</p>
       </template>
 
       <template #danger>

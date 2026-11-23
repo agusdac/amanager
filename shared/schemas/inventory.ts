@@ -136,6 +136,10 @@ export const createDependencySchema = z.object({
   description: z.string().max(2000).optional(),
 })
 
+export const createDependenciesBulkSchema = z.object({
+  items: z.array(createDependencySchema).min(1).max(30),
+})
+
 export const createAssetRoleSchema = z.object({
   assetId: z.string().uuid(),
   identityId: z.string().uuid(),

@@ -7,6 +7,8 @@ const props = defineProps<{
   variant?: 'sidebar' | 'top'
 }>()
 
+const emit = defineEmits<{ navigate: [] }>()
+
 const { t } = useI18n()
 const route = useRoute()
 const { pathWithScope } = useScopedNavigation()
@@ -22,6 +24,7 @@ const isActive = computed(() => {
     :to="pathWithScope(item.to)"
     :title="collapsed ? t(item.labelKey) : undefined"
     class="app-nav-link"
+    @click="emit('navigate')"
     :class="[
       variant === 'top' ? 'app-nav-link--top' : 'app-nav-link--side',
       collapsed && variant !== 'top' ? 'app-nav-link--collapsed' : '',
